@@ -1,0 +1,484 @@
+# -*- encoding: utf-8 -*-
+"""
+Copyright (c) 2019 - present AppSeed.us
+"""
+
+from datetime import datetime
+import os
+from flask import render_template, redirect, request, url_for, jsonify
+from flask_login import (
+    current_user,
+    login_required,
+    login_user,
+    logout_user
+) 
+
+from apps import db, login_manager
+from apps.authentication import blueprint
+from apps.authentication.email import send_email
+from apps.authentication.forms import LoginForm, CreateAccountForm
+from apps.authentication.models import UserProfile, Users
+
+from apps.authentication.signals import user_saved_signals, delete_user_signals
+from apps.authentication.token import confirm_token, generate_confirmation_token
+from apps.authentication.util import hash_pass, new_password_should_be_different, verify_pass
+from apps.config import Config
+from apps.helpers import createAccessToken, emailValidate, password_validate, sanitise_fille_name, createFolder, serverImageUrl, uniqueFileName, get_ts
+from ftp_server import uploadImageFTP
+from werkzeug.utils import secure_filename
+from flask import Flask, flash
+from messages import Messages
+from flask_dance.contrib.github import github
+
+
+message = Messages.message
+
+login_limit = Config.LOGIN_ATTEMPT_LIMIT
+
+# User States
+STATUS_SUSPENDED = Config.USERS_STATUS['SUSPENDED']
+STATUS_ACTIVE    = Config.USERS_STATUS['ACTIVE'   ]
+
+# Users Roles
+ROLE_ADMIN       = Config.USERS_ROLES['ADMIN']
+ROLE_USER        = Config.USERS_ROLES['USER']
+
+upload_folder_name = createFolder('media')
+app = Flask(__name__)
+app.config['uploadFolder'] = upload_folder_name 
+
+@blueprint.route('/')
+def route_default():
+    return redirect(url_for('authentication_blueprint.login')) 
+
+@blueprint.route("/github")
+def login_github():
+    """ Github login """
+    if not github.authorized:
+        return redirect(url_for("github.login"))
+
+    res = github.get("/user")
+    return redirect(url_for('home_blueprint.index'))
+
+# Login & Registration
+@blueprint.route('/login', methods=['GET', 'POST'])
+def login():
+    """ 
+        Login View 
+    """
+    
+    template_name = 'accounts/login.html'
+    login_form = LoginForm(request.form)
+
+    if 'login' in request.form:
+
+        # Read form data
+        userID   = request.form['username'] # user || email
+        password = request.form['password']
+        
+        valid_email = emailValidate(userID)
+                        
+        if valid_email == True:
+            user = Users.find_by_email(userID)
+        else:
+            # Locate user
+            user = Users.find_by_username(userID)
+
+        # if user not found
+        if not user:
+            return render_template(template_name,
+                                   msg=message['wrong_user_or_password'],
+                                   form=login_form)
+        
+        # Check user is suspended
+        if STATUS_SUSPENDED == user.status:
+            return render_template(template_name,
+                               msg=message['suspended_account_please_contact_support'],
+                               form=login_form)            
+
+        if user.failed_logins >= login_limit:
+            user.status = STATUS_SUSPENDED
+            db.session.commit()
+            return render_template(template_name,
+                               msg=message['suspended_account_maximum_nb_of_tries_exceeded'],
+                               form=login_form)
+        
+        # Check the password
+        if user and not verify_pass(password, user.password):
+            user.failed_logins += 1
+            db.session.commit()
+
+            return render_template(template_name,
+                               msg=message['incorrect_password'],
+                               form=login_form)
+        login_user(user)
+        user.failed_logins = 0
+        db.session.commit()
+        
+        return redirect(url_for('home_blueprint.index'))
+
+    if not current_user.is_authenticated:
+
+        # we might have a redirect from OAuth
+        msg = request.args.get('oautherr')
+
+        if msg and 'suspended' in msg:
+            msg = message['suspended_account_please_contact_support']
+
+        return render_template(template_name,
+                               form=login_form,
+                               msg=msg)
+    
+    return redirect(url_for('home_blueprint.index'))
+
+
+@blueprint.route('/register', methods=['GET', 'POST'])
+def register():
+    """
+        User register view
+    """
+    # already logged in
+    if current_user.is_authenticated:
+        return redirect('/')
+    
+    template_name = 'accounts/register.html'
+    create_account_form = CreateAccountForm(request.form)
+
+    if 'register' in request.form:
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        password2 = request.form['password_check']
+        
+        if password != password2:
+            return render_template(template_name,
+                                   msg=message['pwd_not_match'],
+                                   success=False,
+                                   form=create_account_form)
+        
+        # Check usename exists
+        user = Users.find_by_username(username)
+        if user:
+            return render_template(template_name,
+                                   msg=message['username_already_registered'],
+                                   success=False,
+                                   form=create_account_form)
+
+        # Check email exists
+        user = Users.find_by_email(email)
+        if user:
+            return render_template(template_name,
+                                   msg=message['email_already_registered'],
+                                   success=False,
+                                   form=create_account_form)
+            
+        valid_pwd = password_validate(password)
+        if valid_pwd != True:
+            return render_template(template_name,
+                                   msg = valid_pwd,
+                                   success = False,
+                                   form = create_account_form)
+        
+        user = Users(**request.form)
+        user.api_token = createAccessToken()
+        user.api_token_ts = get_ts()
+        
+        user.save()
+
+        # Force logout
+        logout_user()
+
+        # send signal for create profile
+        user_saved_signals.send({"user_id":user.id, "email": user.email})
+
+        return render_template(template_name,
+                               msg = message['account_created_successfully'],
+                               success = True,
+                               form = create_account_form)
+
+    else:
+        return render_template(template_name, form=create_account_form) 
+
+
+@blueprint.route('/profile', methods=['GET', 'PUT'])
+def user_profile():
+    """
+        Get user profile view
+    """
+    if request.method =='GET':
+       
+        template = 'accounts/account-settings.html'
+        
+        user         = Users.find_by_id(current_user.id)
+        user_profile = UserProfile.find_by_user_id(user.id) 
+        
+        context = { 'id':user.id, 
+                    'profile_name':user_profile.full_name,
+                    'profile_bio':user_profile.bio, 
+                    'profile_address':user_profile.address, 
+                    'profile_zipcode':user_profile.zipcode, 
+                    'profile_phone':user_profile.phone,
+                    'email':user_profile.email, 
+                    'profile_website':user_profile.website, 
+                    'profile_image':user_profile.image, 
+                    'user_profile_id':user_profile.id}
+        
+        return render_template(template, context=context)
+
+    return redirect(url_for('home_blueprint.index')) 
+
+
+@blueprint.route('/user_list', methods=['GET'])
+def user_list():
+    """
+        Get all users list view
+    """
+
+    if current_user.role != ROLE_ADMIN:
+        return redirect(url_for('authentication_blueprint.user_profile')) 
+
+    if request.method == 'GET':
+        template = 'accounts/users-reports.html'
+        users = Users.query.all()
+    
+        user_list = []
+        if users is not None:
+            for user in users:
+                for data in UserProfile.query.filter_by(user=user.id):
+                    user_list.append(data)
+
+        context = {'users':user_list}
+        
+        return render_template(template, context=context)
+    
+    return redirect(url_for('home_blueprint.index'))
+
+@blueprint.route('/edit_user', methods=['GET', 'PUT'])
+def edit_user():
+    """
+        1.Get User by id(Get user view)
+        2.Update user(update user view)
+    Returns:
+        _type_: json data
+    """
+    if request.method == 'GET':
+       
+        user = UserProfile.find_by_id(request.args.get('user_id'))
+
+        # if check user none or not
+        if user:
+
+            context = {'id':user.id,'full_name':user.full_name,'bio':user.bio,
+                    'address':user.address, 'zipcode':user.zipcode, 'phone':user.phone,
+                    'email':user.email, 'website':user.website, 'image':user.image, 
+                    'user_id':user.user_id.id}
+            
+            return jsonify(context), 200
+        
+        else:
+            return jsonify({'error':message['record_not_found']}), 404
+        
+    
+    if request.method == 'PUT':
+
+        data  = request.form
+        image = request.files.get('image')
+        
+        FTP_error = False 
+
+        profile_obj = UserProfile.find_by_id(data.get('user_id'))
+        if profile_obj is not None:
+            # if check image none or not
+            if image:
+                filename = sanitise_fille_name(secure_filename(image.filename))
+                
+                # unque file name
+                unique_name  = uniqueFileName(filename)
+                
+                # if check folder
+                if upload_folder_name in os.listdir():
+                    image.save(os.path.join(app.config['uploadFolder'], unique_name))
+                
+                # if check image
+                if profile_obj.image is not None:
+
+                    # save to FTP server replace exists image
+                    if uploadImageFTP(unique_name, profile_obj.image):
+                        profile_obj.image = serverImageUrl(unique_name)
+                    else:
+                        FTP_error = True
+            if data.get('email') != '':
+                try:
+                    profile_obj.full_name = data.get('full_name')
+                    profile_obj.bio = data.get('bio')
+                    profile_obj.address = data.get('address')
+                    profile_obj.zipcode = data.get('zipcode')
+                    profile_obj.phone = data.get('phone')
+                    profile_obj.email = data.get('email')
+                    profile_obj.website = data.get('website')
+
+                    profile_obj.save()
+                except:
+                    return jsonify({'error': message['email_already_registered']}), 404
+            
+                user = Users.find_by_id(data.get('user_id'))
+                user.email = data.get('email')
+                user.save()
+            else:
+                profile_obj.full_name = data.get('full_name')
+                profile_obj.bio       = data.get('bio')
+                profile_obj.address   = data.get('address')
+                profile_obj.zipcode   = data.get('zipcode')
+                profile_obj.phone     = data.get('phone')
+                profile_obj.website   = data.get('website')
+
+                profile_obj.save()
+
+        aMsg = message['user_updated_successfully']
+        
+        if FTP_error:
+            aMsg += ' (FTP Upload Err)'
+
+        return jsonify({'message':aMsg}), 200
+        
+    else:
+        return jsonify({'error':message['record_not_found']}), 404
+
+@blueprint.route('/update_status', methods=['PUT'])
+def update_status():
+    """Update status view
+
+    Returns:
+        _type_: json
+    """
+    if request.method == 'PUT':
+       
+        user = Users.find_by_id(request.form.get('user_id'))
+        
+        # if check user none or not
+        if user:
+
+            # if check status none or not
+            if user.status:
+                if user.status == STATUS_ACTIVE:
+                    user.status = STATUS_SUSPENDED
+                else:
+                    user.status = STATUS_ACTIVE
+                
+                # save user state
+                user.save()
+               
+            context = {'message':message['successfully_updated']}
+            
+            return jsonify(context), 200
+        
+        else:
+            return jsonify({'error':message['record_not_found']}), 404
+
+
+@blueprint.route('/delete_user', methods=['DELETE'])      
+def delete_user():
+    """Delete user view
+
+    Returns:
+        _type_: json
+    """
+    if request.method == 'DELETE':
+        user = Users.find_by_id(request.form.get('user_id'))
+        if user:
+            # send signal for create profile
+            delete_user_signals.send({"user_id":user.id})
+            user.delete_from_db()
+            return jsonify({'message':message["deleted_successfully"]}), 200
+
+@blueprint.route('/logout')
+def logout():
+    """ Logout View """
+    logout_user()
+    return redirect(url_for('authentication_blueprint.login'))
+
+@blueprint.route('/verify_email', methods=['GET', 'POST'])  
+def verify_email():
+    """ Verify email view """
+
+    if request.method == 'POST':
+        email = request.form['email']
+        user = Users.query.filter_by(username=current_user.username).one()
+        if user:
+            if user.email != email and user.email is not None:
+                flash(message['email_not_found'])
+            else:
+                token = generate_confirmation_token(email)
+                
+                confirm_url = url_for('authentication_blueprint.confirm_email', token=token, _external=True)
+                html = render_template('accounts/activate.html', confirm_url=confirm_url)
+                subject = "Please confirm your email"
+                # send email
+                send_email(email, subject, html)
+                
+                flash(message['email_has_been_sent_via_email'])
+   
+    return render_template('home/pages-auth-verify-email.html')
+
+
+@blueprint.route('/confirm/<token>')
+def confirm_email(token):
+    """ confirm email with token """
+    try:
+        email = confirm_token(token)
+    except:
+        return message['link_is_invalid_or_has_expired']
+
+    user = Users.query.filter_by(username=current_user.username).first_or_404()
+
+    if user.verified_email == 1:
+        return message['account_already_confirmed']
+    else:
+        user.verified_email = 1
+        user.email = email
+        user.save()
+        profile = UserProfile.find_by_user_id(user.id)
+        profile.email = email
+        profile.save()
+
+    return redirect(url_for('home_blueprint.index'))
+
+@blueprint.route('/change_password', methods=['POST'])    
+def change_password():
+    """Change an existing user's password."""
+    
+    data          = request.form
+    new_password  = data.get('new_password')
+    new_password2 = data.get('new_password2')
+
+    user = Users.find_by_username(username=current_user.username)
+
+    if not user:
+        return jsonify({'error':message['user_not_found']}), 404
+
+    # check password match or not 
+    if new_password != new_password2:
+            return jsonify({'error':message['pwd_not_match']}), 404
+
+    # Save the new password
+    user.password = hash_pass(new_password)
+    user.save()
+
+    return jsonify({'message':message['password_has_been_updated']}), 200
+
+# Errors
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return render_template('home/page-403.html'), 403
+
+@blueprint.errorhandler(403)
+def access_forbidden(error):
+    return render_template('home/page-403.html'), 403
+
+@blueprint.errorhandler(404)
+def not_found_error(error):
+    return render_template('home/page-404.html'), 404
+
+@blueprint.errorhandler(500)
+def internal_error(error):
+    return render_template('home/page-500.html'), 500
