@@ -27,7 +27,8 @@ class Users(db.Model, UserMixin):
     username        = db.Column(db.String(64), unique=True)
     email           = db.Column(db.String(100), unique=True)
     password        = db.Column(db.LargeBinary)
-    
+    reset_token     = db.Column(db.String(100), nullable=True)
+    reset_token_expiration = db.Column(db.DateTime, nullable=True)
     role            = db.Column(db.Integer(),
                         default=RoleType['USER'], nullable=False)
     status          = db.Column(db.Integer(),
@@ -129,7 +130,7 @@ class UserProfile(db.Model):
     zipcode       = db.Column(db.String(6),    nullable=True, default='')
     phone         = db.Column(db.String(50),   nullable=True, default='')
     email         = db.Column(db.String(100),  unique=True,   nullable=True)
-    website       = db.Column(db.String(100),  nullable=True, default='')
+    service       = db.Column(db.String(100),  nullable=True, default='')
     image         = db.Column(db.String(1000), nullable=True, default= Config.ASSETS_ROOT + "/img/user/avatar-5.jpg")
     user          = db.Column(db.Integer, db.ForeignKey("users.id",ondelete="cascade"), nullable=False)
     user_id       = relationship(Users, uselist=False, backref="profile")

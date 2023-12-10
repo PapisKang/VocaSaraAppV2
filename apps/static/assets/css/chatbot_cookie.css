@@ -1,0 +1,49 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
+
+.cookie-consent {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  max-width: 90%;
+  height: 290px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px 25px 22px;
+  transition: right 0.3s ease;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  display: none;
+}
+
+.cookie-consent__message {
+  margin-top: 30px;
+  margin-bottom: 25px;
+  font-size: 18px;
+  color: #333;
+  text-align: center;
+}
+
+.cookie-consent__actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+.cookie-consent button {
+  font-size: 16px;
+  color: #020202;
+  background-color: #18aee9;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin-top: 5%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cookie-consent button:hover {
+  background-color: #0e0e0e;
+  color: azure;
+}
