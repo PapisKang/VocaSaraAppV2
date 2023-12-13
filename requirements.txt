@@ -13,6 +13,8 @@ flask-wtf==1.1.1
 flask-dance==7.0.0
 flask-mail==0.9.1
 
+mysql-connector-python==8.1.0
+
 aniso8601==9.0.1
 attrs==21.4.0
 Babel==2.10.1

@@ -13,9 +13,7 @@ from uuid import uuid4
 import datetime, time
 message = Messages.message
 
-Currency = Config.CURRENCY
-PAYMENT_TYPE = Config.PAYMENT_TYPE
-STATE = Config.STATE
+
 FTP_IMAGE_URL = Config.FTP_WWW_ROOT
 
 
@@ -29,7 +27,7 @@ def password_validate(password):
     msg = ''
     while True:
         if len(password) < 6:
-           msg = "Make sure your password is at lest 6 letters"
+           msg = "Assurer vous que votre mot de passe contient 6 lettre"
            return msg
         elif re.search('[0-9]',password) is None:
             msg = "Make sure your password has a number in it"
@@ -90,42 +88,6 @@ def validateCurrency(currency):
     if currency not in list(Currency.keys()):
         raise ValidationError(
             f"{message['invalid_currency']}, expected {','.join(Currency.keys())}", 422)
-
-def validatePaymentMethod(payment):
-    """ check valid payment methods  """
-    # if check PAYMENT_TYPE validate or not
-    if payment not in list(PAYMENT_TYPE.keys()):
-        raise ValidationError(
-            f"{message['invalid_payment_method']}, expected {expectedValue(PAYMENT_TYPE)}", 422)
-        
-    else:
-        value = 0
-        if payment == "cc":
-            value =  1
-        elif payment == "paypal":
-            value = 2
-        else:
-            value = 3
-
-    return value 
-
-def validateState(state):
-    """ check valid state methods  """
-    # if check state  validate or not
-    if state not in list(STATE.keys()):
-        raise ValidationError(
-            f"{message['invalid_state']}, expected {expectedValue(STATE)}", 422)
-        
-    else:
-        value = 0
-        if state == "completed":
-            value =  1
-        elif state == "pending":
-            value = 2
-        else:
-            value = 3
-
-    return value 
 
  
 def expectedValue(data):
