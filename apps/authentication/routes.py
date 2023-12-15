@@ -51,14 +51,6 @@ app.config['uploadFolder'] = upload_folder_name
 def route_default():
     return redirect(url_for('authentication_blueprint.login')) 
 
-@blueprint.route("/github")
-def login_github():
-    """ Github login """
-    if not github.authorized:
-        return redirect(url_for("github.login"))
-
-    res = github.get("/user")
-    return redirect(url_for('home_blueprint.index'))
 
 # Login & Registration
 @blueprint.route('/login', methods=['GET', 'POST'])
@@ -200,58 +192,7 @@ def register():
         return render_template(template_name, form=create_account_form) 
 
 
-@blueprint.route('/profile', methods=['GET', 'PUT'])
-def user_profile():
-    """
-        Get user profile view
-    """
-    if request.method =='GET':
-       
-        template = 'accounts/account-settings.html'
-        
-        user         = Users.find_by_id(current_user.id)
-        user_profile = UserProfile.find_by_user_id(user.id) 
-        
-        context = { 'id':user.id, 
-                    'profile_name':user_profile.full_name,
-                    'profile_bio':user_profile.bio, 
-                    'profile_address':user_profile.address, 
-                    'profile_zipcode':user_profile.zipcode, 
-                    'profile_phone':user_profile.phone,
-                    'email':user_profile.email, 
-                    'profile_website':user_profile.website, 
-                    'profile_image':user_profile.image, 
-                    'user_profile_id':user_profile.id}
-        
-        return render_template(template, context=context)
 
-    return redirect(url_for('home_blueprint.index')) 
-
-
-@blueprint.route('/user_list', methods=['GET'])
-def user_list():
-    """
-        Get all users list view
-    """
-
-    if current_user.role != ROLE_ADMIN:
-        return redirect(url_for('authentication_blueprint.user_profile')) 
-
-    if request.method == 'GET':
-        template = 'accounts/users-reports.html'
-        users = Users.query.all()
-    
-        user_list = []
-        if users is not None:
-            for user in users:
-                for data in UserProfile.query.filter_by(user=user.id):
-                    user_list.append(data)
-
-        context = {'users':user_list}
-        
-        return render_template(template, context=context)
-    
-    return redirect(url_for('home_blueprint.index'))
 
 @blueprint.route('/edit_user', methods=['GET', 'PUT'])
 def edit_user():
