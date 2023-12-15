@@ -9,7 +9,7 @@ from sqlalchemy.exc import OperationalError
 
 class Config(object):
     
-    # for Product model
+    # for Product model iii
     CURRENCY     = { 'usd' : 'usd' , 'eur' : 'eur' }
     STATE        = { 'completed' : 1 , 'pending' : 2, 'refunded' : 3 }
     PAYMENT_TYPE = { 'cc' : 1 , 'paypal' : 2, 'wire' : 3 }
