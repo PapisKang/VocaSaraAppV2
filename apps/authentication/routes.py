@@ -477,7 +477,7 @@ def change_password():
 
 #.................#forget pass.............................####################
 
-from werkzeug.security import generate_password_hash, check_password_hash
+
 from wtforms import StringField, PasswordField, SubmitField, FileField, SelectField, BooleanField
 from wtforms.validators import DataRequired, EqualTo, Email  # Ajoutez Email ici
 from flask_sqlalchemy import SQLAlchemy
