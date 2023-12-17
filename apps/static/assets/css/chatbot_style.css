@@ -1,0 +1,273 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+*, html {
+    --primaryGradient: linear-gradient(93.12deg, #2a2a2b 0.52%, #363636 100%);
+    --secondaryGradient: linear-gradient(268.91deg, #a0aacada -2.14%, #a0aacada 99.69%);
+    --primaryBoxShadow: 0px 10px 15px rgba(0, 0, 0, 0.1);
+    --secondaryBoxShadow: 0px -10px 15px rgba(0, 0, 0, 0.1);
+    --primary: #a0aacada;
+}
+
+/* CHATBOX */
+.chatbox {
+    position: fixed; /* Utiliser une position fixe pour que l'icône reste en bas à droite même en faisant défiler la page */
+    bottom: 30px;
+    right: 30px;
+    width: 40px; /* Réduire la largeur de l'icône */
+    height: 40px; /* Réduire la hauteur de l'icône */
+    border-radius: 10%; /* Utiliser une forme de cercle pour l'icône */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* Changer la couleur du texte de l'icône */
+    font-size: 24px; /* Changer la taille de la police de l'icône */
+    cursor: pointer;
+    z-index: 9999; /* S'assurer que l'icône est au-dessus des autres éléments */
+    cursor: move
+}
+
+/* CONTENT IS CLOSE */
+.chatbox__support {
+    display: none;
+    position: absolute;
+    bottom: 70%;
+    right: 3%;
+    flex-direction: column;
+    background: #eeeeee;
+    width: 90%; /* Réduire la largeur */
+    max-width: 500px; /* Limiter la largeur maximale */
+    height: 400px; /* Réduire la hauteur */
+    max-height: 550px; /* Limiter la hauteur maximale */
+    opacity: 0;
+    transition: all .5s ease-in-out;
+}
+
+/* Ajout d'une animation pour l'ouverture de la chatbox */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* CONTENT IS OPEN */
+.chatbox__support.chatbox--active {
+    display: flex;
+    transform: translateY(-40px);
+    opacity: 1;
+    animation: fadeIn 0.9s ease-in-out;
+}
+
+/* CONTENT IS OPEN */
+.chatbox--active {
+    transform: translateY(-40px);
+    z-index: 1;
+    visibility: visible;
+    opacity: 1;
+}
+
+/* BUTTON */
+.chatbox__button {
+    text-align: right;
+}
+
+.send__button,
+.clear_button {
+    padding: 4px;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+
+/* HEADER */
+.chatbox__header {
+    position: sticky;
+    top: 0;
+    background: orange;
+}
+
+/* MESSAGES */
+.chatbox__messages {
+    margin-top: auto;
+    display: flex;
+    overflow-y: scroll;
+    flex-direction: column-reverse;
+}
+
+.messages__item {
+    background: orange;
+    max-width: 60.6%;
+    width: fit-content;
+}
+
+.messages__item--operator {
+    margin-left: auto;
+}
+
+.messages__item--visitor {
+    margin-right: auto;
+}
+
+/* FOOTER */
+.chatbox__footer {
+    position: sticky;
+    bottom: 0;
+}
+
+.chatbox__support {
+    background: #dad8d8;
+    height: 550px;
+    min-height: 300px;
+    width: 850px;
+    min-width: 380px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.9);
+    border-radius: 20px;
+   
+}
+
+/* HEADER */
+.chatbox__header {
+    background: var(--primaryGradient);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 20px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    box-shadow: var(--primaryBoxShadow);
+}
+
+.chatbox__image--header {
+    margin-right: 10px;
+}
+
+.chatbox__heading--header {
+    font-size: 1rem; /* Réduire la taille de la police */
+    color: white;
+}
+
+.chatbox__description--header {
+    font-size: .7rem; /* Réduire la taille de la police */
+    color: white;
+}
+
+/* Messages */
+.chatbox__messages {
+    padding: 0 20px;
+}
+
+.messages__item {
+    margin-top: 10px;
+    background: #2c2c2c;
+    padding: 8px 12px;
+    max-width: 93%;
+    white-space: pre-wrap;
+    font-size: 0.8rem; /* Réduire la taille de la police */
+}
+
+.messages__item--visitor,
+.messages__item--typing {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.messages__item--operator {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    background: var(--primary);
+    color: rgb(0, 0, 0);
+}
+
+/* FOOTER */
+.chatbox__footer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px;
+    background: var(--secondaryGradient);
+    box-shadow: var(--secondaryBoxShadow);
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    margin-top: 20px;
+}
+
+.chatbox__footer input {
+    width: 85%;
+    border: none;
+    padding: 10px 10px;
+    border-radius: 30px;
+    text-align: left;
+    font-size: 0.8rem; /* Réduire la taille de la police */
+}
+
+.chatbox__send--footer {
+    color: white;
+}
+
+.chatbox__button button,
+.chatbox__button button:focus,
+.chatbox__button button:visited {
+    padding: 10px;
+    background: white;
+    border: none;
+    outline: none;
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+/* Adjust dimensions for different screen sizes */
+@media screen and (max-width: 1024px) {
+    .chatbox__support {
+        width: 90%;
+        max-width: unset;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .chatbox__support {
+        width: 90%;
+        height: 300px; /* Réduire la hauteur */
+        max-height: 400px; /* Limiter la hauteur maximale */
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .chatbox__support {
+        width: 90%;
+        height: 250px; /* Réduire la hauteur */
+        max-height: 300px; /* Limiter la hauteur maximale */
+    }
+}
+
+@media screen and (max-width: 390x) {
+    .chatbox__support {
+        width: 90%;
+        height: 200px; /* Réduire la hauteur */
+        max-height: 280px; /* Limiter la hauteur maximale */
+        
+    }
+}
+@media screen and (max-width: 390px) {
+    .chatbox {
+      bottom: 10px; /* Ajuster la position verticale de l'icône */
+      right: 10px; /* Ajuster la position horizontale de l'icône */
+    }
+  }
+  
