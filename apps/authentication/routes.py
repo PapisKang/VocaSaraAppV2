@@ -565,7 +565,7 @@ def password_reset_request():
         # Gérer l'erreur de connexion SMTP ici
         error_message = message['serveur_error']
 
-    return render_template('accounts/password_reset_request.html', form=form,
+    return render_template('accounts/authentication-reset-illustration.html', form=form,
                            success_message=success_message, error_message=error_message)
 
 
@@ -614,8 +614,6 @@ def reset_password(token):
     else:
         error_message = message['lien_invalide']
         return redirect(url_for('authentication_blueprint.login', error_message=error_message))
-
-
 
 #.................#forget pass.............................####################
 
