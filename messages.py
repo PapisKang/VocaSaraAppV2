@@ -12,14 +12,10 @@ class Messages:
         "email_already_registered": "Email déjà enregistré.",
         "valid_email": "Email valide.",
         "deleted_successfully": "Supprimé avec succès.",
-        "product_created_successfully": "Produit créé avec succès",
         "not_exists": "L'enregistrement n'existe pas.",
         "record_updated": "Enregistrement mis à jour avec succès.",
         "record_created_successfully": "Enregistrement créé avec succès.",
         "required_field": "Ce champ est requis.",
-        "product_not_exists": "Le produit n'existe pas.",
-        "invalid_currency": "Devise invalide",
-        "invalid_payment_method": "Méthode de paiement invalide",
         "invalid_state": "État invalide",
         "user_not_found": "Utilisateur non trouvé.",
         "pwd_not_match": "Le mot de passe ne correspond pas.",
@@ -30,5 +26,11 @@ class Messages:
         "password_has_been_updated": "Votre mot de passe a été mis à jour.",
         "old_password_not_match": "L'ancien mot de passe ne correspond pas!",
         "new_password_should_be_different": "Le nouveau mot de passe doit être différent de l'ancien.",
-        "generic_error": "Erreur générique"
+        "generic_error": "Erreur générique",
+        "email_ok_message" : "Un e-mail de réinitialisation de mot de passe a été envoyé.",
+        "lien_invalide" : "Le lien de réinitialisation de mot de passe est invalide ou a expiré.",
+        "erreur_connexion_smtp" : "Aucun utilisateur avec cette adresse e-mail n\'a été trouvé.",
+        "caractere_mot_de_passe" : 'Le mot de passe doit comporter au moins 6 caractères.',
+        "lettre_caractere_mot_de_passe" : 'Le mot de passe doit contenir au moins une lettre majuscule, un chiffre, et un caractère spécial.',
+        "serveur_error" : "Une erreur s\'est produite lors de la tentative de connexion au serveur de messagerie."
         }

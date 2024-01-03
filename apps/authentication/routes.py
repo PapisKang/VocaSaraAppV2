@@ -18,18 +18,25 @@ from apps.authentication import blueprint
 from apps.authentication.email import send_email
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import UserProfile, Users
-
+import re
 from apps.authentication.signals import user_saved_signals, delete_user_signals
 from apps.authentication.token import confirm_token, generate_confirmation_token
 from apps.authentication.util import hash_pass, new_password_should_be_different, verify_pass
 from apps.config import Config
+from apps.config import Email_config
 from apps.helpers import createAccessToken, emailValidate, password_validate, sanitise_fille_name, createFolder, serverImageUrl, uniqueFileName, get_ts
 from ftp_server import uploadImageFTP
 from werkzeug.utils import secure_filename
 from flask import Flask, flash
 from messages import Messages
 from flask_dance.contrib.github import github
-
+import secrets
+from datetime import datetime, timedelta
+from flask_wtf import FlaskForm
+from wtforms import PasswordField, StringField, SubmitField
+from wtforms.validators import InputRequired, EqualTo, Length, Regexp
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 message = Messages.message
 
@@ -45,7 +52,9 @@ ROLE_USER        = Config.USERS_ROLES['USER']
 
 upload_folder_name = createFolder('media')
 app = Flask(__name__)
+
 app.config['uploadFolder'] = upload_folder_name 
+
 
 @blueprint.route('/')
 def route_default():
@@ -465,6 +474,148 @@ def change_password():
     user.save()
 
     return jsonify({'message':message['password_has_been_updated']}), 200
+
+#.................#forget pass.............................####################
+
+
+from wtforms import StringField, PasswordField, SubmitField, FileField, SelectField, BooleanField
+from wtforms.validators import DataRequired, EqualTo, Email  # Ajoutez Email ici
+from flask_sqlalchemy import SQLAlchemy
+from flask import jsonify
+from flask_wtf import FlaskForm
+from flask import Flask, render_template, request, flash, redirect, session, url_for, send_from_directory, send_file
+from flask_mail import Mail, Message
+from smtplib import SMTPConnectError
+
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = Email_config.MAIL_USERNAME
+app.config['MAIL_PASSWORD'] = Email_config.MAIL_PASSWORD
+app.config['MAIL_DEFAULT_SENDER'] = Email_config.MAIL_DEFAULT_SENDER
+
+mail = Mail(app)
+
+class PasswordResetRequestForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired()])
+    submit = SubmitField('Demander la réinitialisation du mot de passe')
+
+
+class ResetPasswordForm(FlaskForm):
+    new_password = PasswordField(
+        'Nouveau mot de passe', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirmer le mot de passe', validators=[DataRequired(
+    ), EqualTo('new_password', message= message['pwd_not_match'])])
+    submit = SubmitField('Réinitialiser le mot de passe')
+
+mail = Mail(app)
+
+def send_password_reset_email(user_form, token):
+    user_email = user_form.email.data  # Utiliser le champ e-mail du formulaire
+
+    email_content = [
+        "Pour réinitialiser votre mot de passe, veuillez suivre le lien suivant :",
+        f"{url_for('authentication_blueprint.reset_password', token=token, _external=True)}",
+        "Si vous n'avez pas demandé à réinitialiser votre mot de passe, veuillez ignorer cet e-mail.",
+        "Ceci est un email régéner automatiquement merci.",
+        "Ce lien est valide 1 heure"
+    ]
+
+    msg = Message('Réinitialisation de votre mot de passe',
+                  sender=app.config['MAIL_USERNAME'], recipients=[user_email])
+    msg.body = "\n".join(email_content)
+    mail.send(msg)
+
+
+@blueprint.route('/password_reset_request', methods=['GET', 'POST'])
+def password_reset_request():
+    form = PasswordResetRequestForm()
+    success_message = None
+    error_message = None
+
+    try:
+        if form.validate_on_submit():
+            email = form.email.data
+            user = Users.query.filter_by(email=email).first()
+
+            if user:
+                # Générer un jeton unique
+                token = secrets.token_urlsafe(20)
+
+                # Définir la date d'expiration du jeton (par exemple, 1 heure à partir de maintenant)
+                expiration_date = datetime.now() + timedelta(hours=1)
+
+                # Stocker le jeton dans la base de données
+                user.reset_token = token
+                user.reset_token_expiration = expiration_date
+                db.session.commit()
+
+                # Envoyer un e-mail à l'utilisateur avec un lien contenant le jeton
+                send_password_reset_email(form, token)  # Passez le formulaire
+
+                success_message = message['email_ok_message']
+                
+
+            else:
+                error_message = message['erreur_connexion_smtp']
+
+    except SMTPConnectError as e:
+        # Gérer l'erreur de connexion SMTP ici
+        error_message = message['serveur_error']
+
+    return render_template('accounts/authentication-reset-illustration.html', form=form,
+                           success_message=success_message, error_message=error_message)
+
+
+class ResetPasswordForm(FlaskForm):
+    new_password = PasswordField(
+        'Nouveau mot de passe',
+        validators=[
+            InputRequired(message='Le champ est requis'),
+            Length(min=6, message=message['caractere_mot_de_passe']),
+            Regexp('^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+{}|:"<>?])',
+                   message= message['lettre_caractere_mot_de_passe'])
+        ]
+    )
+
+    confirm_password = PasswordField(
+        'Confirmer le mot de passe',
+        validators=[
+            InputRequired(message='Le champ est requis'),
+            EqualTo('new_password', message= message['pwd_not_match'])
+        ]
+    )
+
+    submit = SubmitField('Réinitialiser le mot de passe')
+    
+@blueprint.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    user = Users.query.filter_by(reset_token=token).first()
+
+    if user and user.reset_token_expiration > datetime.now():
+        form = ResetPasswordForm()
+
+        if form.validate_on_submit():
+            new_password = form.new_password.data
+
+            # Mise à jour du mot de passe de l'utilisateur
+            user.password = hash_pass(new_password)
+            user.reset_token = None
+            user.reset_token_expiration = None
+            db.session.commit()
+
+            success_message = message['password_has_been_updated']
+            return render_template('accounts/reset_password.html', form=form, token=token, success_message=success_message)
+
+        return render_template('accounts/reset_password.html', form=form, token=token)
+
+    else:
+        error_message = message['lien_invalide']
+        return redirect(url_for('authentication_blueprint.login', error_message=error_message))
+
+#.................#forget pass.............................####################
 
 # Errors
 @login_manager.unauthorized_handler
