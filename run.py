@@ -9,6 +9,7 @@ from  sys import exit
 
 from apps.config import config_dict
 from apps import create_app, db
+from flask_wtf.csrf import CSRFProtect
 
 from apps.commands.create_admin import CreateAdmin
 
@@ -27,6 +28,7 @@ except KeyError:
     exit('Error: Invalid <config_mode>. Expected values [Debug, Production] ')
 
 app = create_app(app_config)
+csrf = CSRFProtect(app)
 app.config['ENV'] = get_config_mode.capitalize()
 Migrate(app, db)
 
