@@ -475,8 +475,6 @@ def change_password():
 
     return jsonify({'message':message['password_has_been_updated']}), 200
 
-#.................#forget pass.............................####################
-
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import StringField, PasswordField, SubmitField, FileField, SelectField, BooleanField
 from wtforms.validators import DataRequired, EqualTo, Email  # Ajoutez Email ici
@@ -565,7 +563,7 @@ def password_reset_request():
         # Gérer l'erreur de connexion SMTP ici
         error_message = message['serveur_error']
 
-    return render_template('accounts/password_reset_request.html', form=form,
+    return render_template('accounts/authentication-reset-illustration.html', form=form,
                            success_message=success_message, error_message=error_message)
 
 

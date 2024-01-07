@@ -79,18 +79,12 @@ class Config(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    #DB_ENGINE   = os.getenv('DB_ENGINE'   , None)
-    #DB_USERNAME = os.getenv('DB_USERNAME' , None)
-    #DB_PASS     = os.getenv('DB_PASS'     , None)
-    #DB_HOST     = os.getenv('DB_HOST'     , None)
-    #DB_NAME     = os.getenv('DB_NAME'     , None)
-
+#base de donnee
+    #DB_ENGINE = os.getenv('DB_ENGINE', 'mysql+pyodbc')
     DB_USERNAME = os.getenv('DB_USERNAME', 'client')
-    DB_PASS = os.getenv('DB_PASS', '1234')
+    DB_PASS = os.getenv('DB_PASS', '11235813')
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_NAME = os.getenv('DB_NAME', 'root')
-
-    USE_SQLITE  = True 
 
     USE_SQLITE = False
     # try to set up a Relational DBMS
@@ -100,7 +94,8 @@ class Config(object):
             
             # Relational DBMS: PSQL, MySql
             SQLALCHEMY_DATABASE_URI = f'mysql+mysqlconnector://{DB_USERNAME}:{DB_PASS}@{DB_HOST}/{DB_NAME}'
-            USE_SQLITE  = False
+
+            USE_SQLITE = False
 
         except OperationalError as e:
             print('> Error: DBMS Exception: ' + str(e))

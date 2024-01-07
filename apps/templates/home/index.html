@@ -1,27 +1,63 @@
-{% extends 'layouts/base.html' %}
-
-{% block title %} Dashboard {% endblock title %}
-
-<!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
-
-{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
-
-{% block content %}
-
-    <div class="container-fluid py-4">
-
-      
-
-
-
-     
-      
-
-      
-
-      {% include "includes/footer.html" %}
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chargement d'Images</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Styles CSS personnalisés */
+    .upload-area {
+      border: 2px dashed #ddd;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .preview-area {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .preview-image {
+      position: relative;
+      margin: 10px;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+    }
+    .delete-icon {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      color: #fff;
+      cursor: pointer;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 50%;
+      padding: 5px;
+    }
+    .progress-text {
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Chargement d'Images</h1>
+    <div class="row">
+      <div class="col-md-6 offset-md-3">
+        <div class="upload-area">
+          <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+          <p>Cliquez ou faites glisser des images ici pour les charger</p>
+          <input type="file" id="fileInput" multiple>
+        </div>
+        <div class="progress mt-4 d-none">
+          <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          <div class="progress-text">0%</div>
+        </div>
+        <div class="preview-area mt-4"></div>
+      </div>
     </div>
   </div>
 
@@ -29,7 +65,57 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
-   
+    // JavaScript pour le chargement et l'affichage des images
+    const fileInput = document.getElementById('fileInput');
+    const previewArea = document.querySelector('.preview-area');
+    const progress = document.querySelector('.progress');
+    const progressBar = document.querySelector('.progress-bar');
+    const progressText = document.querySelector('.progress-text');
+
+    fileInput.addEventListener('change', function() {
+      const files = fileInput.files;
+
+      if (files.length > 0) {
+        progress.classList.remove('d-none');
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (file.type.match('image.*')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const image = document.createElement('div');
+              const uniqueId = Date.now() + i; // Génère un identifiant unique
+              image.innerHTML = `
+                <img src="${e.target.result}" class="preview-image" id="image_${uniqueId}">
+                <i class="fas fa-times delete-icon" onclick="removeImage(${uniqueId})"></i>
+              `;
+              previewArea.appendChild(image);
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+
+        // Barre de progression simulée
+        let progressValue = 0;
+        const interval = setInterval(function() {
+          progressValue += 10;
+          progressBar.style.width = `${progressValue}%`;
+          progressBar.setAttribute('aria-valuenow', progressValue);
+          progressText.textContent = `${progressValue}%`;
+          if (progressValue >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              progress.classList.add('d-none');
+            }, 500);
+          }
+        }, 500);
+      }
+    });
+
+    function removeImage(uniqueId) {
+      const image = document.getElementById(`image_${uniqueId}`);
+      image.parentNode.remove();
+    }
   </script>
 </body>
 </html>
