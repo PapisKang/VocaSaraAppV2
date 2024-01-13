@@ -82,7 +82,7 @@ class Config(object):
 #base de donnee
     #DB_ENGINE = os.getenv('DB_ENGINE', 'mysql+pyodbc')
     DB_USERNAME = os.getenv('DB_USERNAME', 'client')
-    DB_PASS = os.getenv('DB_PASS', '11235813')
+    DB_PASS = os.getenv('DB_PASS', '1234')
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_NAME = os.getenv('DB_NAME', 'root')
 
