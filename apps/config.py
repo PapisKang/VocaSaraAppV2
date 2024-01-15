@@ -1,19 +1,22 @@
 # -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
 
-import os, random, string
+import os
+import random
+import string
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
+import sqlite3
 
+class Email_config(object):
+    MAIL_USERNAME = 'vocasaracontactapp@gmail.com'
+    MAIL_PASSWORD = 'oviq vypu oozz cjou'
+    MAIL_DEFAULT_SENDER = 'vocasaracontactapp@gmail.com'
+    
+    
 class Config(object):
     
-    # for Product model
-    CURRENCY     = { 'usd' : 'usd' , 'eur' : 'eur' }
-    STATE        = { 'completed' : 1 , 'pending' : 2, 'refunded' : 3 }
-    PAYMENT_TYPE = { 'cc' : 1 , 'paypal' : 2, 'wire' : 3 }
-    
+
     USERS_ROLES  = { 'ADMIN'  :1 , 'USER'      : 2 }
     USERS_STATUS = { 'ACTIVE' :1 , 'SUSPENDED' : 2 }
     
@@ -24,6 +27,12 @@ class Config(object):
     LOGIN_ATTEMPT_LIMIT = 3
 
     DEFAULT_IMAGE_URL =  'static/assets/images/'
+    UPLOAD_IMAGE_SERVER_PATCH = 'C:/client'
+
+    # Vérifier si le dossier existe
+    if not os.path.exists(UPLOAD_IMAGE_SERVER_PATCH):
+        # Créer le dossier
+        os.makedirs(UPLOAD_IMAGE_SERVER_PATCH)
 
     # Read the optional FTP values
     FTP_SERVER   = os.getenv( 'FTP_SERVER'   )
@@ -70,34 +79,45 @@ class Config(object):
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    DB_ENGINE   = os.getenv('DB_ENGINE'   , None)
-    DB_USERNAME = os.getenv('DB_USERNAME' , None)
-    DB_PASS     = os.getenv('DB_PASS'     , None)
-    DB_HOST     = os.getenv('DB_HOST'     , None)
-    DB_NAME     = os.getenv('DB_NAME'     , None)
+#base de donnee
+    #DB_ENGINE = os.getenv('DB_ENGINE', 'mysql+pyodbc')
+    DB_USERNAME = os.getenv('DB_USERNAME', 'client')
+    DB_PASS = os.getenv('DB_PASS', '11235813')
+    DB_HOST = os.getenv('DB_HOST', 'localhost')
+    DB_NAME = os.getenv('DB_NAME', 'root')
 
-    USE_SQLITE  = True 
-
+    USE_SQLITE = False
     # try to set up a Relational DBMS
-    if DB_ENGINE and DB_NAME and DB_USERNAME:
+    if  DB_NAME and DB_USERNAME:
 
         try:
             
             # Relational DBMS: PSQL, MySql
-            SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc://{DB_USERNAME}:{DB_PASS}@{DB_HOST}/{DB_NAME}?driver=ODBC+Driver+17+for+SQL+Server"
+            SQLALCHEMY_DATABASE_URI = f'mysql+mysqlconnector://{DB_USERNAME}:{DB_PASS}@{DB_HOST}/{DB_NAME}'
 
-            USE_SQLITE  = False
+            USE_SQLITE = False
 
-        except Exception as e:
-
-            print('> Error: DBMS Exception: ' + str(e) )
-            print('> Fallback to SQLite ')    
+        except OperationalError as e:
+            print('> Error: DBMS Exception: ' + str(e))
+            print('> Fallback to SQLite ')
+            USE_SQLITE = True
 
     if USE_SQLITE:
 
-        # This will create a file in <app> FOLDER
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')    
-    
+        # Use SQLite if the connection to SQL Server fails
+        try:
+            # This will create a file in <app> FOLDER
+            SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')
+
+            # Check if the SQLite database file exists, if not, create it
+            if not os.path.exists(os.path.join(basedir, 'db.sqlite3')):
+                conn = sqlite3.connect(os.path.join(basedir, 'db.sqlite3'))
+                conn.close()
+
+        except Exception as e:
+            print('> Error: SQLite Exception: ' + str(e))
+            raise
+
 class ProductionConfig(Config):
 
     DEBUG = False
@@ -109,7 +129,6 @@ class ProductionConfig(Config):
 
 class DebugConfig(Config):
     DEBUG = True
-
 
 # Load all possible configurations
 config_dict = {

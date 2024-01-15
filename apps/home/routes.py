@@ -1,7 +1,4 @@
 # -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
 
 from apps.home import blueprint
 from flask import render_template, request
@@ -12,7 +9,6 @@ from jinja2 import TemplateNotFound
 @blueprint.route('/index')
 @login_required
 def index():
-
     return render_template('home/index.html', segment='index')
 
 
@@ -59,18 +55,7 @@ def get_segment( request ):
 
         if segment == '':
             segment     = 'index'
-            active_menu = 'dashboard'
-
-        if segment.startswith('dashboards-'):
-            active_menu = 'dashboard'
-
-        if segment.startswith('account-') or segment.startswith('users-') or segment.startswith('profile-') or segment.startswith('projects-'):
-            active_menu = 'pages'
-
-        if  segment.startswith('notifications') or segment.startswith('sweet-alerts') or segment.startswith('charts.html') or segment.startswith('widgets') or segment.startswith('messages'):
-            active_menu = 'pages'     
-
-
+ 
         parent = core.split('-')[0] if core.split('-')[0] else ""
         segment_name = core
 
@@ -78,4 +63,4 @@ def get_segment( request ):
         return segment, active_menu, parent, segment_name
 
     except:
-        return 'index', 'dashboard', '', ''  
+        return 'index', ''  
