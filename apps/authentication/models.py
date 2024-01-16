@@ -15,6 +15,10 @@ from sqlalchemy.orm import relationship
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 from apps.config import Config
 
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, LargeBinary
+
+
 RoleType = Config.USERS_ROLES
 Status   = Config.USERS_STATUS
 VERIFIED_EMAIL = Config.VERIFIED_EMAIL
@@ -40,12 +44,84 @@ class Users(db.Model, UserMixin):
     
     verified_email  = db.Column(db.Integer(),   default=VERIFIED_EMAIL['not-verified'], nullable=False)
     
-    oauth_twitter   = db.Column(db.String(100), nullable=True)
-    oauth_github    = db.Column(db.String(100), nullable=True)
     
     date_created    = db.Column(db.DateTime, default=dt.datetime.utcnow())
     date_modified   = db.Column(db.DateTime, default=db.func.current_timestamp(),
                                                onupdate=db.func.current_timestamp())
+    
+class Inspection(db.Model):
+    __tablename__ = 'Inspection'
+    id = Column(Integer, primary_key=True)
+    DateInspection = Column(Date)
+    TronconId = Column(Integer, ForeignKey('Troncon.id'))
+    FeederId = Column(Integer, ForeignKey('Feeder.id'))
+    ZoneId = Column(Integer, ForeignKey('Zone.id'))
+    StatutInspectionId = Column(Integer, ForeignKey('StatutInspection.id'))
+
+class InspectionOperateur(db.Model):
+    __tablename__ = 'InspectionOperateur'
+    id = Column(Integer, primary_key=True)
+    Inspection = Column(Integer, ForeignKey('Inspection.id'))
+    Users = Column(Integer, ForeignKey('users.id'))
+    EstResponsable = Column(Boolean)
+
+class ImageInspection(db.Model):
+    __tablename__ = 'ImageInspection'
+    id = Column(Integer, primary_key=True)
+    DateImage = Column(Date)
+    Contenu = Column(LargeBinary)
+    InspectionId = Column(Integer, ForeignKey('Inspection.id'))
+    Long = Column(String(255))
+    Latitute = Column(String(255))
+
+class Defaut(db.Model):
+    __tablename__ = 'Defaut'
+    id = Column(Integer, primary_key=True)
+    Nom = Column(String(255))
+    TypeDefaut = Column(Integer, ForeignKey('TypeDefaut.id'))
+
+class TypeDefaut(db.Model):
+    __tablename__ = 'TypeDefaut'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
+
+class ImageInspectionDefaut(db.Model):
+    __tablename__ = 'ImageInspectionDefaut'
+    id = Column(Integer, primary_key=True)
+    ImageInspectionId = Column(Integer, ForeignKey('ImageInspection.id'))
+    DefautId = Column(Integer, ForeignKey('Defaut.id'))
+    StatutImageInspectionId = Column(Integer, ForeignKey('StatutImageInspection.id'))
+
+class StatutImageInspection(db.Model):
+    __tablename__ = 'StatutImageInspection'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
+
+class StatutInspection(db.Model):
+    __tablename__ = 'StatutInspection'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
+
+class Feeder(db.Model):
+    __tablename__ = 'Feeder'
+    id = Column(Integer, primary_key=True)
+    Nom = Column(String(255))
+
+class Troncon(db.Model):
+    __tablename__ = 'Troncon'
+    id = Column(Integer, primary_key=True)
+    Nom = Column(String(255))
+
+class Zone(db.Model):
+    __tablename__ = 'Zone'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
+
+class Profil(db.Model):
+    __tablename__ = 'Profil'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
+
     
 
     def __init__(self, **kwargs):
@@ -145,6 +221,7 @@ class UserProfile(db.Model):
     @classmethod
     def find_by_user_id(cls, _id: int):
         return cls.query.filter_by(user=_id).first()
+    
     
     def save(self) -> None:
         try:
