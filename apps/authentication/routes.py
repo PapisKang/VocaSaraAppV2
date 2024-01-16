@@ -60,15 +60,6 @@ app.config['uploadFolder'] = upload_folder_name
 def route_default():
     return redirect(url_for('authentication_blueprint.login')) 
 
-@blueprint.route("/github")
-def login_github():
-    """ Github login """
-    if not github.authorized:
-        return redirect(url_for("github.login"))
-
-    res = github.get("/user")
-    return redirect(url_for('home_blueprint.index'))
-
 # Login & Registration
 @blueprint.route('/login', methods=['GET', 'POST'])
 def login():
@@ -475,7 +466,9 @@ def change_password():
 
     return jsonify({'message':message['password_has_been_updated']}), 200
 
-from werkzeug.security import generate_password_hash, check_password_hash
+#.................#forget pass.............................####################
+
+
 from wtforms import StringField, PasswordField, SubmitField, FileField, SelectField, BooleanField
 from wtforms.validators import DataRequired, EqualTo, Email  # Ajoutez Email ici
 from flask_sqlalchemy import SQLAlchemy
@@ -612,8 +605,6 @@ def reset_password(token):
     else:
         error_message = message['lien_invalide']
         return redirect(url_for('authentication_blueprint.login', error_message=error_message))
-
-
 
 #.................#forget pass.............................####################
 
