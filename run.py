@@ -11,7 +11,6 @@ from apps.config import config_dict
 from apps import create_app, db
 from flask_wtf.csrf import CSRFProtect
 
-
 # WARNING: Don't run with debug turned on in production!
 DEBUG = os.getenv('FLASK_DEBUG', 'False') == 'True'
 # The configuration
@@ -32,6 +31,14 @@ Migrate(app, db)
 if not DEBUG:
     Minify(app=app, html=True, js=False, cssless=False)
 
+
+@app.cli.command("test_ftp")
+def test_ftp():
+
+    if testFTPConnection():
+        app.logger.info( 'FTP connection OK' )
+    else:
+        app.logger.info( 'FTP connection ERROR' )
 
 
 if DEBUG:

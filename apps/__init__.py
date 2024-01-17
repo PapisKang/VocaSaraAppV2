@@ -44,7 +44,7 @@ def configure_database(app):
     @app.teardown_request
     def shutdown_session(exception=None):
         db.session.remove()
-
+ 
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)

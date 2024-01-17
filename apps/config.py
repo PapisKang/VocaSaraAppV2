@@ -50,10 +50,6 @@ class Config(object):
     # Social AUTH Settings
     OAUTHLIB_INSECURE_TRANSPORT = os.getenv('OAUTHLIB_INSECURE_TRANSPORT')
 
-    SOCIAL_AUTH_GITHUB  = False
-    SOCIAL_AUTH_TWITTER = False
-
-
     # Mail Settings
     MAIL_SERVER   = os.getenv('MAIL_SERVER')
     MAIL_PORT     = os.getenv('MAIL_PORT')
@@ -71,7 +67,7 @@ class Config(object):
 #base de donnee
     #DB_ENGINE = os.getenv('DB_ENGINE', 'mysql+pyodbc')
     DB_USERNAME = os.getenv('DB_USERNAME', 'client')
-    DB_PASS = os.getenv('DB_PASS', '1234')
+    DB_PASS = os.getenv('DB_PASS', '11235813')
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_NAME = os.getenv('DB_NAME', 'root')
 

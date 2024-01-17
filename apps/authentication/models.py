@@ -49,78 +49,6 @@ class Users(db.Model, UserMixin):
     date_modified   = db.Column(db.DateTime, default=db.func.current_timestamp(),
                                                onupdate=db.func.current_timestamp())
     
-class Inspection(db.Model):
-    __tablename__ = 'Inspection'
-    id = Column(Integer, primary_key=True)
-    DateInspection = Column(Date)
-    TronconId = Column(Integer, ForeignKey('Troncon.id'))
-    FeederId = Column(Integer, ForeignKey('Feeder.id'))
-    ZoneId = Column(Integer, ForeignKey('Zone.id'))
-    StatutInspectionId = Column(Integer, ForeignKey('StatutInspection.id'))
-
-class InspectionOperateur(db.Model):
-    __tablename__ = 'InspectionOperateur'
-    id = Column(Integer, primary_key=True)
-    Inspection = Column(Integer, ForeignKey('Inspection.id'))
-    Users = Column(Integer, ForeignKey('users.id'))
-    EstResponsable = Column(Boolean)
-
-class ImageInspection(db.Model):
-    __tablename__ = 'ImageInspection'
-    id = Column(Integer, primary_key=True)
-    DateImage = Column(Date)
-    Contenu = Column(LargeBinary)
-    InspectionId = Column(Integer, ForeignKey('Inspection.id'))
-    Long = Column(String(255))
-    Latitute = Column(String(255))
-
-class Defaut(db.Model):
-    __tablename__ = 'Defaut'
-    id = Column(Integer, primary_key=True)
-    Nom = Column(String(255))
-    TypeDefaut = Column(Integer, ForeignKey('TypeDefaut.id'))
-
-class TypeDefaut(db.Model):
-    __tablename__ = 'TypeDefaut'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
-
-class ImageInspectionDefaut(db.Model):
-    __tablename__ = 'ImageInspectionDefaut'
-    id = Column(Integer, primary_key=True)
-    ImageInspectionId = Column(Integer, ForeignKey('ImageInspection.id'))
-    DefautId = Column(Integer, ForeignKey('Defaut.id'))
-    StatutImageInspectionId = Column(Integer, ForeignKey('StatutImageInspection.id'))
-
-class StatutImageInspection(db.Model):
-    __tablename__ = 'StatutImageInspection'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
-
-class StatutInspection(db.Model):
-    __tablename__ = 'StatutInspection'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
-
-class Feeder(db.Model):
-    __tablename__ = 'Feeder'
-    id = Column(Integer, primary_key=True)
-    Nom = Column(String(255))
-
-class Troncon(db.Model):
-    __tablename__ = 'Troncon'
-    id = Column(Integer, primary_key=True)
-    Nom = Column(String(255))
-
-class Zone(db.Model):
-    __tablename__ = 'Zone'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
-
-class Profil(db.Model):
-    __tablename__ = 'Profil'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
 
     
 
@@ -245,6 +173,7 @@ class UserProfile(db.Model):
         return
 
 
+
 @login_manager.user_loader
 def user_loader(id):
     return Users.query.filter_by(id=id).first()
@@ -260,3 +189,76 @@ def request_loader(request):
 class OAuth(OAuthConsumerMixin, db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="cascade"), nullable=False)
     user = db.relationship(Users)
+
+class Inspection(db.Model):
+    __tablename__ = 'Inspection'
+    id = Column(Integer, primary_key=True)
+    DateInspection = Column(Date)
+    TronconId = Column(Integer, ForeignKey('Troncon.id'))
+    FeederId = Column(Integer, ForeignKey('Feeder.id'))
+    ZoneId = Column(Integer, ForeignKey('Zone.id'))
+    StatutInspectionId = Column(Integer, ForeignKey('StatutInspection.id'))
+
+class InspectionOperateur(db.Model):
+    __tablename__ = 'InspectionOperateur'
+    id = Column(Integer, primary_key=True)
+    Inspection = Column(Integer, ForeignKey('Inspection.id'))
+    Users = Column(Integer, ForeignKey('users.id'))
+    EstResponsable = Column(Boolean)
+
+class ImageInspection(db.Model):
+    __tablename__ = 'ImageInspection'
+    id = Column(Integer, primary_key=True)
+    DateImage = Column(Date)
+    Contenu = Column(LargeBinary)
+    InspectionId = Column(Integer, ForeignKey('Inspection.id'))
+    Long = Column(String(255))
+    Latitute = Column(String(255))
+
+class Defaut(db.Model):
+    __tablename__ = 'Defaut'
+    id = Column(Integer, primary_key=True)
+    Nom = Column(String(255))
+    TypeDefaut = Column(Integer, ForeignKey('TypeDefaut.id'))
+
+class TypeDefaut(db.Model):
+    __tablename__ = 'TypeDefaut'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
+
+class ImageInspectionDefaut(db.Model):
+    __tablename__ = 'ImageInspectionDefaut'
+    id = Column(Integer, primary_key=True)
+    ImageInspectionId = Column(Integer, ForeignKey('ImageInspection.id'))
+    DefautId = Column(Integer, ForeignKey('Defaut.id'))
+    StatutImageInspectionId = Column(Integer, ForeignKey('StatutImageInspection.id'))
+
+class StatutImageInspection(db.Model):
+    __tablename__ = 'StatutImageInspection'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
+
+class StatutInspection(db.Model):
+    __tablename__ = 'StatutInspection'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
+
+class Feeder(db.Model):
+    __tablename__ = 'Feeder'
+    id = Column(Integer, primary_key=True)
+    Nom = Column(String(255))
+
+class Troncon(db.Model):
+    __tablename__ = 'Troncon'
+    id = Column(Integer, primary_key=True)
+    Nom = Column(String(255))
+
+class Zone(db.Model):
+    __tablename__ = 'Zone'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
+
+class Profil(db.Model):
+    __tablename__ = 'Profil'
+    id = Column(Integer, primary_key=True)
+    Libelle = Column(String(255))
