@@ -24,6 +24,7 @@ from apps.authentication.util import hash_pass, new_password_should_be_different
 from apps.config import Config
 from apps.config import Email_config
 from apps.helpers import createAccessToken, emailValidate, password_validate, sanitise_fille_name, createFolder, serverImageUrl, uniqueFileName, get_ts
+from ftp_server import uploadImageFTP
 from werkzeug.utils import secure_filename
 from flask import Flask, flash
 from messages import Messages
