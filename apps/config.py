@@ -34,6 +34,11 @@ class Config(object):
         # Créer le dossier
         os.makedirs(UPLOAD_IMAGE_SERVER_PATCH)
 
+    # Read the optional FTP values
+    FTP_SERVER   = os.getenv( 'FTP_SERVER'   )
+    FTP_USER     = os.getenv( 'FTP_USER'     )
+    FTP_PASSWORD = os.getenv( 'FTP_PASSWORD' )
+    FTP_WWW_ROOT = os.getenv( 'FTP_WWW_ROOT' )
 
     basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -53,6 +58,12 @@ class Config(object):
     SOCIAL_AUTH_GITHUB  = False
     SOCIAL_AUTH_TWITTER = False
 
+    GITHUB_ID      = os.getenv('GITHUB_ID')
+    GITHUB_SECRET  = os.getenv('GITHUB_SECRET')
+
+    # Enable/Disable Github Social Login    
+    if GITHUB_ID and GITHUB_SECRET:
+         SOCIAL_AUTH_GITHUB  = True
 
     # Mail Settings
     MAIL_SERVER   = os.getenv('MAIL_SERVER')
@@ -71,7 +82,7 @@ class Config(object):
 #base de donnee
     #DB_ENGINE = os.getenv('DB_ENGINE', 'mysql+pyodbc')
     DB_USERNAME = os.getenv('DB_USERNAME', 'client')
-    DB_PASS = os.getenv('DB_PASS', '1234')
+    DB_PASS = os.getenv('DB_PASS', '11235813')
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_NAME = os.getenv('DB_NAME', 'root')
 

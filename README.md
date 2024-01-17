@@ -73,7 +73,10 @@ The meaning of each variable can be found below:
     - `DB_PORT`, default value = `3306`
     - `DB_USERNAME`, default value = `appseed_db_usr`
     - `DB_PASS`, default value = `pass`
-
+- `SOCIAL AUTH` Github (optional)
+  - `GITHUB_ID`=YOUR_GITHUB_ID
+  - `GITHUB_SECRET`=YOUR_GITHUB_SECRET
+  
 <br />
 
 ## ✅ Set up MySql

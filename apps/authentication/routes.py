@@ -19,6 +19,7 @@ from apps.authentication.email import send_email
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import UserProfile, Users
 import re
+from apps.authentication.signals import user_saved_signals, delete_user_signals
 from apps.authentication.token import confirm_token, generate_confirmation_token
 from apps.authentication.util import hash_pass, new_password_should_be_different, verify_pass
 from apps.config import Config
@@ -226,6 +227,169 @@ def user_profile():
 
     return redirect(url_for('home_blueprint.index')) 
 
+
+@blueprint.route('/user_list', methods=['GET'])
+def user_list():
+    """
+        Get all users list view
+    """
+
+    if current_user.role != ROLE_ADMIN:
+        return redirect(url_for('authentication_blueprint.user_profile')) 
+
+    if request.method == 'GET':
+        template = 'accounts/users-reports.html'
+        users = Users.query.all()
+    
+        user_list = []
+        if users is not None:
+            for user in users:
+                for data in UserProfile.query.filter_by(user=user.id):
+                    user_list.append(data)
+
+        context = {'users':user_list}
+        
+        return render_template(template, context=context)
+    
+    return redirect(url_for('home_blueprint.index'))
+
+@blueprint.route('/edit_user', methods=['GET', 'PUT'])
+def edit_user():
+    """
+        1.Get User by id(Get user view)
+        2.Update user(update user view)
+    Returns:
+        _type_: json data
+    """
+    if request.method == 'GET':
+       
+        user = UserProfile.find_by_id(request.args.get('user_id'))
+
+        # if check user none or not
+        if user:
+
+            context = {'id':user.id,'full_name':user.full_name,'bio':user.bio,
+                    'address':user.address, 'zipcode':user.zipcode, 'phone':user.phone,
+                    'email':user.email, 'website':user.website, 'image':user.image, 
+                    'user_id':user.user_id.id}
+            
+            return jsonify(context), 200
+        
+        else:
+            return jsonify({'error':message['record_not_found']}), 404
+        
+    
+    if request.method == 'PUT':
+
+        data  = request.form
+        image = request.files.get('image')
+        
+        FTP_error = False 
+
+        profile_obj = UserProfile.find_by_id(data.get('user_id'))
+        if profile_obj is not None:
+            # if check image none or not
+            if image:
+                filename = sanitise_fille_name(secure_filename(image.filename))
+                
+                # unque file name
+                unique_name  = uniqueFileName(filename)
+                
+                # if check folder
+                if upload_folder_name in os.listdir():
+                    image.save(os.path.join(app.config['uploadFolder'], unique_name))
+                
+                # if check image
+                if profile_obj.image is not None:
+
+                    # save to FTP server replace exists image
+                    if uploadImageFTP(unique_name, profile_obj.image):
+                        profile_obj.image = serverImageUrl(unique_name)
+                    else:
+                        FTP_error = True
+            if data.get('email') != '':
+                try:
+                    profile_obj.full_name = data.get('full_name')
+                    profile_obj.bio = data.get('bio')
+                    profile_obj.address = data.get('address')
+                    profile_obj.zipcode = data.get('zipcode')
+                    profile_obj.phone = data.get('phone')
+                    profile_obj.email = data.get('email')
+                    profile_obj.website = data.get('website')
+
+                    profile_obj.save()
+                except:
+                    return jsonify({'error': message['email_already_registered']}), 404
+            
+                user = Users.find_by_id(data.get('user_id'))
+                user.email = data.get('email')
+                user.save()
+            else:
+                profile_obj.full_name = data.get('full_name')
+                profile_obj.bio       = data.get('bio')
+                profile_obj.address   = data.get('address')
+                profile_obj.zipcode   = data.get('zipcode')
+                profile_obj.phone     = data.get('phone')
+                profile_obj.website   = data.get('website')
+
+                profile_obj.save()
+
+        aMsg = message['user_updated_successfully']
+        
+        if FTP_error:
+            aMsg += ' (FTP Upload Err)'
+
+        return jsonify({'message':aMsg}), 200
+        
+    else:
+        return jsonify({'error':message['record_not_found']}), 404
+
+@blueprint.route('/update_status', methods=['PUT'])
+def update_status():
+    """Update status view
+
+    Returns:
+        _type_: json
+    """
+    if request.method == 'PUT':
+       
+        user = Users.find_by_id(request.form.get('user_id'))
+        
+        # if check user none or not
+        if user:
+
+            # if check status none or not
+            if user.status:
+                if user.status == STATUS_ACTIVE:
+                    user.status = STATUS_SUSPENDED
+                else:
+                    user.status = STATUS_ACTIVE
+                
+                # save user state
+                user.save()
+               
+            context = {'message':message['successfully_updated']}
+            
+            return jsonify(context), 200
+        
+        else:
+            return jsonify({'error':message['record_not_found']}), 404
+
+
+@blueprint.route('/delete_user', methods=['DELETE'])      
+def delete_user():
+    """Delete user view
+
+    Returns:
+        _type_: json
+    """
+    if request.method == 'DELETE':
+        user = Users.find_by_id(request.form.get('user_id'))
+        if user:
+            # send signal for create profile
+            delete_user_signals.send({"user_id":user.id})
+            user.delete_from_db()
+            return jsonify({'message':message["deleted_successfully"]}), 200
 
 @blueprint.route('/logout')
 def logout():

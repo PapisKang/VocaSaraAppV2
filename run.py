@@ -11,6 +11,9 @@ from apps.config import config_dict
 from apps import create_app, db
 from flask_wtf.csrf import CSRFProtect
 
+from apps.commands.create_admin import CreateAdmin
+
+from ftp_server import testFTPConnection
 
 # WARNING: Don't run with debug turned on in production!
 DEBUG = os.getenv('FLASK_DEBUG', 'False') == 'True'
@@ -32,6 +35,22 @@ Migrate(app, db)
 if not DEBUG:
     Minify(app=app, html=True, js=False, cssless=False)
 
+@app.cli.command("create_admin")
+def create_admin():
+
+    # Make sure we have the tables
+    db.create_all()
+
+    # Create the admin user
+    CreateAdmin.create_admin()
+
+@app.cli.command("test_ftp")
+def test_ftp():
+
+    if testFTPConnection():
+        app.logger.info( 'FTP connection OK' )
+    else:
+        app.logger.info( 'FTP connection ERROR' )
 
 
 if DEBUG:
