@@ -34,11 +34,6 @@ class Config(object):
         # Créer le dossier
         os.makedirs(UPLOAD_IMAGE_SERVER_PATCH)
 
-    # Read the optional FTP values
-    FTP_SERVER   = os.getenv( 'FTP_SERVER'   )
-    FTP_USER     = os.getenv( 'FTP_USER'     )
-    FTP_PASSWORD = os.getenv( 'FTP_PASSWORD' )
-    FTP_WWW_ROOT = os.getenv( 'FTP_WWW_ROOT' )
 
     basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -54,16 +49,6 @@ class Config(object):
     
     # Social AUTH Settings
     OAUTHLIB_INSECURE_TRANSPORT = os.getenv('OAUTHLIB_INSECURE_TRANSPORT')
-
-    SOCIAL_AUTH_GITHUB  = False
-    SOCIAL_AUTH_TWITTER = False
-
-    GITHUB_ID      = os.getenv('GITHUB_ID')
-    GITHUB_SECRET  = os.getenv('GITHUB_SECRET')
-
-    # Enable/Disable Github Social Login    
-    if GITHUB_ID and GITHUB_SECRET:
-         SOCIAL_AUTH_GITHUB  = True
 
     # Mail Settings
     MAIL_SERVER   = os.getenv('MAIL_SERVER')

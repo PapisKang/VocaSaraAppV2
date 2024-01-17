@@ -25,11 +25,9 @@ from apps.authentication.util import hash_pass, new_password_should_be_different
 from apps.config import Config
 from apps.config import Email_config
 from apps.helpers import createAccessToken, emailValidate, password_validate, sanitise_fille_name, createFolder, serverImageUrl, uniqueFileName, get_ts
-from ftp_server import uploadImageFTP
 from werkzeug.utils import secure_filename
 from flask import Flask, flash
 from messages import Messages
-from flask_dance.contrib.github import github
 import secrets
 from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
@@ -59,6 +57,15 @@ app.config['uploadFolder'] = upload_folder_name
 @blueprint.route('/')
 def route_default():
     return redirect(url_for('authentication_blueprint.login')) 
+
+@blueprint.route("/github")
+def login_github():
+    """ Github login """
+    if not github.authorized:
+        return redirect(url_for("github.login"))
+
+    res = github.get("/user")
+    return redirect(url_for('home_blueprint.index'))
 
 # Login & Registration
 @blueprint.route('/login', methods=['GET', 'POST'])
@@ -468,7 +475,7 @@ def change_password():
 
 #.................#forget pass.............................####################
 
-
+from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import StringField, PasswordField, SubmitField, FileField, SelectField, BooleanField
 from wtforms.validators import DataRequired, EqualTo, Email  # Ajoutez Email ici
 from flask_sqlalchemy import SQLAlchemy
@@ -556,7 +563,7 @@ def password_reset_request():
         # Gérer l'erreur de connexion SMTP ici
         error_message = message['serveur_error']
 
-    return render_template('accounts/authentication-reset-illustration.html', form=form,
+    return render_template('accounts/password_reset_request.html', form=form,
                            success_message=success_message, error_message=error_message)
 
 
@@ -605,6 +612,8 @@ def reset_password(token):
     else:
         error_message = message['lien_invalide']
         return redirect(url_for('authentication_blueprint.login', error_message=error_message))
+
+
 
 #.................#forget pass.............................####################
 
