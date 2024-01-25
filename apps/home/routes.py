@@ -54,7 +54,7 @@ def get_segment( request ):
         
 
         if segment == '':
-            segment     = 'index'
+            segment     = 'index','apropos'
  
         parent = core.split('-')[0] if core.split('-')[0] else ""
         segment_name = core
@@ -64,3 +64,6 @@ def get_segment( request ):
 
     except:
         return 'index', ''  
+@blueprint.route('/apropos')
+def apropos():
+    return render_template('home/apropos.html', segment='apropos')
