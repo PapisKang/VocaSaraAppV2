@@ -1,7 +1,3 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from smtplib import SMTPConnectError
@@ -740,7 +736,7 @@ def extract_gps_info(img_path):
         print(f"Error extracting GPS info: {e}")
     return None
 
-
+@login_required
 @blueprint.route("/upload_page")
 def upload_page():
     return render_template('rapport/traitement_visible.html')

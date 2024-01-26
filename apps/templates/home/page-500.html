@@ -46,7 +46,7 @@
 </head>
 <body>
     <div class="container">
-        <img class="error-image" src="{{ config.ASSETS_ROOT }}/img/illustrations/3828550.jpg" alt="404-error">
+        <img class="error-image" src="{{ config.ASSETS_ROOT }}/img/illustrations/3828550.jpg" alt="404-error" loading="lazy" >
         <h1>OUPS</h1>
         <p>Quelque Chose c'est mal passer</p>
         <p>S'il vous plait <a href="{{ url_for('authentication_blueprint.login') }}">Connecter vous</a> Pour continuer</p>
