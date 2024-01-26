@@ -27,12 +27,8 @@ class Config(object):
     LOGIN_ATTEMPT_LIMIT = 3
 
     DEFAULT_IMAGE_URL =  'static/assets/images/'
-    UPLOAD_IMAGE_SERVER_PATCH = 'C:/client'
+  
 
-    # Vérifier si le dossier existe
-    if not os.path.exists(UPLOAD_IMAGE_SERVER_PATCH):
-        # Créer le dossier
-        os.makedirs(UPLOAD_IMAGE_SERVER_PATCH)
 
 
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -67,7 +63,7 @@ class Config(object):
 #base de donnee
     #DB_ENGINE = os.getenv('DB_ENGINE', 'mysql+pyodbc')
     DB_USERNAME = os.getenv('DB_USERNAME', 'client')
-    DB_PASS = os.getenv('DB_PASS', '1234')
+    DB_PASS = os.getenv('DB_PASS', '11235813')
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_NAME = os.getenv('DB_NAME', 'root')
 
@@ -110,7 +106,7 @@ class ProductionConfig(Config):
     # Security
     SESSION_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_HTTPONLY = True
-    REMEMBER_COOKIE_DURATION = 3600
+    REMEMBER_COOKIE_DURATION = 36000
 
 class DebugConfig(Config):
     DEBUG = True

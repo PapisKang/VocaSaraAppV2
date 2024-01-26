@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+
+    <!-- Ajout des liens vers les fichiers CSS de Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+{%include 'home/index.html'%}
+<body class="bg-light">
+    <div class="container mt-5">
+        
+        <p class="lead">Bienvenue, {{ current_user.username }}!</p>
+
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="image">Photo de Profil:</label>
+                <input type="file" class="form-control-file" name="image" accept="image/*">
+            </div>
+            <button type="submit" class="btn btn-primary">Changer de Photo</button>
+        </form>
+
+        <hr class="my-4">
+
+        {% if user_profile.image %}
+            <img src="data:image/jpeg;base64,{{ user_profile.image }}" alt="Profile Picture" class="img-fluid rounded">
+        {% endif %}
+    </div>
+
+    <!-- Ajout des scripts JS de Bootstrap (optionnel) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>

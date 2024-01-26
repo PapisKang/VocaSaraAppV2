@@ -1,251 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
+
 <head>
     <title>À propos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+{%include 'home/index.html'%}
+<body>
+    <div class="container">
+        <div class="text-center mt-4 mb-5">
+            <h1 class="display-4">À PROPOS DE VOCA SARA-SUARL</h1>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <section class="bg-white rounded shadow-sm mb-4 p-4">
+                    <h2 class="h4">Bienvenue chez VOCA SARA-SUARL</h2>
+                    <p class="blinking-text">VOCA SARA-SUARL est une nouvelle PME créée par Monsieur Yiékiédion Raphael SARA en 2021 à Dakar, naissant d’une véritable passion des drones et de la robotique. En effet, l’entreprise VOCA SARA-SUARL agit dans la réalisation et la conception des inspections par drones, notamment dans le secteur de l’énergie avec les visites et inspections du réseau aérien HTA et BT de la SENELEC par drones, mais aussi dans le secteur agricole, industriel, pétrolier, multimédia, etc.</p>
+                </section>
+
+                <section class="bg-white rounded shadow-sm mb-4 p-4">
+                    <h2 class="h4">Évolution de l'entreprise</h2>
+                    <p>Par ailleurs, elle a d’abord vu le jour sous le nom de Volantis en 2018 en statut de GIE, et au fil du temps, elle a signé en 2019 avec la SENELEC sur le projet portant inspections et visites par drones des lignes du réseau aérien HTA. Ensuite, en 2020, elle change de statut juridique pour devenir une SARL, avec pour ambition de bien pouvoir développer ses activités et d'être en adéquation avec ses différents métiers. En fin, Volantis SARL a décidé en 2021 de changer de dénomination sociale et de statut juridique pour devenir VOCA SARA-SUARL.</p>
+                </section>
+
+                <section class="bg-white rounded shadow-sm mb-4 p-4">
+                    <h2 class="h4">Nos Compétences</h2>
+                    <p>Cependant, notre savoir-faire et nos compétences reposent sur l’ingéniosité en inspections par drones via notre Centre de Traitement and d’Analyse de Données (CTAD), nos compétences du terrain and d’un personnel expérimenté and motivé. En outre, quel que soit votre projet, l’entreprise VOCA SARA-SUARL vous accompagne, identifie l’ensemble de vos besoins and vous propose des solutions à votre attente afin de réaliser une maintenance préventive or curative.</p>
+                </section>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <h2 class="mb-4">Contactez-nous</h2>
+            <form method="POST" action="/envoyer_message" class="col-lg-6 offset-lg-3">
+                <div class="form-group">
+                    <label for="nom">Nom :</label>
+                    <input type="text" id="nom" name="nom" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email :</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message :</label>
+                    <textarea id="message" name="message" class="form-control" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+            </form>
+        </div>
+
+        <div class="text-center mt-5">
+            <h3 class="mb-3">DIAYANTE BA NAW</h3>
+        </div>
+
+        <div class="iframe-container">
+            <h5 class="blinking-text text-center mb-4">Dakar (Sénégal), Hann Maristes I Villa numéro B 113.</h5>
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe class="embed-responsive-item rounded" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d964.6424348265977!2d-17.425846330448714!3d14.736900999110382!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xec10d54666a52ff%3A0x494168c5dd93026e!2sVOCASARA!5e0!3m2!1sfr!2ssn!4v1696973615830!5m2!1sfr!2ssn" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
-    <style>
-        body {
-           color: none;
-        }
-
-        #header {
-    text-align: center;
-    border-radius: 6px;
-    margin: 15px;
-}
-
-h1 {
-    font-size: 24px; /* Vous pouvez ajuster la taille selon vos besoins */
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #eeeeee;
-}
-
-
-        /* Style général du contenu principal */
-#main-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f7f7f7; /* Ajout d'une couleur de fond */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Amélioration de l'ombre */
-}
-
-/* Style des sections */
-section {
-    background-color: #fff; /* Couleur de fond blanche */
-    margin-bottom: 20px;
-    border-radius: 8px; /* Augmentation du rayon de la bordure */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Légère amélioration de l'ombre */
-    padding: 20px;
-}
-
-/* Style des titres de section */
-h2 {
-    font-size: 28px; /* Augmentation de la taille de la police */
-    font-weight: bold;
-    color: #333; /* Couleur de texte plus sombre */
-    margin-top: 20px;
-    margin-bottom: 15px; /* Légère augmentation de la marge inférieure */
-}
-
-/* Animation du texte clignotant */
-.blinking-text {
-    font-size: 20px; /* Ajustement de la taille de la police */
-    line-height: 1.5;
-    color: #ff6347; /* Couleur de texte rouge */
-    animation: blinkText 3s infinite alternate;
-}
-
-/* Style spécifique à l'élément avec l'ID "pp" */
-#pp {
-    font-size: 18px;
-    line-height: 1.5;
-    color: #333;
-}
-
-
-        #contact-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #contact-form {
-            width: 60%;
-            background-color: rgba(96, 138, 227, 0.26);
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0px 0px 10px 0px #ccc;
-            text-align: left;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        input[type="submit"] {
-            background-color: #000000;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #717272;
-        }
-
-        .iframe-container {
-            margin: 20px;
-        }
-
-        iframe {
-            height: 350px;
-            width: 100%;
-            border: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .container {
-            text-align: center;
-        }
-
-        h3 {
-            font-size: 24px;
-            animation: flyingPlane 2s ease-in-out;
-            color: #ffffff;
-        }
-
-        @keyframes blinkText {
-            0% {
-                opacity: 0;
-            }
-            100% {
-                opacity: 1;
-            }
-        }
-
-        @keyframes flyingPlane {
-            0% {
-                transform: translateX(-100%);
-                opacity: 0;
-            }
-            100% {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Mobile responsive styles */
-        @media (max-width: 768px) {
-            #contact-form {
-                width: 90%; /* Make the contact form wider on smaller screens */
-            }
-
-            .iframe-container {
-                padding: 0; /* Remove padding on both sides for the iframe container */
-            }
-
-            iframe {
-                width: 100%; /* Make the iframe full-width on smaller screens */
-                height: 300px; /* Adjust the height as needed */
-            }
-        }
-    </style>
-</head>
-<body>
-    {% extends 'layouts/base.html' %}
-
-    {% block title %}  Dashboard {% endblock title %}
-    
-    <!-- Specific CSS goes HERE -->
-    {% block stylesheets %}{% endblock stylesheets %}
-    
-    {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
-    
-    {% block content %}
-   
-
-    <div id="contact-container">
-        <div id="header">
-            <h1>À PROPOS DE VOCA SARA-SUARL</h1>
-        </div>
-
-        <div id="main-content">
-            <section id="intro-section">
-                <h2>Bienvenue chez VOCA SARA-SUARL</h2>
-                <p class="blinking-text" id="pp">
-                    VOCA SARA-SUARL est une nouvelle PME créée par Monsieur Yiékiédion Raphael SARA en 2021 à Dakar,
-                    naissant d’une véritable passion des drones et de la robotique. En effet, l’entreprise VOCA
-                    SARA-SUARL agit dans la réalisation et la conception des inspections par drones, notamment dans
-                    le secteur de l’énergie avec les visites et inspections du réseau aérien HTA et BT de la SENELEC par
-                    drones, mais aussi dans le secteur agricole, industriel, pétrolier, multimédia, etc.
-                </p>
-            </section>
-
-            <section id="evolution-section">
-                <h2>Évolution de l'entreprise</h2>
-                <p id="pp">
-                    Par ailleurs, elle a d’abord vu le jour sous le nom de Volantis en 2018 en statut de GIE, et au fil
-                    du temps, elle a signé en 2019 avec la SENELEC sur le projet portant inspections et visites par
-                    drones des lignes du réseau aérien HTA. Ensuite, en 2020, elle change de statut juridique pour
-                    devenir une SARL, avec pour ambition de bien pouvoir développer ses activités et d'être en
-                    adéquation avec ses différents métiers. En fin, Volantis SARL a décidé en 2021 de changer de
-                    dénomination sociale et de statut juridique pour devenir VOCA SARA-SUARL.
-                </p>
-            </section>
-
-            <section id="competences-section">
-                <h2>Nos Compétences</h2>
-                <p id="pp">
-                    Cependant, notre savoir-faire et nos compétences reposent sur l’ingéniosité en inspections par
-                    drones via notre Centre de Traitement and d’Analyse de Données (CTAD), nos compétences du terrain and
-                    d’un personnel expérimenté and motivé. En outre, quel que soit votre projet, l’entreprise VOCA
-                    SARA-SUARL vous accompagne, identifie l’ensemble de vos besoins and vous propose des solutions à
-                    votre attente afin de réaliser une maintenance préventive or curative.
-                </p>
-            </section>
-
-        </div>
-        <h2>Contactez-nous</h2>
-
-        <form method="POST" action="/envoyer_message" id="contact-form">
-            <label for="nom">Nom :</label>
-            <input type="text" id="nom" name="nom" required><br><br>
-
-            <label for="email">Email :</label>
-            <input type="email" id="email" name="email" required><br><br>
-
-            <label for "message">Message :</label><br>
-            <textarea id="message" name="message" rows="4" cols="50" required></textarea><br><br>
-
-            <input type="submit" value="Envoyer">
-        </form>
-    </div>
-    <div class="container">
-        <h3>DIAYANTE BA NAW</h3>
-    </div>
-    <div class="iframe-container" style="padding-left: 0; padding-right: 0;">
-        <h5 class="blinking-text" style="text-align: center; font-size: 24px; color: #494040; font-style: italic; font-weight: bold;">Dakar (Sénégal), Hann Maristes I Villa numéro B 113.</h5>
-        <iframe frameborder="0" style="border: 6px inset #f3f3f3; /* Couleur et épaisseur de la bordure */
-        border-radius: 10px;"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d964.6424348265977!2d-17.425846330448714!3d14.736900999110382!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xec10d54666a52ff%3A0x494168c5dd93026e!2sVOCASARA!5e0!3m2!1sfr!2ssn!4v1696973615830!5m2!1sfr!2ssn"
-            allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-
-    {% include "includes/footer.html" %}           
-
-    {% endblock content %}
 </body>
+
 </html>
