@@ -723,11 +723,8 @@ def extract_gps_info(img_path):
             if exif_data is not None:
                 gps_info = exif_data.get(34853)  # GPSInfo tag
                 if gps_info is not None:
-                    # Assurez-vous que les valeurs sont des flottants
-                    latitude = float(gps_info[2][0]) + \
-                        float(gps_info[2][1])/60 + float(gps_info[2][2])/3600
-                    longitude = float(gps_info[4][0]) + \
-                        float(gps_info[4][1])/60 + float(gps_info[4][2])/3600
+                    latitude = decimal_coords(gps_info[2])
+                    longitude = decimal_coords(gps_info[4])
                     if gps_info[3] == 'S':
                         latitude *= -1
                     if gps_info[1] == 'W':
@@ -736,6 +733,15 @@ def extract_gps_info(img_path):
     except Exception as e:
         print(f"Error extracting GPS info: {e}")
     return None
+
+
+def decimal_coords(coords):
+    degrees, minutes, seconds = coords
+    decimal = float(degrees) + float(minutes) / 60 + float(seconds) / 3600
+    return decimal
+
+
+
 
 @login_required
 @blueprint.route("/upload_page")
