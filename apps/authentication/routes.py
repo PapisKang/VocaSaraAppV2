@@ -471,6 +471,7 @@ def delete_user():
 
 
 @blueprint.route('/logout')
+@login_required
 def logout():
     """ Logout View """
     logout_user()
