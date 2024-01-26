@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GENERATION DE RAPPORT</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0; /* Supprimer la marge par défaut du body */
+      min-height: 100vh; /* Occuper au moins 100% de la hauteur de la fenêtre */
+      display: flex;
+      flex-direction: column; /* Aligner les éléments verticalement */
+    }
+
+    .container-main {
+      display: flex;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 50px auto;
+      flex: 1; /* Utiliser l'espace restant pour la flexbox */
+    }
+
+    .container-form {
+      flex: 1;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #illustration {
+      max-width: 60%;
+      height: auto;
+    }
+
+    form {
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .error-message {
+      color: #ff0000;
+      display: none;
+    }
+  </style>
+</head>
+{%include 'home/index.html'%}
+<body>
+
+  <div id="sidebar-container"></div>
+  <div class="container-main">
+    <div class="container-form">
+      <h2>FORMULAIRE DE RAPPORT</h2>
+      <form id="rapportForm" action="{{ url_for('home_blueprint.generate_rapport') }}" method="POST">
+        <label for="feeder">Feeder:</label>
+        <select id="feeder" name="feeder">
+          <option value="" disabled selected>Choisissez un feeder existant ou saisissez-en un nouveau</option>
+          {% for feeder in feeders_existants %}
+            <option value="{{ feeder.Nom }}">{{ feeder.Nom }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" id="feederInput" name="feederInput" placeholder="Saisissez le feeder">
+        
+        <label for="troncon">Troncon:</label>
+        <select id="troncon" name="troncon">
+          <option value="" disabled selected>Choisissez un troncon existant ou saisissez-en un nouveau</option>
+          {% for troncon in troncons_existants %}
+            <option value="{{ troncon.Nom }}">{{ troncon.Nom }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" id="tronconInput" name="tronconInput" placeholder="Saisissez le tronçon">
+        
+        <label for="dateDebut">Date de visite - Début:</label>
+        <input type="date" id="dateDebut" name="dateDebut" required>
+
+        <label for="dateFin">Date de visite - Fin:</label>
+        <input type="date" id="dateFin" name="dateFin" required>
+
+        <label for="operateur">Nom de l'opérateur:</label>
+        <input type="text" id="operateur" name="operateur" value="{{ current_user.username }}" readonly>
+
+        <label for="zone">Zone:</label>
+        <select id="zone" name="zone" required>
+          <option value="" disabled selected>Choisissez une zone</option>
+          <option value="DRS">DRS</option>
+          <option value="DRN">DRN</option>
+          <option value="DNO">DNO</option>
+          <option value="DRE">DRE</option>
+        </select>
+        
+        <label for="groupementTroncon">Groupement troncon:</label>
+        <input type="text" id="groupementTroncon" name="groupementTroncon">
+
+        <button type="submit" onclick="saveFormData()">Confirmer</button>
+      </form>
+
+      <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
+    </div>
+
+    <img src="{{ config.ASSETS_ROOT }}/img/illustrations/3129554.jpg" alt="Illustration"
+         id="illustration" loading="lazy">
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      loadFormData();
+    });
+
+    function saveFormData() {
+      const feeder = encodeURIComponent(document.getElementById("feeder").value);
+      const troncon = encodeURIComponent(document.getElementById("troncon").value);
+      const dateDebut = encodeURIComponent(document.getElementById("dateDebut").value);
+      const dateFin = encodeURIComponent(document.getElementById("dateFin").value);
+      const operateur = encodeURIComponent(document.getElementById("operateur").value);
+      const zone = encodeURIComponent(document.getElementById("zone").value);
+      const groupementTroncon = encodeURIComponent(document.getElementById("groupementTroncon").value);
+
+      document.cookie = `feeder=${feeder}; path=/`;
+      document.cookie = `troncon=${troncon}; path=/`;
+      document.cookie = `dateDebut=${dateDebut}; path=/`;
+      document.cookie = `dateFin=${dateFin}; path=/`;
+      document.cookie = `operateur=${operateur}; path=/`;
+      document.cookie = `zone=${zone}; path=/`;
+      document.cookie = `groupementTroncon=${groupementTroncon}; path=/`;
+    }
+
+    function loadFormData() {
+      const cookies = document.cookie.split(';');
+      const formData = {};
+
+      cookies.forEach(cookie => {
+        const parts = cookie.trim().split('=');
+        const key = decodeURIComponent(parts[0]);
+        const value = decodeURIComponent(parts[1]);
+        formData[key] = value;
+      });
+
+      if (formData.feeder) {
+        document.getElementById("feeder").value = formData.feeder;
+      }
+      if (formData.troncon) {
+        document.getElementById("troncon").value = formData.troncon;
+      }
+      if (formData.dateDebut) {
+        document.getElementById("dateDebut").value = formData.dateDebut;
+      }
+      if (formData.dateFin) {
+        document.getElementById("dateFin").value = formData.dateFin;
+      }
+      if (formData.operateur) {
+        document.getElementById("operateur").value = formData.operateur;
+      }
+      if (formData.zone) {
+        document.getElementById("zone").value = formData.zone;
+      }
+      if (formData.groupementTroncon) {
+        document.getElementById("groupementTroncon").value = formData.groupementTroncon;
+      }
+    }
+    function toggleMenu() {
+      const nav = document.querySelector('nav');
+      nav.classList.toggle('active');
+    }
+
+  </script>
+  
+</body>
+</html>
