@@ -57,6 +57,13 @@ pyodbc==5.0.1
 zipp==3.6.0
 pyOpenSSL
 
+tensorflow
+numpy
+matplotlib
+piexif
+opencv-python
+keras
+pillow
 # flask_mysqldb
 # mysqlclient==2.1.1
 # psycopg2-binary 
