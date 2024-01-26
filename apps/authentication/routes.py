@@ -168,7 +168,7 @@ def login():
         user.failed_logins = 0
         db.session.commit()
         
-        return redirect(url_for('authentication_blueprint.index'))
+        return redirect(url_for('home_blueprint.acceuil'))
 
     if not current_user.is_authenticated:
 
@@ -182,7 +182,7 @@ def login():
                                form=login_form,
                                msg=msg)
     
-    return redirect(url_for('authentication_blueprint.index'))
+    return redirect(url_for('home_blueprint.aceuil'))
 
 
 @blueprint.route('/register', methods=['GET', 'POST'])
