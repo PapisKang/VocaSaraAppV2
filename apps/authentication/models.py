@@ -14,9 +14,12 @@ import datetime as dt
 from sqlalchemy.orm import relationship
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 from apps.config import Config
-
+from flask_login import current_user
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, LargeBinary
+from sqlalchemy import Column,DateTime, Integer, String, Date, Boolean, ForeignKey, LargeBinary
+from datetime import datetime
+from sqlalchemy import LargeBinary
+from sqlalchemy.dialects.mysql import LONGTEXT
 
 
 RoleType = Config.USERS_ROLES
@@ -135,7 +138,7 @@ class UserProfile(db.Model):
     phone         = db.Column(db.String(50),   nullable=True, default='')
     email         = db.Column(db.String(100),  unique=True,   nullable=True)
     service       = db.Column(db.String(100),  nullable=True, default='')
-    image         = db.Column(db.String(1000), nullable=True, default= Config.ASSETS_ROOT + "/img/user/avatar-5.jpg")
+    image          = db.Column(LONGTEXT, nullable=True)
     user          = db.Column(db.Integer, db.ForeignKey("users.id",ondelete="cascade"), nullable=False)
     user_id       = relationship(Users, uselist=False, backref="profile")
     date_created  = db.Column(db.DateTime, default=dt.datetime.utcnow())
@@ -186,34 +189,14 @@ def request_loader(request):
     return user if user else None
 
 
-class OAuth(OAuthConsumerMixin, db.Model):
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="cascade"), nullable=False)
-    user = db.relationship(Users)
-
-class Inspection(db.Model):
-    __tablename__ = 'Inspection'
-    id = Column(Integer, primary_key=True)
-    DateInspection = Column(Date)
-    TronconId = Column(Integer, ForeignKey('Troncon.id'))
-    FeederId = Column(Integer, ForeignKey('Feeder.id'))
-    ZoneId = Column(Integer, ForeignKey('Zone.id'))
-    StatutInspectionId = Column(Integer, ForeignKey('StatutInspection.id'))
-
 class InspectionOperateur(db.Model):
     __tablename__ = 'InspectionOperateur'
     id = Column(Integer, primary_key=True)
-    Inspection = Column(Integer, ForeignKey('Inspection.id'))
+    Inspection = Column(Integer, ForeignKey('RapportGenere.id'))
     Users = Column(Integer, ForeignKey('users.id'))
     EstResponsable = Column(Boolean)
 
-class ImageInspection(db.Model):
-    __tablename__ = 'ImageInspection'
-    id = Column(Integer, primary_key=True)
-    DateImage = Column(Date)
-    Contenu = Column(LargeBinary)
-    InspectionId = Column(Integer, ForeignKey('Inspection.id'))
-    Long = Column(String(255))
-    Latitute = Column(String(255))
+
 
 class Defaut(db.Model):
     __tablename__ = 'Defaut'
@@ -226,12 +209,6 @@ class TypeDefaut(db.Model):
     id = Column(Integer, primary_key=True)
     Libelle = Column(String(255))
 
-class ImageInspectionDefaut(db.Model):
-    __tablename__ = 'ImageInspectionDefaut'
-    id = Column(Integer, primary_key=True)
-    ImageInspectionId = Column(Integer, ForeignKey('ImageInspection.id'))
-    DefautId = Column(Integer, ForeignKey('Defaut.id'))
-    StatutImageInspectionId = Column(Integer, ForeignKey('StatutImageInspection.id'))
 
 class StatutImageInspection(db.Model):
     __tablename__ = 'StatutImageInspection'
@@ -245,20 +222,79 @@ class StatutInspection(db.Model):
 
 class Feeder(db.Model):
     __tablename__ = 'Feeder'
-    id = Column(Integer, primary_key=True)
-    Nom = Column(String(255))
+    id = db.Column(db.Integer, primary_key=True)
+    Nom = db.Column(db.String(255), nullable=False)  # Retirez l'option unique=True
 
 class Troncon(db.Model):
     __tablename__ = 'Troncon'
-    id = Column(Integer, primary_key=True)
-    Nom = Column(String(255))
+    id = db.Column(db.Integer, primary_key=True)
+    Nom = db.Column(db.String(255), nullable=False)  # Retirez l'option unique=True
 
-class Zone(db.Model):
-    __tablename__ = 'Zone'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
 
-class Profil(db.Model):
-    __tablename__ = 'Profil'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
+# Définition du modèle RapportGenere
+class RapportGenere(db.Model):
+    __tablename__ = 'RapportGenere'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nom_operateur = db.Column(db.String(64), nullable=False, default=None)
+    feeder = db.Column(db.String(255), nullable=False)
+    troncon = db.Column(db.String(255), nullable=False)
+    date_debut = db.Column(db.DateTime, nullable=False)
+    date_fin = db.Column(db.DateTime, nullable=False)
+    zone = db.Column(db.String(255), nullable=False)
+    groupement_troncon = db.Column(db.String(255))
+
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+
+    # Relations avec les images visibles et invisibles
+    images_upload_visible = db.relationship('ImageUploadVisible', back_populates='rapport_genere', cascade='all, delete-orphan')
+    images_upload_invisible = db.relationship('ImageUploadInvisible', back_populates='rapport_genere', cascade='all, delete-orphan')
+
+
+class ImageUploadVisible(db.Model):
+    __tablename__ = 'ImageUploadVisible'
+    id = db.Column(db.Integer, primary_key=True)
+    nom_operateur = db.Column(db.String(64), nullable=False, default=None)
+    filename = db.Column(db.String(255))
+    original_size = db.Column(db.String(20)) 
+    compressed_size = db.Column(db.String(20)) 
+    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+    data = db.Column(LONGTEXT)
+    
+    # Nouvelles colonnes pour la longueur, la largeur et le type de défaut
+    longitude = db.Column(db.Float)
+    latitude = db.Column(db.Float)
+    type_defaut = db.Column(db.String(255))
+    
+    feeder = db.Column(db.String(255), nullable=False)
+    troncon = db.Column(db.String(255), nullable=False)
+    zone = db.Column(db.String(255), nullable=False)
+    type_image = db.Column(db.String(20), default='Visible')
+    #Relation avec RapportGenere
+    rapport_genere_id = db.Column(db.Integer, db.ForeignKey('RapportGenere.id'))
+    rapport_genere = db.relationship('RapportGenere', back_populates='images_upload_visible')  # Modifier ici
+
+
+# Définition du modèle ImageUploadInvisible
+class ImageUploadInvisible(db.Model):
+    __tablename__ = 'ImageUploadInvisible'
+    id = db.Column(db.Integer, primary_key=True)
+    nom_operateur = db.Column(db.String(64), nullable=False, default=None)
+    filename = db.Column(db.String(255))
+    original_size = db.Column(db.String(20)) 
+    compressed_size = db.Column(db.String(20)) 
+    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+    data = db.Column(LONGTEXT)
+    
+    feeder = db.Column(db.String(255), nullable=False)
+    troncon = db.Column(db.String(255), nullable=False)
+    zone = db.Column(db.String(255), nullable=False)
+    type_image = db.Column(db.String(20), default='Invsible')
+    #Relation avec RapportGenere
+    rapport_genere_id = db.Column(db.Integer, db.ForeignKey('RapportGenere.id'))
+    rapport_genere = db.relationship('RapportGenere', back_populates='images_upload_invisible')
+    
+
+
+
