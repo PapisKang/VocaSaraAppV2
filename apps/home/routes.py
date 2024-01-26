@@ -143,3 +143,7 @@ def apropos():
 @blueprint.route('/localisation_page')
 def localisation_page():
     return render_template('home/localisation_defauts.html')
+
+@blueprint.route('/acceuil')
+def acceuil():
+    return render_template('home/acceuil.html')

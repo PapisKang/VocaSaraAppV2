@@ -46,7 +46,7 @@
 </head>
 <body>
     <div class="container">
-        <img class="error-image" src="{{ config.ASSETS_ROOT }}/img/illustrations/11132.jpg" alt="403-error">
+        <img class="error-image" src="{{ config.ASSETS_ROOT }}/img/illustrations/11132.jpg" alt="403-error" loading="lazy" >
         <h1>Accés Refusé</h1>
         <p>Vous n'avez pas les accés pour acceder à cette page</p>
         <p>S'il vous plait <a href="{{ url_for('authentication_blueprint.login') }}">Connecter vous</a> Pour continuer</p>
