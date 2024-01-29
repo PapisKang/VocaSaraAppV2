@@ -17,8 +17,9 @@ import zlib
 import base64
 import logging
 import os
-
 import base64
+from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible
+from flask import render_template, jsonify, send_file
 
 
 
@@ -139,6 +140,39 @@ def confirmation_page():
 def apropos():
     return render_template('home/apropos.html', segment='apropos')
 
+
+
+
+@blueprint.route('/acceuil')
+def acceuil():
+    return render_template('home/acceuil.html')
+
+
+
+@blueprint.route('/get_map_data')
+def get_map_data():
+    # Récupérer les données nécessaires de la base de données
+    image_points = ImageUploadVisible.query.all()
+
+    # Préparer les données pour la carte
+    map_data = []
+    for point in image_points:
+        data = {
+            'latitude': point.latitude,
+            'longitude': point.longitude,
+            'type_defaut': point.type_defaut,
+            'feeder': point.feeder,
+            'troncon': point.troncon,
+            'zone': point.zone,
+            'filename': point.filename,
+            'nom_operateur': point.nom_operateur,
+            'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'image_binary': point.data
+
+        }
+        map_data.append(data)
+
+    return jsonify(map_data)
 
 @blueprint.route('/localisation_page')
 def localisation_page():

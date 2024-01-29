@@ -1,13 +1,9 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from smtplib import SMTPConnectError
 from flask_mail import Mail, Message
 from flask import Flask, render_template, request, flash, redirect, session, url_for, send_from_directory, send_file,current_app
-from flask import jsonify
+from flask import jsonify,g
 from flask_sqlalchemy import SQLAlchemy
 from wtforms.validators import DataRequired, EqualTo, Email  # Ajoutez Email ici
 from wtforms import StringField, PasswordField, SubmitField, FileField, SelectField, BooleanField
@@ -64,7 +60,7 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 
 from keras.models import load_model
 import matplotlib.pyplot as plt
-
+from fractions import Fraction
 from flask import Markup
 # classification d'images chargement du model
 
@@ -101,22 +97,13 @@ def route_default():
 
 # Login & Registration
 
+
 @blueprint.route('/index')
 @login_required
 def index():
-    # Récupère le profil de l'utilisateur depuis la base de données
-    user_profile = UserProfile.query.filter_by(user=current_user.id).first()
+    return render_template('index.html')
 
-    # Vérifie si l'utilisateur a un profil et une image associée
-    if user_profile and user_profile.image:
-        # Utilise l'image stockée dans la base de données
-        image_url = user_profile.image
-    else:
-        # Utilise une image par défaut si l'utilisateur n'a pas d'image
-        image_url = '/static/default_profile_image.jpg'
 
-    # Passe l'URL de l'image à la page HTML
-    return render_template('home/index.html', segment='index', image_url=image_url)
 # Login & Registration
 @blueprint.route('/login', methods=['GET', 'POST'])
 def login():
@@ -172,7 +159,7 @@ def login():
         user.failed_logins = 0
         db.session.commit()
         
-        return redirect(url_for('authentication_blueprint.index'))
+        return redirect(url_for('home_blueprint.acceuil'))
 
     if not current_user.is_authenticated:
 
@@ -186,7 +173,7 @@ def login():
                                form=login_form,
                                msg=msg)
     
-    return redirect(url_for('authentication_blueprint.index'))
+    return redirect(url_for('home_blueprint.acceuil'))
 
 
 @blueprint.route('/register', methods=['GET', 'POST'])
@@ -292,6 +279,8 @@ def user_profile():
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
+
+#///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
 @blueprint.route('/photo_upload', methods=['GET', 'POST'])
 @login_required
 def photo_upload():
@@ -304,9 +293,12 @@ def photo_upload():
                 user_profile.image = image_binary
                 db.session.commit()
 
+                # Update the image_url variable after updating the user_profile.image
+                image_url = user_profile.image
 
     user_profile = UserProfile.query.filter_by(user=current_user.id).first()
-    return render_template('accounts/profile.html', user_profile=user_profile)
+    return render_template('home/index.html', user_profile=user_profile)
+#///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
 
 @blueprint.route('/user_list', methods=['GET'])
 def user_list():
@@ -475,6 +467,7 @@ def delete_user():
 
 
 @blueprint.route('/logout')
+@login_required
 def logout():
     """ Logout View """
     logout_user()
@@ -719,28 +712,69 @@ def allowed_file(filename):
 # ................IMAAGE//////VISIBLE//////////
 
 
+def get_decimal_from_dms(dms, ref):
+    degrees, minutes, seconds = dms
+    decimal = degrees + (minutes / 60.0) + (seconds / 3600.0)
+    if ref in ['S', 'W']:
+        decimal = -decimal
+    return decimal
+
 def extract_gps_info(img_path):
     try:
-        with Image.open(img_path) as img:
-            exif_data = img._getexif()
-            if exif_data is not None:
-                gps_info = exif_data.get(34853)  # GPSInfo tag
-                if gps_info is not None:
-                    # Assurez-vous que les valeurs sont des flottants
-                    latitude = float(gps_info[2][0]) + \
-                        float(gps_info[2][1])/60 + float(gps_info[2][2])/3600
-                    longitude = float(gps_info[4][0]) + \
-                        float(gps_info[4][1])/60 + float(gps_info[4][2])/3600
-                    if gps_info[3] == 'S':
-                        latitude *= -1
-                    if gps_info[1] == 'W':
-                        longitude *= -1
-                    return {'latitude': latitude, 'longitude': longitude}
+        img = Image.open(img_path)
+        exif_data = img._getexif()
+
+        if not exif_data:
+            return None
+
+        # Get the GPSInfo dictionary
+        gps_info = exif_data.get(34853)
+        if not gps_info:
+            return None
+
+        # Parse GPS coordinates
+        gps_latitude = gps_info.get(2)
+        gps_latitude_ref = gps_info.get(1)
+        gps_longitude = gps_info.get(4)
+        gps_longitude_ref = gps_info.get(3)
+
+        if gps_latitude and gps_latitude_ref and gps_longitude and gps_longitude_ref:
+            latitude = get_decimal_from_dms(gps_latitude, gps_latitude_ref)
+            longitude = get_decimal_from_dms(gps_longitude, gps_longitude_ref)
+
+            # Ensure longitude is negative for West Africa
+            if longitude > 0:
+                longitude = -longitude
+
+            return {'latitude': latitude, 'longitude': longitude}
+        else:
+            return None
     except Exception as e:
         print(f"Error extracting GPS info: {e}")
+        return None
+    # Ouvrir l'image avec PIL
+    img = Image.open(img_path)
+
+    # Vérifier si l'image a des métadonnées EXIF
+    exif_data = img._getexif()
+    if exif_data is not None:
+        # Recherche des informations GPS dans les métadonnées EXIF
+        for tag, value in exif_data.items():
+            tag_name = TAGS.get(tag, tag)
+            if tag_name == 'GPSInfo':
+                for t, v in value.items():
+                    sub_tag_name = GPSTAGS.get(t, t)
+                    value[t] = v[0] / v[1]  # Convertir les coordonnées GPS en décimales
+                    if sub_tag_name == 'GPSLongitudeRef' and v == 'W':
+                        value[t] = -value[t]  # Inverser la longitude si elle est à l'ouest
+
+                return {'latitude': value.get(2), 'longitude': value.get(4)}
+
     return None
 
 
+
+@login_required
 @blueprint.route("/upload_page")
 def upload_page():
     return render_template('rapport/traitement_visible.html')
@@ -803,6 +837,7 @@ def upload_and_traitement_visible():
 
             # Extraire les coordonnées GPS si disponibles
             gps_info = extract_gps_info(file_path)
+            
 
             # Compresser l'image
             compressed_data = compress_image(file_path)
