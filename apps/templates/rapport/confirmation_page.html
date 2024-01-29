@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmation Page</title>
+  <style>
+    body {
+      font-family: math;
+      background-color: #f4f4f4;
+      margin: 0; /* Supprimer la marge par défaut du body */
+      min-height: 100vh; /* Occuper au moins 100% de la hauteur de la fenêtre */
+      display:inline-block;
+      flex-direction: column; /* Aligner les éléments verticalement */
+    }
+    
+  .container {
+    display:;
+    justify-content: space-between;
+    max-width: 900px;
+    margin: 50px auto;
+    flex: 1; /* Utiliser l'espace restant pour la flexbox */
+    }  
+    
+    /* Le reste de votre CSS reste inchangé */
+    
+    h2 {
+      color: #2dbdff;
+    }
+    h3{
+      color: #2dbdff;
+    }
+
+    p {
+      
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #3bc8ff;
+      color: #000000;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .image-container {
+      text-align: right;
+      display:flex;
+      margin-top: 20px; /* Ajout d'une marge au-dessus de l'image */
+    }
+
+    .image-container img {
+      max-width: 20%;
+      height: auto;
+      border-radius: 8px;
+      display: block; /* Pour éviter un léger espace en bas de l'image */
+      margin: 0 auto; /* Centrer l'image */
+    }
+
+    @media only screen and (max-width: 600px) {
+      /* Styles pour les petits écrans */
+      h2 {
+        font-size: 1.5em; /* Ajuster la taille du titre */
+      }
+
+      p {
+        font-size: 0.9em; /* Ajuster la taille du texte */
+      }
+
+      .image-container img {
+        display: none; /* Cacher l'image sur les petits écrans */
+      }
+      .indented-paragraph {
+    margin-left: 20px; /* Vous pouvez ajuster cette valeur selon vos préférences */
+}
+
+    }
+  </style>
+</head>
+{%include 'home/index.html'%}
+<body>
+
+  <div class="container">
+    <h2>Important</h2>
+    <p>L'explication fournie dans le texte vise à sensibiliser les utilisateurs sur les limites et les challenges associés à la classification d'images par les modèles d'intelligence artificielle.</p>
+
+    <h3>Quantité de données d'entraînement limitée :</h3>
+    <p>Les modèles d'intelligence artificielle, y compris ceux utilisés pour la classification d'images, dépendent fortement des données sur lesquelles ils sont entraînés. Si le modèle a été entraîné sur une quantité limitée de données, il peut ne pas être capable de </br> généraliser efficacement à des situations nouvelles ou différentes. Un modèle qui a été entraîné sur une diversité insuffisante d'images peut avoir des difficultés à reconnaître des motifs inattendus ou des exemples atypiques.</p>
+
+    <h3>Classification non garantie à 100% :</h3>
+    <p>Même avec une quantité importante de données d'entraînement, la classification d'images par des modèles d'IA n'est généralement pas garantie à 100%. Cela est dû à la complexité de certaines tâches de classification et à la variabilité naturelle des données. Il est important de comprendre que les modèles d'IA ne sont pas infaillibles et peuvent parfois produire des prédictions incorrectes.</p>
+
+    <h3>Recommandation de tri des images :</h3>
+    <p>Étant donné la possibilité d'erreurs de classification, il est recommandé de trier les images avant de les charger dans le système. Cela signifie que les utilisateurs doivent examiner les résultats de la classification et s'assurer que les étiquettes attribuées par le modèle correspondent correctement au contenu réel des images. Ce processus de vérification manuelle peut aider à identifier et à corriger d'éventuelles erreurs, améliorant ainsi la qualité globale des données utilisées par le modèle.</p>
+
+    <p>En résumé, l'idée est de souligner que même les modèles d'IA avancés ne sont pas infaillibles, et qu'il est essentiel d'adopter une approche prudente lors de l'utilisation de ces modèles. La vérification manuelle des résultats de la classification et le tri préalable des données contribuent à garantir une utilisation plus fiable et précise des modèles d'IA, en particulier dans des domaines où la précision est cruciale.</p>
+    
+    <h3>Options :</h3>
+    <button onclick="handleButtonClick('visible')"><i class="fas fa-eye"></i> Rapport Visible</button>
+    <button onclick="handleButtonClick('invisible')"><i class="fas fa-eye-slash"></i> Rapport Invisible</button>
+    
+  </div>
+  
+  <!-- Ajout de l'image à droite -->
+  <div class="image-container">
+    <img src="{{ config.ASSETS_ROOT }}/img/illustrations/IA.jpg" alt="Image explicative" loading="lazy">
+  </div>
+
+  <script>
+    // Fonction pour définir un cookie avec une durée d'expiration
+    function setCookie(name, value, days) {
+      var expires = "";
+      if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = name + "=" + value + expires + "; path=/";
+    }
+  
+    // Fonction pour obtenir la valeur d'un cookie
+    function getCookie(name) {
+      var nameEQ = name + "=";
+      var ca = document.cookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+      }
+      return null;
+    }
+  
+    // Stocke l'option sélectionnée dans une variable
+    var selectedOption = null;
+  
+    // Fonction pour rediriger l'utilisateur en fonction de l'option sélectionnée
+    function redirectToStoredOption() {
+      var storedOption = getCookie('selectedOption');
+      if (storedOption) {
+        selectedOption = storedOption;
+      }
+    }
+  
+    // Fonction pour gérer le clic sur les boutons
+    function handleButtonClick(option) {
+      // Stocke l'option sélectionnée dans le cookie
+      setCookie('selectedOption', option, 1);  // Stocke l'option sélectionnée dans le cookie pendant 1 jour
+      // Met à jour la variable avec l'option sélectionnée
+      selectedOption = option;
+      // Redirige l'utilisateur
+      redirectToStoredOption();
+      // Redirection manuelle
+      if (selectedOption === 'visible') {
+        window.location.href = '/upload_page';
+      } else if (selectedOption === 'invisible') {
+        window.location.href = '/upload_page';
+      }
+    }
+  
+    document.addEventListener('DOMContentLoaded', function() {
+      // Appel de la fonction pour rediriger l'utilisateur en fonction du cookie
+      redirectToStoredOption();
+    });
+  </script>
+  
+</body>
+</html>

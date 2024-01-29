@@ -1,442 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Chargement d'Images</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  <link rel="icon" type="image/x-icon" href="{{ config.ASSETS_ROOT }}/img/logo.png">
-  
-  <style>
-    /* Styles CSS personnalisés */
-    .upload-area {
-      border: 2px dashed #ddd;
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-    }
-    .preview-area {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .preview-image {
-      position: relative;
-      margin: 10px;
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-    }
-    .delete-icon {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      color: #fff;
-      cursor: pointer;
-      background-color: rgba(0, 0, 0, 0.7);
-      border-radius: 50%;
-      padding: 5px;
-    }
-    .progress-text {
-      text-align: center;
-      margin-top: 10px;
-    }
-  </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Boxicons -->
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<!-- My CSS -->
+	<link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/css/sidebar.css">
+	<title>Vocasara</title>
 </head>
+
 <body>
-  {% extends 'layouts/base.html' %}
-
-{% block title %}  Dashboard {% endblock title %}
-
-<!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
-
-{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
-
-{% block content %}
-
-    <div class="container-fluid py-4">
-
-      
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Chargement d'Images</h1>
-    <div class="row">
-      <div class="col-md-6 offset-md-3">
-        <div class="upload-area">
-          <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
-          <p>Cliquez ou faites glisser des images ici pour les charger</p>
-          <input type="file" id="fileInput" multiple>
-        </div>
-        <div class="progress mt-4 d-none">
-          <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-          <div class="progress-text">0%</div>
-        </div>
-        <div class="preview-area mt-4"></div>
-      </div>
-    </div>
-  </div>
 
 
-     
-      
-  <div class="row">
-    <div class="col-12">
-      <div id="globe" class="position-absolute end-0 top-10 mt-sm-3 mt-7 me-lg-7">
-        <canvas width="700" height="600" class="w-lg-100 h-lg-100 w-75 h-75 me-lg-0 me-n10 mt-lg-5"></canvas>
-      </div>
-    </div>
-  </div>
-      
-      {% include "includes/footer.html" %}           
-      
-    </div>
-
-{% endblock content %}
+	<!-- SIDEBAR -->
+	<section id="sidebar">
+    <a href="#" class="brand">
+      <img  src="{{ config.ASSETS_ROOT }}/img/vocasara/logo1.png" alt="Vocasara Logo" class="logo-img">
+      <span class="text">VOCASARA</span>
+  </a>
   
-{% block javascripts %} 
-
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script>
-    // JavaScript pour le chargement et l'affichage des images
-    const fileInput = document.getElementById('fileInput');
-    const previewArea = document.querySelector('.preview-area');
-    const progress = document.querySelector('.progress');
-    const progressBar = document.querySelector('.progress-bar');
-    const progressText = document.querySelector('.progress-text');
-
-    fileInput.addEventListener('change', function() {
-      const files = fileInput.files;
-
-      if (files.length > 0) {
-        progress.classList.remove('d-none');
-
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          if (file.type.match('image.*')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              const image = document.createElement('div');
-              const uniqueId = Date.now() + i; // Génère un identifiant unique
-              image.innerHTML = `
-                <img src="${e.target.result}" class="preview-image" id="image_${uniqueId}">
-                <i class="fas fa-times delete-icon" onclick="removeImage(${uniqueId})"></i>
-              `;
-              previewArea.appendChild(image);
-            };
-            reader.readAsDataURL(file);
-          }
-        }
-
-        // Barre de progression simulée
-        let progressValue = 0;
-        const interval = setInterval(function() {
-          progressValue += 10;
-          progressBar.style.width = `${progressValue}%`;
-          progressBar.setAttribute('aria-valuenow', progressValue);
-          progressText.textContent = `${progressValue}%`;
-          if (progressValue >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-              progress.classList.add('d-none');
-            }, 500);
-          }
-        }, 500);
-      }
-    });
-
-    function removeImage(uniqueId) {
-      const image = document.getElementById(`image_${uniqueId}`);
-      image.parentNode.remove();
-    }
-
-    
-    var ctx = document.getElementById("chart-bars").getContext("2d");
-
-    new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        datasets: [{
-          label: "Sales",
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 4,
-          borderSkipped: false,
-          backgroundColor: "#fff",
-          data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
-          maxBarThickness: 6
-        }, ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-        scales: {
-          y: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false,
-            },
-            ticks: {
-              suggestedMin: 0,
-              suggestedMax: 500,
-              beginAtZero: true,
-              padding: 15,
-              font: {
-                size: 14,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-              color: "#fff"
-            },
-          },
-          x: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false
-            },
-            ticks: {
-              display: false
-            },
-          },
-        },
-      },
-    });
-
-
-    var ctx2 = document.getElementById("chart-line").getContext("2d");
-
-    var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
-    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-    gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
-
-    var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
-    gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-    gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
-
-    new Chart(ctx2, {
-      type: "line",
-      data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        datasets: [{
-            label: "Mobile apps",
-            tension: 0.4,
-            borderWidth: 0,
-            pointRadius: 0,
-            borderColor: "#cb0c9f",
-            borderWidth: 3,
-            backgroundColor: gradientStroke1,
-            fill: true,
-            data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-            maxBarThickness: 6
-
-          },
-          {
-            label: "Websites",
-            tension: 0.4,
-            borderWidth: 0,
-            pointRadius: 0,
-            borderColor: "#3A416F",
-            borderWidth: 3,
-            backgroundColor: gradientStroke2,
-            fill: true,
-            data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
-            maxBarThickness: 6
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-        scales: {
-          y: {
-            grid: {
-              drawBorder: false,
-              display: true,
-              drawOnChartArea: true,
-              drawTicks: false,
-              borderDash: [5, 5]
-            },
-            ticks: {
-              display: true,
-              padding: 10,
-              color: '#b2b9bf',
-              font: {
-                size: 11,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-            }
-          },
-          x: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false,
-              borderDash: [5, 5]
-            },
-            ticks: {
-              display: true,
-              color: '#b2b9bf',
-              padding: 20,
-              font: {
-                size: 11,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-            }
-          },
-        },
-      },
-    });
-    (function() {
-      const container = document.getElementById("globe");
-      const canvas = container.getElementsByTagName("canvas")[0];
-
-      const globeRadius = 100;
-      const globeWidth = 4098 / 2;
-      const globeHeight = 1968 / 2;
-
-      function convertFlatCoordsToSphereCoords(x, y) {
-        let latitude = ((x - globeWidth) / globeWidth) * -180;
-        let longitude = ((y - globeHeight) / globeHeight) * -90;
-        latitude = (latitude * Math.PI) / 180;
-        longitude = (longitude * Math.PI) / 180;
-        const radius = Math.cos(longitude) * globeRadius;
-
-        return {
-          x: Math.cos(latitude) * radius,
-          y: Math.sin(longitude) * globeRadius,
-          z: Math.sin(latitude) * radius
-        };
-      }
-
-      function makeMagic(points) {
-        const {
-          width,
-          height
-        } = container.getBoundingClientRect();
-
-        // 1. Setup scene
-        const scene = new THREE.Scene();
-        // 2. Setup camera
-        const camera = new THREE.PerspectiveCamera(45, width / height);
-        // 3. Setup renderer
-        const renderer = new THREE.WebGLRenderer({
-          canvas,
-          antialias: true
-        });
-        renderer.setSize(width, height);
-        // 4. Add points to canvas
-        // - Single geometry to contain all points.
-        const mergedGeometry = new THREE.Geometry();
-        // - Material that the dots will be made of.
-        const pointGeometry = new THREE.SphereGeometry(0.5, 1, 1);
-        const pointMaterial = new THREE.MeshBasicMaterial({
-          color: "#989db5",
-        });
-
-        for (let point of points) {
-          const {
-            x,
-            y,
-            z
-          } = convertFlatCoordsToSphereCoords(
-            point.x,
-            point.y,
-            width,
-            height
-          );
-
-          if (x && y && z) {
-            pointGeometry.translate(x, y, z);
-            mergedGeometry.merge(pointGeometry);
-            pointGeometry.translate(-x, -y, -z);
-          }
-        }
-
-        const globeShape = new THREE.Mesh(mergedGeometry, pointMaterial);
-        scene.add(globeShape);
-
-        container.classList.add("peekaboo");
-
-        // Setup orbital controls
-        camera.orbitControls = new THREE.OrbitControls(camera, canvas);
-        camera.orbitControls.enableKeys = false;
-        camera.orbitControls.enablePan = false;
-        camera.orbitControls.enableZoom = false;
-        camera.orbitControls.enableDamping = false;
-        camera.orbitControls.enableRotate = true;
-        camera.orbitControls.autoRotate = true;
-        camera.position.z = -265;
-
-        function animate() {
-          // orbitControls.autoRotate is enabled so orbitControls.update
-          // must be called inside animation loop.
-          camera.orbitControls.update();
-          requestAnimationFrame(animate);
-          renderer.render(scene, camera);
-        }
-        animate();
-      }
-
-      function hasWebGL() {
-        const gl =
-          canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-        if (gl && gl instanceof WebGLRenderingContext) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      function init() {
-        if (hasWebGL()) {
-          window
-          window.fetch("https://raw.githubusercontent.com/creativetimofficial/public-assets/master/soft-ui-dashboard-pro/assets/js/points.json")
-            .then(response => response.json())
-            .then(data => {
-              makeMagic(data.points);
-            });
-        }
-      }
-      init();
-    })();
-  </script>
   
-  {% endblock javascripts %}
+		<ul class="side-menu top">
+			<li class="active">
+				<a href="/acceuil">
+					<i class='bx bxs-dashboard bx-sm bx-burst' ></i>
+					<span class="text">Acceuil</span>
+				</a>
+			</li>
+			<li>
+				<a href="/generation_rapport">
+					<i class='bx bxs-shopping-bag-alt bx-sm ' ></i>
+					<span class="text">Traitement</span>
+				</a>
+			</li>
+			<li>
+				<a href="/localisation_page">
+					<i class='bx bxs-doughnut-chart bx-sm ' ></i>
+					<span class="text">Localisation</span>
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<i class='bx bx-line-chart-down bx-sm ' ></i>
+					<span class="text">Statistiques</span> 
+				</a>
+			</li>
+			<li>
+				<a href="#">
+					<i class='bx bx-sort-alt-2 bx-sm ' ></i>
+					<span class="text">Inspections</span> 
+				</a>
+			</li>
+      <li>
+				<a href="/apropos">
+					<i class='bx bx-layer bx-sm ' ></i> 
+					<span class="text">A propos</span>
+				</a>
+			</li>
+	
+		<ul class="side-menu">
+			<li>
+				<a href="{{ url_for('authentication_blueprint.user_profile') }}">
+					<i class='bx bxs-cog bx-sm  ' ></i> <i class='' ></i>
+					<span class="text">Mon Profil</span>
+				</a>
+			</li>
+			<li>
+				<ul class="side-menu">
+					<li>
+						<a href="/photo_upload">
+							<i class='bx bx-user-plus bx-sm bx-border-circle  bx-fade-left' ></i>
+							<span class="text">photo</span>
+						</a>
+					</li>
+				</ul>
+				<a href="{{ url_for('authentication_blueprint.logout') }}" class="logout">
+					<i class='bx bxs-log-out-circle bx-md bx-tada' ></i>
+					<span class="text">Déconnexion</span>
+				</a>
+			</li>
+		</ul>
+	</section>
+	<!-- SIDEBAR -->
+
+
+
+	<!-- CONTENT -->
+	<section id="content">
+		<!-- NAVBAR -->
+		<nav>
+			<i class='bx bx-menu' ></i>
+			<form action="#">
+				<div class="form-input">
+					<input type="search" placeholder="Rechercher...">
+					<button type="submit" class="search-btn"><i class='bx bx-search' ></i></button>
+				</div>
+			</form>
+			<input type="checkbox" id="switch-mode" hidden>
+			<label for="switch-mode" class="switch-mode"></label>
+			<a href="#" class="notification">
+				<i class='bx bxs-bell' ></i>
+				<span class="num">8</span>
+			</a>
+			<a href="/photo_upload" class="profile">
+				<img src="data:image/jpeg;base64,{{ image_url }}" alt="Profile Picture" class="img-fluid rounded">
+			</a>
+		</nav>
+		<!-- NAVBAR -->
+
+	</section>
+	<!-- CONTENT -->
+	
+
+	<script >
+		const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+allSideMenu.forEach(item=> {
+	const li = item.parentElement;
+
+	item.addEventListener('click', function () {
+		allSideMenu.forEach(i=> {
+			i.parentElement.classList.remove('active');
+		})
+		li.classList.add('active');
+	})
+});
+
+// TOGGLE SIDEBAR
+const menuBar = document.querySelector('#content nav .bx.bx-menu');
+const sidebar = document.getElementById('sidebar');
+menuBar.addEventListener('click', function () {
+	sidebar.classList.toggle('hide');
+})
+
+const searchButton = document.querySelector('#content nav form .form-input button');
+const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
+const searchForm = document.querySelector('#content nav form');
+
+searchButton.addEventListener('click', function (e) {
+	if(window.innerWidth < 576) {
+		e.preventDefault();
+		searchForm.classList.toggle('show');
+		if(searchForm.classList.contains('show')) {
+			searchButtonIcon.classList.replace('bx-search', 'bx-x');
+		} else {
+			searchButtonIcon.classList.replace('bx-x', 'bx-search');
+		}
+	}
+})
+
+if(window.innerWidth < 768) {
+	sidebar.classList.add('hide');
+} else if(window.innerWidth > 576) {
+	searchButtonIcon.classList.replace('bx-x', 'bx-search');
+	searchForm.classList.remove('show');
+}
+
+window.addEventListener('resize', function () {
+	if(this.innerWidth > 576) {
+		searchButtonIcon.classList.replace('bx-x', 'bx-search');
+		searchForm.classList.remove('show');
+	}
+})
+
+const switchMode = document.getElementById('switch-mode');
+switchMode.addEventListener('change', function () {
+	if(this.checked) {
+		document.body.classList.add('dark');
+	} else {
+		document.body.classList.remove('dark');
+	}
+})
+<script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+	</script>
+	
 </body>
-
 </html>

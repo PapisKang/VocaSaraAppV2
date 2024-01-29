@@ -1,37 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Refused</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
 
-{% block title %} Error 403 {% endblock title %}
+        .container {
+            text-align: center;
+        }
 
-<!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+        .error-image {
+            width: 400%;
+            max-width: 600px;
+        }
 
-{% block body_class %} error-page {% endblock %}
+        h1 {
+            color: #333;
+        }
 
-{% block content %}
+        p {
+            color: #666;
+        }
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg position-absolute top-0 z-index-3 w-100 shadow-none my-3  navbar-transparent mt-4">
-    
-  </nav>
-  <!-- End Navbar -->
+        a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+        }
 
-  <main class="main-content  mt-0">
-    <section class="my-10">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-6 my-auto">
-            <h1 class="display-1 text-bolder text-gradient text-danger">Error 403</h1>
-            <h2>Access Denied</h2>
-            <p class="lead">Please contact support or try later.</p>
-            <button type="button" class="btn bg-gradient-dark mt-4">Go to Homepage</button>
-          </div>
-          <div class="col-lg-6 my-auto position-relative">
-            <img class="w-100 position-relative" src="{{ config.ASSETS_ROOT }}/img/illustrations/error-404.png" alt="404-error">
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-
-
-{% endblock content %}
+        a:hover {
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img class="error-image" src="{{ config.ASSETS_ROOT }}/img/illustrations/11132.jpg" alt="403-error" loading="lazy" >
+        <h1>Accés Refusé</h1>
+        <p>Vous n'avez pas les accés pour acceder à cette page</p>
+        <p>S'il vous plait <a href="{{ url_for('authentication_blueprint.login') }}">Connecter vous</a> Pour continuer</p>
+    </div>
+</body>
+</html>

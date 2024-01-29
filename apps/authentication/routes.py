@@ -1,23 +1,26 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
 
+from werkzeug.security import generate_password_hash, check_password_hash
+from smtplib import SMTPConnectError
+from flask_mail import Mail, Message
+from flask import Flask, render_template, request, flash, redirect, session, url_for, send_from_directory, send_file,current_app
+from flask import jsonify
+from flask_sqlalchemy import SQLAlchemy
+from wtforms.validators import DataRequired, EqualTo, Email  # Ajoutez Email ici
+from wtforms import StringField, PasswordField, SubmitField, FileField, SelectField, BooleanField
 from datetime import datetime
-import os
-from flask import render_template, redirect, request, url_for, jsonify
+from flask import render_template, redirect, request, url_for, jsonify, render_template_string
 from flask_login import (
     current_user,
     login_required,
     login_user,
     logout_user
-) 
+)
 
 from apps import db, login_manager
 from apps.authentication import blueprint
 from apps.authentication.email import send_email
 from apps.authentication.forms import LoginForm, CreateAccountForm
-from apps.authentication.models import UserProfile, Users
+from apps.authentication.models import UserProfile, Users, ImageUploadVisible, RapportGenere, ImageUploadInvisible
 import re
 from apps.authentication.signals import user_saved_signals, delete_user_signals
 from apps.authentication.token import confirm_token, generate_confirmation_token
@@ -26,7 +29,6 @@ from apps.config import Config
 from apps.config import Email_config
 from apps.helpers import createAccessToken, emailValidate, password_validate, sanitise_fille_name, createFolder, serverImageUrl, uniqueFileName, get_ts
 from werkzeug.utils import secure_filename
-from flask import Flask, flash
 from messages import Messages
 import secrets
 from datetime import datetime, timedelta
@@ -34,6 +36,34 @@ from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField
 from wtforms.validators import InputRequired, EqualTo, Length, Regexp
 import ssl
+from werkzeug.utils import secure_filename
+from PIL import Image
+from base64 import b64encode
+from io import BytesIO
+import math
+import piexif
+from PIL.ExifTags import TAGS, GPSTAGS
+import cv2
+import base64
+
+# classification d'images chargement du model
+import os
+import uuid
+from werkzeug.utils import secure_filename
+from io import BytesIO
+import shutil
+
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+
+from keras.models import load_model
+import matplotlib.pyplot as plt
+
+from flask import Markup
+# classification d'images chargement du model
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 message = Messages.message
@@ -42,31 +72,47 @@ login_limit = Config.LOGIN_ATTEMPT_LIMIT
 
 # User States
 STATUS_SUSPENDED = Config.USERS_STATUS['SUSPENDED']
-STATUS_ACTIVE    = Config.USERS_STATUS['ACTIVE'   ]
+STATUS_ACTIVE = Config.USERS_STATUS['ACTIVE']
 
 # Users Roles
-ROLE_ADMIN       = Config.USERS_ROLES['ADMIN']
-ROLE_USER        = Config.USERS_ROLES['USER']
+ROLE_ADMIN = Config.USERS_ROLES['ADMIN']
+ROLE_USER = Config.USERS_ROLES['USER']
 
 upload_folder_name = createFolder('media')
 app = Flask(__name__)
 
-app.config['uploadFolder'] = upload_folder_name 
+app.config['UPLOAD_FOLDER'] = upload_folder_name
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
+
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(
+    days=365)  # adjust as needed
+app.config['SESSION_PROTECTION'] = 'strong'
 
 
 @blueprint.route('/')
 def route_default():
-    return redirect(url_for('authentication_blueprint.login')) 
+    return redirect(url_for('authentication_blueprint.login'))
 
-@blueprint.route("/github")
-def login_github():
-    """ Github login """
-    if not github.authorized:
-        return redirect(url_for("github.login"))
+# Login & Registration
 
-    res = github.get("/user")
-    return redirect(url_for('home_blueprint.index'))
+@blueprint.route('/index')
+@login_required
+def index():
+    # Récupère le profil de l'utilisateur depuis la base de données
+    user_profile = UserProfile.query.filter_by(user=current_user.id).first()
 
+    # Vérifie si l'utilisateur a un profil et une image associée
+    if user_profile and user_profile.image:
+        # Utilise l'image stockée dans la base de données
+        image_url = user_profile.image
+    else:
+        # Utilise une image par défaut si l'utilisateur n'a pas d'image
+        image_url = '/static/default_profile_image.jpg'
+
+    # Passe l'URL de l'image à la page HTML
+    return render_template('home/index.html', segment='index', image_url=image_url)
 # Login & Registration
 @blueprint.route('/login', methods=['GET', 'POST'])
 def login():
@@ -122,7 +168,7 @@ def login():
         user.failed_logins = 0
         db.session.commit()
         
-        return redirect(url_for('home_blueprint.index'))
+        return redirect(url_for('home_blueprint.acceuil'))
 
     if not current_user.is_authenticated:
 
@@ -136,7 +182,7 @@ def login():
                                form=login_form,
                                msg=msg)
     
-    return redirect(url_for('home_blueprint.index'))
+    return redirect(url_for('home_blueprint.aceuil'))
 
 
 @blueprint.route('/register', methods=['GET', 'POST'])
@@ -208,32 +254,55 @@ def register():
 
 
 @blueprint.route('/profile', methods=['GET', 'PUT'])
+@login_required
 def user_profile():
     """
-        Get user profile view
+    Get user profile view
     """
-    if request.method =='GET':
+    if request.method == 'GET':
        
         template = 'accounts/account-settings.html'
         
-        user         = Users.find_by_id(current_user.id)
+        user = Users.find_by_id(current_user.id)
         user_profile = UserProfile.find_by_user_id(user.id) 
         
-        context = { 'id':user.id, 
-                    'profile_name':user_profile.full_name,
-                    'profile_bio':user_profile.bio, 
-                    'profile_address':user_profile.address, 
-                    'profile_zipcode':user_profile.zipcode, 
-                    'profile_phone':user_profile.phone,
-                    'email':user_profile.email, 
-                    'profile_website':user_profile.website, 
-                    'profile_image':user_profile.image, 
-                    'user_profile_id':user_profile.id}
+        context = {
+            'id': user.id, 
+            'profile_name': user_profile.full_name,
+            'profile_bio': user_profile.bio, 
+            'profile_address': user_profile.address, 
+            'profile_zipcode': user_profile.zipcode, 
+            'profile_phone': user_profile.phone,
+            'email': user_profile.email, 
+            'profile_service': user_profile.service, 
+            'user_profile_id': user_profile.id
+            
+        }
         
         return render_template(template, context=context)
 
-    return redirect(url_for('home_blueprint.index')) 
+    return redirect(url_for('authentication_blueprint.index'))
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+@blueprint.route('/photo_upload', methods=['GET', 'POST'])
+@login_required
+def photo_upload():
+    if request.method == 'POST':
+        if 'image' in request.files:
+            image = request.files['image']
+            if image.filename != '':
+                image_binary = base64.b64encode(image.read())
+                user_profile = UserProfile.query.filter_by(user=current_user.id).first()
+                user_profile.image = image_binary
+                db.session.commit()
+
+
+    user_profile = UserProfile.query.filter_by(user=current_user.id).first()
+    return render_template('accounts/profile.html', user_profile=user_profile)
 
 @blueprint.route('/user_list', methods=['GET'])
 def user_list():
@@ -242,25 +311,26 @@ def user_list():
     """
 
     if current_user.role != ROLE_ADMIN:
-        return redirect(url_for('authentication_blueprint.user_profile')) 
+        return redirect(url_for('authentication_blueprint.user_profile'))
 
     if request.method == 'GET':
         template = 'accounts/users-reports.html'
         users = Users.query.all()
-    
+
         user_list = []
         if users is not None:
             for user in users:
                 for data in UserProfile.query.filter_by(user=user.id):
                     user_list.append(data)
 
-        context = {'users':user_list}
-        
-        return render_template(template, context=context)
-    
-    return redirect(url_for('home_blueprint.index'))
+        context = {'users': user_list}
 
-@blueprint.route('/edit_user', methods=['GET', 'PUT'])
+        return render_template(template, context=context)
+
+    return redirect(url_for('authentication_blueprint.index'))
+
+
+@blueprint.route('/edit_user', methods=['PUT'])
 def edit_user():
     """
         1.Get User by id(Get user view)
@@ -269,43 +339,43 @@ def edit_user():
         _type_: json data
     """
     if request.method == 'GET':
-       
+
         user = UserProfile.find_by_id(request.args.get('user_id'))
 
         # if check user none or not
         if user:
 
-            context = {'id':user.id,'full_name':user.full_name,'bio':user.bio,
-                    'address':user.address, 'zipcode':user.zipcode, 'phone':user.phone,
-                    'email':user.email, 'website':user.website, 'image':user.image, 
-                    'user_id':user.user_id.id}
-            
+            context = {'id': user.id, 'full_name': user.full_name, 'bio': user.bio,
+                       'address': user.address, 'zipcode': user.zipcode, 'phone': user.phone,
+                       'email': user.email, 'service': user.service, 'image': user.image,
+                       'user_id': user.user_id.id}
+
             return jsonify(context), 200
-        
+
         else:
-            return jsonify({'error':message['record_not_found']}), 404
-        
-    
+            return jsonify({'error': message['record_not_found']}), 404
+
     if request.method == 'PUT':
 
-        data  = request.form
+        data = request.form
         image = request.files.get('image')
-        
-        FTP_error = False 
+
+        FTP_error = False
 
         profile_obj = UserProfile.find_by_id(data.get('user_id'))
         if profile_obj is not None:
             # if check image none or not
             if image:
                 filename = sanitise_fille_name(secure_filename(image.filename))
-                
+
                 # unque file name
-                unique_name  = uniqueFileName(filename)
-                
+                unique_name = uniqueFileName(filename)
+
                 # if check folder
                 if upload_folder_name in os.listdir():
-                    image.save(os.path.join(app.config['uploadFolder'], unique_name))
-                
+                    image.save(os.path.join(
+                        app.config['uploadFolder'], unique_name))
+
                 # if check image
                 if profile_obj.image is not None:
 
@@ -322,34 +392,35 @@ def edit_user():
                     profile_obj.zipcode = data.get('zipcode')
                     profile_obj.phone = data.get('phone')
                     profile_obj.email = data.get('email')
-                    profile_obj.website = data.get('website')
+                    profile_obj.service = data.get('service')
 
                     profile_obj.save()
                 except:
                     return jsonify({'error': message['email_already_registered']}), 404
-            
+
                 user = Users.find_by_id(data.get('user_id'))
                 user.email = data.get('email')
                 user.save()
             else:
                 profile_obj.full_name = data.get('full_name')
-                profile_obj.bio       = data.get('bio')
-                profile_obj.address   = data.get('address')
-                profile_obj.zipcode   = data.get('zipcode')
-                profile_obj.phone     = data.get('phone')
-                profile_obj.website   = data.get('website')
+                profile_obj.bio = data.get('bio')
+                profile_obj.address = data.get('address')
+                profile_obj.zipcode = data.get('zipcode')
+                profile_obj.phone = data.get('phone')
+                profile_obj.service = data.get('service')
 
                 profile_obj.save()
 
         aMsg = message['user_updated_successfully']
-        
+
         if FTP_error:
             aMsg += ' (FTP Upload Err)'
 
-        return jsonify({'message':aMsg}), 200
-        
+        return jsonify({'message': aMsg}), 200
+
     else:
-        return jsonify({'error':message['record_not_found']}), 404
+        return jsonify({'error': message['record_not_found']}), 404
+
 
 @blueprint.route('/update_status', methods=['PUT'])
 def update_status():
@@ -359,9 +430,9 @@ def update_status():
         _type_: json
     """
     if request.method == 'PUT':
-       
+
         user = Users.find_by_id(request.form.get('user_id'))
-        
+
         # if check user none or not
         if user:
 
@@ -371,19 +442,19 @@ def update_status():
                     user.status = STATUS_SUSPENDED
                 else:
                     user.status = STATUS_ACTIVE
-                
+
                 # save user state
                 user.save()
-               
-            context = {'message':message['successfully_updated']}
-            
+
+            context = {'message': message['successfully_updated']}
+
             return jsonify(context), 200
-        
+
         else:
-            return jsonify({'error':message['record_not_found']}), 404
+            return jsonify({'error': message['record_not_found']}), 404
 
 
-@blueprint.route('/delete_user', methods=['DELETE'])      
+@blueprint.route('/delete_user', methods=['DELETE'])
 def delete_user():
     """Delete user view
 
@@ -394,17 +465,20 @@ def delete_user():
         user = Users.find_by_id(request.form.get('user_id'))
         if user:
             # send signal for create profile
-            delete_user_signals.send({"user_id":user.id})
+            delete_user_signals.send({"user_id": user.id})
             user.delete_from_db()
-            return jsonify({'message':message["deleted_successfully"]}), 200
+            return jsonify({'message': message["deleted_successfully"]}), 200
+
 
 @blueprint.route('/logout')
+@login_required
 def logout():
     """ Logout View """
     logout_user()
     return redirect(url_for('authentication_blueprint.login'))
 
-@blueprint.route('/verify_email', methods=['GET', 'POST'])  
+
+@blueprint.route('/verify_email', methods=['GET', 'POST'])
 def verify_email():
     """ Verify email view """
 
@@ -416,15 +490,17 @@ def verify_email():
                 flash(message['email_not_found'])
             else:
                 token = generate_confirmation_token(email)
-                
-                confirm_url = url_for('authentication_blueprint.confirm_email', token=token, _external=True)
-                html = render_template('accounts/activate.html', confirm_url=confirm_url)
+
+                confirm_url = url_for(
+                    'authentication_blueprint.confirm_email', token=token, _external=True)
+                html = render_template(
+                    'accounts/activate.html', confirm_url=confirm_url)
                 subject = "Please confirm your email"
                 # send email
                 send_email(email, subject, html)
-                
+
                 flash(message['email_has_been_sent_via_email'])
-   
+
     return render_template('home/pages-auth-verify-email.html')
 
 
@@ -448,42 +524,33 @@ def confirm_email(token):
         profile.email = email
         profile.save()
 
-    return redirect(url_for('home_blueprint.index'))
+    return redirect(url_for('authentication_blueprint.index'))
 
-@blueprint.route('/change_password', methods=['POST'])    
+
+@blueprint.route('/change_password', methods=['POST'])
 def change_password():
     """Change an existing user's password."""
-    
-    data          = request.form
-    new_password  = data.get('new_password')
+
+    data = request.form
+    new_password = data.get('new_password')
     new_password2 = data.get('new_password2')
 
     user = Users.find_by_username(username=current_user.username)
 
     if not user:
-        return jsonify({'error':message['user_not_found']}), 404
+        return jsonify({'error': message['user_not_found']}), 404
 
-    # check password match or not 
+    # check password match or not
     if new_password != new_password2:
-            return jsonify({'error':message['pwd_not_match']}), 404
+        return jsonify({'error': message['pwd_not_match']}), 404
 
     # Save the new password
     user.password = hash_pass(new_password)
     user.save()
 
-    return jsonify({'message':message['password_has_been_updated']}), 200
+    return jsonify({'message': message['password_has_been_updated']}), 200
 
-#.................#forget pass.............................####################
-
-from werkzeug.security import generate_password_hash, check_password_hash
-from wtforms import StringField, PasswordField, SubmitField, FileField, SelectField, BooleanField
-from wtforms.validators import DataRequired, EqualTo, Email  # Ajoutez Email ici
-from flask_sqlalchemy import SQLAlchemy
-from flask import jsonify
-from flask_wtf import FlaskForm
-from flask import Flask, render_template, request, flash, redirect, session, url_for, send_from_directory, send_file
-from flask_mail import Mail, Message
-from smtplib import SMTPConnectError
+# .................#forget pass.............................####################
 
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -496,6 +563,7 @@ app.config['MAIL_DEFAULT_SENDER'] = Email_config.MAIL_DEFAULT_SENDER
 
 mail = Mail(app)
 
+
 class PasswordResetRequestForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])
     submit = SubmitField('Demander la réinitialisation du mot de passe')
@@ -505,10 +573,12 @@ class ResetPasswordForm(FlaskForm):
     new_password = PasswordField(
         'Nouveau mot de passe', validators=[DataRequired()])
     confirm_password = PasswordField('Confirmer le mot de passe', validators=[DataRequired(
-    ), EqualTo('new_password', message= message['pwd_not_match'])])
+    ), EqualTo('new_password', message=message['pwd_not_match'])])
     submit = SubmitField('Réinitialiser le mot de passe')
 
+
 mail = Mail(app)
+
 
 def send_password_reset_email(user_form, token):
     user_email = user_form.email.data  # Utiliser le champ e-mail du formulaire
@@ -554,7 +624,6 @@ def password_reset_request():
                 send_password_reset_email(form, token)  # Passez le formulaire
 
                 success_message = message['email_ok_message']
-                
 
             else:
                 error_message = message['erreur_connexion_smtp']
@@ -574,7 +643,7 @@ class ResetPasswordForm(FlaskForm):
             InputRequired(message='Le champ est requis'),
             Length(min=6, message=message['caractere_mot_de_passe']),
             Regexp('^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+{}|:"<>?])',
-                   message= message['lettre_caractere_mot_de_passe'])
+                   message=message['lettre_caractere_mot_de_passe'])
         ]
     )
 
@@ -582,12 +651,13 @@ class ResetPasswordForm(FlaskForm):
         'Confirmer le mot de passe',
         validators=[
             InputRequired(message='Le champ est requis'),
-            EqualTo('new_password', message= message['pwd_not_match'])
+            EqualTo('new_password', message=message['pwd_not_match'])
         ]
     )
 
     submit = SubmitField('Réinitialiser le mot de passe')
-    
+
+
 @blueprint.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     user = Users.query.filter_by(reset_token=token).first()
@@ -614,22 +684,208 @@ def reset_password(token):
         return redirect(url_for('authentication_blueprint.login', error_message=error_message))
 
 
+# .................#forget pass.............................####################
 
-#.................#forget pass.............................####################
 
 # Errors
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return render_template('home/page-403.html'), 403
 
+
 @blueprint.errorhandler(403)
 def access_forbidden(error):
     return render_template('home/page-403.html'), 403
+
 
 @blueprint.errorhandler(404)
 def not_found_error(error):
     return render_template('home/page-404.html'), 404
 
+
 @blueprint.errorhandler(500)
 def internal_error(error):
     return render_template('home/page-500.html'), 500
+
+
+# //////////////////////////UPLAD////////////
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# ................IMAAGE//////VISIBLE//////////
+
+
+def extract_gps_info(img_path):
+    try:
+        with Image.open(img_path) as img:
+            exif_data = img._getexif()
+            if exif_data is not None:
+                gps_info = exif_data.get(34853)  # GPSInfo tag
+                if gps_info is not None:
+                    latitude = decimal_coords(gps_info[2], gps_info[3])
+                    longitude = decimal_coords(gps_info[4], gps_info[5])
+                    if gps_info[3] == 'S':
+                        latitude *= -1
+                    if gps_info[1] == 'W':
+                        longitude *= -1
+                    return {'latitude': latitude, 'longitude': longitude}
+    except Exception as e:
+        print(f"Error extracting GPS info: {e}")
+    return None
+
+def decimal_coords(coords, direction):
+    degrees, minutes, seconds = coords
+    decimal = float(degrees) + float(minutes)/60 + float(seconds)/3600
+    if direction == 'S' or direction == 'W':
+        decimal *= -1
+        return decimal
+
+@login_required
+@blueprint.route("/upload_page")
+def upload_page():
+    return render_template('rapport/traitement_visible.html')
+
+def prepare_image_from_path(file_path):
+    img = image.load_img(file_path, target_size=(224, 224))
+    img_array = image.img_to_array(img)
+    img_array = preprocess_input(img_array)
+    img_array = np.expand_dims(img_array, axis=0)
+    return img_array
+
+@blueprint.route('/results_page/<rapport_genere_id>', methods=['GET'])
+def results_page(rapport_genere_id):
+    # Récupérer les images associées au rapport généré
+    images = ImageUploadVisible.query.filter_by(rapport_genere_id=rapport_genere_id).all()
+    return render_template('rapport/traitement_visible.html', images=images)
+
+
+# Mettez à jour la route pour traiter les images
+@blueprint.route('/upload_and_traitement_visible', methods=['POST'])
+def upload_and_traitement_visible():
+    
+    # Assurez-vous de récupérer le champ "file" comme une liste
+    files = request.files.getlist('file')
+
+    # Créer un identifiant unique pour le sous-répertoire
+    user_subdirectory = str(uuid.uuid4())
+
+    # Chemin du sous-répertoire dans le répertoire UPLOAD_FOLDER
+    user_upload_path = os.path.join(app.config['UPLOAD_FOLDER'], user_subdirectory)
+
+    # Créer le sous-répertoire
+    os.makedirs(user_upload_path)
+
+    # Charger le modèle d'apprentissage automatique et les étiquettes de classe
+    model_path = 'apps/IA/model/trained_tensorflow_model_MobileNetV2_normal.h5'
+    model = load_model(model_path)
+    class_labels_path = 'apps/IA/label/class_labels_normal.txt'
+    with open(class_labels_path, 'r') as f:
+        class_labels = f.read().splitlines()
+
+    # Ajout de la déclaration pour threshold
+    threshold = 0.5  # Vous pouvez ajuster cette valeur en fonction de vos besoins
+
+    rapport_genere_id = None  # Déclarer rapport_genere_id à l'extérieur de la boucle
+
+    for file in files:
+        try:
+            # Le traitement pour chaque fichier est similaire à votre code existant
+            filename = secure_filename(file.filename)
+
+            # Sauvegarder le fichier dans le sous-répertoire
+            file_path = os.path.join(user_upload_path, filename)
+            file.save(file_path)
+
+            # Préparer l'image pour la classification
+            img_array = prepare_image_from_path(file_path)
+            predictions = model.predict(img_array)
+            predicted_class_indices = np.where(predictions > threshold)[1]
+
+            # Extraire les coordonnées GPS si disponibles
+            gps_info = extract_gps_info(file_path)
+
+            # Compresser l'image
+            compressed_data = compress_image(file_path)
+
+            # Obtenir la taille de l'image originale
+            original_size = os.path.getsize(file_path)
+
+            # Créer une nouvelle instance de ImageUploadVisible avec les résultats
+            new_image = ImageUploadVisible(
+                filename=filename,
+                data=compressed_data,  # Stocker les données compressées
+                original_size=convert_size(original_size),  # Stocker la taille originale
+                compressed_size=convert_size(len(compressed_data)),  # Stocker la taille compressée
+                nom_operateur=current_user.email,
+                feeder=request.cookies.get('feeder'),
+                troncon=request.cookies.get('troncon'),
+                zone=request.cookies.get('zone'),
+                type_image=request.cookies.get('selectedOption'),
+                latitude=gps_info['latitude'] if gps_info else None,
+                longitude=gps_info['longitude'] if gps_info else None,
+                type_defaut=class_labels[predicted_class_indices[0]] if predicted_class_indices.size > 0 else None
+            )
+
+            # Associer l'image au rapport généré
+            if rapport_genere_id is None:
+                rapport_genere_id = request.cookies.get('rapportGenereId')
+            new_image.rapport_genere_id = rapport_genere_id
+
+            # Ajouter à la base de données (pas besoin de commit ici)
+            db.session.add(new_image)
+
+        except Exception as e:
+            print(f"Error processing image: {e}")
+
+    # Ajouter le commit ici, après avoir traité tous les fichiers
+    db.session.commit()
+
+    # Supprimer le sous-répertoire après le traitement des images
+    shutil.rmtree(user_upload_path)
+
+    # Rendre le template avec le message de succès et les résultats
+    rapport_genere_id = request.cookies.get('rapportGenereId')
+    return redirect(url_for('authentication_blueprint.results_page', rapport_genere_id=rapport_genere_id))
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
+
+
+import traceback
+
+# Mettez à jour la fonction compress_image pour retourner les données compressées sans sauvegarder sur le disque
+def compress_image(file_path, quality=60):
+    try:
+        # Ouvrir l'image avec Pillow à partir du chemin du fichier
+        img = Image.open(file_path)
+
+        # Convertir l'image en mode RGB
+        img = img.convert('RGB')
+
+        # Vérifier la présence de données EXIF
+        exif_bytes = img.info.get('exif', b'')
+
+        # Si des données EXIF sont présentes, réduire la qualité en préservant les données EXIF
+        if exif_bytes:
+            output_buffer = BytesIO()
+            img.save(output_buffer, 'JPEG', quality=quality, exif=exif_bytes)
+        else:
+            # Si aucune donnée EXIF n'est présente, réduire la qualité sans conserver les données EXIF
+            output_buffer = BytesIO()
+            img.save(output_buffer, 'JPEG', quality=quality)
+
+        # Lire les données de l'image compressée
+        compressed_data = b64encode(output_buffer.getvalue()).decode('utf-8')
+
+        return compressed_data
+    except Exception as e:
+        print(f"Error compressing image: {e}")
+        print(traceback.format_exc())  # Imprime la trace complète de l'erreur
+        return None

@@ -91,8 +91,8 @@ class UserProfileForm(FlaskForm):
     email = StringField('Email',
                             id='email_create',
                             validators=[DataRequired()])
-    website = StringField('Website',
-                            id='website_create')
+    service = StringField('Service',
+                            id='service')
     image = StringField('Image',
                             id='image_create',
                             validators=[DataRequired()])
