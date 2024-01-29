@@ -471,6 +471,7 @@ def delete_user():
 
 
 @blueprint.route('/logout')
+@login_required
 def logout():
     """ Logout View """
     logout_user()
@@ -722,8 +723,11 @@ def extract_gps_info(img_path):
             if exif_data is not None:
                 gps_info = exif_data.get(34853)  # GPSInfo tag
                 if gps_info is not None:
-                    latitude = decimal_coords(gps_info[2], gps_info[3])
-                    longitude = decimal_coords(gps_info[4], gps_info[5])
+                    # Assurez-vous que les valeurs sont des flottants
+                    latitude = float(gps_info[2][0]) + \
+                        float(gps_info[2][1])/60 + float(gps_info[2][2])/3600
+                    longitude = float(gps_info[4][0]) + \
+                        float(gps_info[4][1])/60 + float(gps_info[4][2])/3600
                     if gps_info[3] == 'S':
                         latitude *= -1
                     if gps_info[1] == 'W':
@@ -732,13 +736,6 @@ def extract_gps_info(img_path):
     except Exception as e:
         print(f"Error extracting GPS info: {e}")
     return None
-
-def decimal_coords(coords, direction):
-    degrees, minutes, seconds = coords
-    decimal = float(degrees) + float(minutes)/60 + float(seconds)/3600
-    if direction == 'S' or direction == 'W':
-        decimal *= -1
-    return decimal
 
 @login_required
 @blueprint.route("/upload_page")
