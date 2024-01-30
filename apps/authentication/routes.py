@@ -297,7 +297,7 @@ def photo_upload():
                 image_url = user_profile.image
 
     user_profile = UserProfile.query.filter_by(user=current_user.id).first()
-    return render_template('home/index.html', user_profile=user_profile)
+    return render_template('accounts/profile.html', user_profile=user_profile)
 #///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
 
 @blueprint.route('/user_list', methods=['GET'])
