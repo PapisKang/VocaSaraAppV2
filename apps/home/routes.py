@@ -82,17 +82,33 @@ def generation_rapport_form():
     troncons_existants = Troncon.query.all()
     return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants)
 
-# Route pour traiter le formulaire
 @blueprint.route('/generate_rapport', methods=['POST'])
 def generate_rapport():
+    feeders_existants = Feeder.query.all()
+    troncons_existants = Troncon.query.all()
+
     feeder_nom = request.form.get('feeder') or request.form.get('feederInput')
     troncon_nom = request.form.get('troncon') or request.form.get('tronconInput')
-    date_debut = datetime.strptime(request.form['dateDebut'], '%Y-%m-%d')
-    date_fin = datetime.strptime(request.form['dateFin'], '%Y-%m-%d')
+    date_debut_str = request.form.get('dateDebut')
+    date_fin_str = request.form.get('dateFin')
     operateur = current_user.email
-    groupement_troncon = request.form['groupementTroncon']
-    zone = request.form['zone']
+    groupement_troncon = request.form.get('groupementTroncon')
+    zone = request.form.get('zone')
 
+    # Vérifier si les champs obligatoires sont vides
+    if not feeder_nom or not troncon_nom or not date_debut_str or not date_fin_str or not groupement_troncon or not zone:
+        return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants, error_message='Veuillez remplir tous les champs obligatoires.')
+
+    # Vérifier si les champs de date sont vides
+    if not date_debut_str or not date_fin_str:
+        return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants, error_message='Veuillez remplir les champs de date.')
+
+    try:
+        date_debut = datetime.strptime(date_debut_str, '%Y-%m-%d')
+        date_fin = datetime.strptime(date_fin_str, '%Y-%m-%d')
+    except ValueError:
+        return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants, error_message='Format de date incorrect.')
+    
     existing_feeder = Feeder.query.filter_by(Nom=feeder_nom).first()
     if existing_feeder:
         feeder_id = existing_feeder.id
@@ -123,12 +139,11 @@ def generate_rapport():
     db.session.add(new_report)
     db.session.commit()
 
-        # Ajouter l'id du rapport généré aux cookies
+    # Ajouter l'id du rapport généré aux cookies
     response = redirect(url_for('home_blueprint.confirmation_page'))
     response.set_cookie('rapportGenereId', str(new_report.id))
     
     return response
-
 
 # Nouvelle route pour afficher la page avec les deux boutons et le texte explicatif
 @blueprint.route('/confirmation_page', methods=['GET'])
