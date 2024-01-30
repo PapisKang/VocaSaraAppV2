@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GENERATION DE RAPPORT</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     body {
@@ -19,7 +18,7 @@
     .container-main {
       display: flex;
       justify-content: space-between;
-      max-width: 900px;
+      max-width: 1200px;
       margin: 50px auto;
       flex: 1; /* Utiliser l'espace restant pour la flexbox */
     }
@@ -47,7 +46,7 @@
     }
 
     button {
-      background-color:cornflowerblue;
+      background-color: #4caf50;
       color: #fff;
       padding: 10px;
       border: none;
@@ -64,6 +63,7 @@
       color: cornflowerblue;
       
     }
+
     
   </style>
 </head>
@@ -76,6 +76,7 @@
       <h2>FORMULAIRE DE RAPPORT</h2>
       <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
       <form id="rapportForm" action="{{ url_for('home_blueprint.generate_rapport') }}" method="POST">
+
         <label for="feeder"> <i class="fas fa-rss"></i> Feeder:</label>
         <select id="feeder" name="feeder">
           <option value="" disabled selected>Choisissez un feeder existant ou saisissez-en un nouveau</option>
@@ -85,6 +86,7 @@
         </select>
         <input type="text" id="feederInput" name="feederInput" placeholder="Saisissez le feeder">
         
+
         <label for="troncon">  <i class="fas fa-road"></i> Troncon:</label>
         <select id="troncon" name="troncon">
           <option value="" disabled selected>Choisissez un troncon existant ou saisissez-en un nouveau</option>
@@ -94,16 +96,19 @@
         </select>
         <input type="text" id="tronconInput" name="tronconInput" placeholder="Saisissez le tronçon">
         
-        <label for="dateDebut"> <i class="fas fa-calendar"></i> Date de visite - Début:</label>
+        <label for="dateDebut">Date de visite - Début:</label>
         <input type="date" id="dateDebut" name="dateDebut" required>
 
-        <label for="dateFin"> <i class="fas fa-calendar"></i> Date de visite - Fin:</label>
+        <label for="dateFin">Date de visite - Fin:</label>
         <input type="date" id="dateFin" name="dateFin" required>
+
 
         <label for="operateur"> <i class="fas fa-user"></i> Nom de l'opérateur:</label>
         <input type="text" id="operateur" name="operateur" value="{{ current_user.username }}" readonly required>
 
         <label for="zone"> <i class="fas fa-map-marker-alt"></i> Zone:</label>
+
+       
         <select id="zone" name="zone" required>
           <option value="" disabled selected>Choisissez une zone</option>
           <option value="DRS">DRS</option>
@@ -112,10 +117,12 @@
           <option value="DRE">DRE</option>
         </select>
         
-        <label for="groupementTroncon"> <i class="fas fa-object-group"></i> Groupement troncon:</label>
+        <label for="groupementTroncon">Groupement troncon:</label>
         <input type="text" id="groupementTroncon" name="groupementTroncon">
 
+
         <button type="submit" onclick="saveFormData()"> <i class="fa-fw fas fa-check"></i>  Confirmer</button>
+
         
 
       </form>
