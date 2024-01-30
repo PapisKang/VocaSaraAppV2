@@ -28,7 +28,7 @@
       flex: 1;
       padding: 20px;
       background-color: #fff;
-      border-radius: 18px;
+      border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
@@ -64,6 +64,7 @@
       color: cornflowerblue;
       
     }
+    
   </style>
 </head>
 {%include 'home/index.html'%}
@@ -73,17 +74,18 @@
   <div class="container-main">
     <div class="container-form">
       <h2>FORMULAIRE DE RAPPORT</h2>
+      <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
       <form id="rapportForm" action="{{ url_for('home_blueprint.generate_rapport') }}" method="POST">
-        <label for="feeder"><i class="fas fa-rss"></i> Feeder:</label>
+        <label for="feeder"> <i class="fas fa-rss"></i> Feeder:</label>
         <select id="feeder" name="feeder">
-          <option value="" disabled selected> Choisissez un feeder existant ou saisissez-en un nouveau</option>
+          <option value="" disabled selected>Choisissez un feeder existant ou saisissez-en un nouveau</option>
           {% for feeder in feeders_existants %}
             <option value="{{ feeder.Nom }}">{{ feeder.Nom }}</option>
           {% endfor %}
         </select>
         <input type="text" id="feederInput" name="feederInput" placeholder="Saisissez le feeder">
         
-        <label for="troncon"> <i class="fas fa-road"></i> Troncon:</label>
+        <label for="troncon">  <i class="fas fa-road"></i> Troncon:</label>
         <select id="troncon" name="troncon">
           <option value="" disabled selected>Choisissez un troncon existant ou saisissez-en un nouveau</option>
           {% for troncon in troncons_existants %}
@@ -98,10 +100,10 @@
         <label for="dateFin"> <i class="fas fa-calendar"></i> Date de visite - Fin:</label>
         <input type="date" id="dateFin" name="dateFin" required>
 
-        <label for="operateur"><i class="fas fa-user"></i> Nom de l'opérateur:</label>
-        <input type="text" id="operateur" name="operateur" value="{{ current_user.username }}" readonly>
+        <label for="operateur"> <i class="fas fa-user"></i> Nom de l'opérateur:</label>
+        <input type="text" id="operateur" name="operateur" value="{{ current_user.username }}" readonly required>
 
-        <label for="zone"> <i class="fas fa-map-marker-alt"></i>  Zone:</label>
+        <label for="zone"> <i class="fas fa-map-marker-alt"></i> Zone:</label>
         <select id="zone" name="zone" required>
           <option value="" disabled selected>Choisissez une zone</option>
           <option value="DRS">DRS</option>
@@ -113,10 +115,11 @@
         <label for="groupementTroncon"> <i class="fas fa-object-group"></i> Groupement troncon:</label>
         <input type="text" id="groupementTroncon" name="groupementTroncon">
 
-        <button type="submit" onclick="saveFormData()"> <i class="fa-fw fas fa-check"></i> Confirmer</button>
+        <button type="submit" onclick="saveFormData()"> <i class="fa-fw fas fa-check"></i>  Confirmer</button>
+        
+
       </form>
 
-      <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
     </div>
     <!-- Ajout du message pour demander l'autorisation des cookies -->
 <div id="cookie-consent-message" style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #333; color: #fff; padding: 10px; text-align: center; z-index: 1000;">
@@ -170,7 +173,13 @@
       document.cookie = `zone=${zone}; path=/`;
       document.cookie = `groupementTroncon=${groupementTroncon}; path=/`;
         // Soumettre le formulaire
+            // Vérifier si les champs obligatoires sont vides
+    if (!feederValue || !tronconValue || !dateDebut || !dateFin || !groupementTroncon || !zone) {
+      document.getElementById("errorMessage").style.display = "block";  // Afficher le message d'erreur
+      return;  // Arrêter le traitement si des champs obligatoires sont vides
+  }
   document.getElementById("rapportForm").submit();
+  
     }
 
     function loadFormData() {

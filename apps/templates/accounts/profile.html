@@ -7,26 +7,62 @@
 
     <!-- Ajout des liens vers les fichiers CSS de Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"  />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        /* CSS pour adapter la taille de la photo de profil */
+        @media (max-width: 576px) {
+            /* Styles pour les écrans de petite taille (mobile) */
+            .rounded-profile-img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        @media (min-width: 577px) {
+            /* Styles pour les écrans de taille moyenne et plus grande */
+            .rounded-profile-img {
+                max-width: 50%; /* Ajustez la largeur selon vos besoins */
+                height: auto;
+            }
+        }
+        form{
+            display:;
+    justify-content: space-between;
+    max-width: 900px;
+    margin: 50px auto;
+    flex: 1; /* Utiliser l'espace restant pour la flexbox */
+        }
+p.lead{
+    text-align:end;
+}
+button.btn.btn-primary {
+    font-family: cursive;
+}
+label {
+    font-family: cursive;
+}
+    </style>
 </head>
 {%include 'home/index.html'%}
 <body class="bg-light">
     <div class="container mt-5">
         
-        <p class="lead">Bienvenue, {{ current_user.username }}!</p>
+        <p class="lead" style"text-align:center;">Bienvenue, {{ current_user.username }}!</p>
 
         <form method="post" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="image">Photo de Profil:</label>
+                <label for="image"><i class="fas fa-user-circle"></i>  Photo de Profil:</label>
                 <input type="file" class="form-control-file" name="image" accept="image/*">
             </div>
-            <button type="submit" class="btn btn-primary">Changer de Photo</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Changer de Photo</button>
         </form>
 
         <hr class="my-4">
 
         {% if user_profile.image %}
-            <img src="data:image/jpeg;base64,{{ user_profile.image }}" alt="Profile Picture" class="img-fluid rounded">
+            <img src="data:image/jpeg;base64,{{ user_profile.image }}" alt="Profile Picture" class="img-fluid rounded rounded-profile-img">
         {% endif %}
     </div>
 

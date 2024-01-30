@@ -5,10 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Upload</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" >
-    
     <!-- Linking Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" >
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -101,7 +100,7 @@
     <div class="container">
         <div class="upload-container">
             <h2 class="text-center mb-4">Chargement d'images Normale</h2>
-            <p class="text-center mb-3"> <i class='bx bxs-hourglass-top bx-sm bx-spin'></i>Cette opération peut prendre du temps</p>
+            <p class="text-center mb-3"> <i class='bx bxs-hourglass-top bx-sm bx-spin'></i> Cette opération peut prendre du temps</p>
 
             <form action="{{ url_for('authentication_blueprint.upload_and_traitement_visible') }}" method="post"
                 enctype="multipart/form-data">
@@ -114,7 +113,7 @@
                 </div>
                 <input type="file" name="file" multiple id="file-input" style="display: none;">
                 <progress value="0" max="100" id="progress-bar" class="w-100 my-2"></progress>
-                <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-download"></i> Télécharger</button>
+                <button type="submit" class="btn btn-primary btn-block"> <i class="fas fa-download"></i> Télécharger</button>
             </form>
             <div class="preview-container" id="preview-container"></div>
             <div class="selected-count" id="selected-count"></div>

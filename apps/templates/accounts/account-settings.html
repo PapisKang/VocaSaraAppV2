@@ -11,13 +11,18 @@
 
  {%include 'home/index.html'%}
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-eF8CFv0h+oCd4fMXM7XYqqF2+rWLGIEvHkPFt8+gFSpVvgdWgaW0GniPkziF+0jf" crossorigin="anonymous">
-
+<style>
+  h5{ 
+    color: cornflowerblue;
+    font-family:math;
+  }
+</style>
 <div class="container-fluid my-3 py-3">
 
   <div class="row mb-5">
     <div class="col-lg-3">
-      <div class="card position-sticky top-1">
-        <ul class="nav flex-column bg-white border-radius-lg p-3">
+      <div class="">
+      
         </ul>
       </div>
     </div>
@@ -53,7 +58,7 @@
       <!-- Card Basic Info -->
       <div class="card mt-4" id="basic-info">
         <div class="card-header">
-          <h5>Compléter vos informations</h5>
+          <h5><i class="fas fa-edit"></i> Compléter vos informations</h5>
         </div>
         <div class="card-body pt-0">
           <form method="put" id="userEditForm" enctype="multipart/form-data">
@@ -74,52 +79,52 @@
                 <!-- End email verification -->
                 <div class="row mt-2">
                   <div class="col-sm-6">
-                    <label class="form-label">Nom Complet</label>
+                    <label class="form-label"> <i class='bx bx-rename bx-flashing bx-flip-vertical ' ></i> Nom Complet</label>
                     <input type="text" id="full_name" name="full_name" class="form-control" placeholder="Nom Complet"
                       value="{{context['profile_name']}}">
                   </div>
   
               <div class="col-sm-6">
-                <label class="form-label">Bio</label>
+                <label class="form-label"> <i class='bx bxs-face bx-flashing' ></i> Bio</label>
                 <input type="text" id="bio" name="bio" class="form-control" placeholder="Bio"
                   value="{{ context['profile_bio']}}">
               </div>
                 <div class="row mt-2">
                   <div class="col-sm-6">
-                    <label class="form-label">Email</label>
+                    <label class="form-label"><i class='bx bx-envelope bx-flashing bx-flip-vertical' ></i> Email</label>
                     <input type="email" id="email" name="email" {% if current_user.email %} readonly
                       value="{{ current_user.email }}" {% else %} placeholder="Email" {% endif %} class="form-control">
                     <section class="display-error-message">
                     </section>
                   </div>
                   <div class="col-sm-6">
-                    <label class="form-label">Téléphone</label>
+                    <label class="form-label"> <i class='bx bx-phone-call bx-flashing bx-flip-vertical' ></i> Téléphone</label>
                     <input type="text" id="phone" name="phone" class="form-control" placeholder="Téléphone"
                       value="{{ context['profile_phone']}}">
                   </div>
                 </div>
                 <div class="row mt-2">
                   <div class="col-sm-6">
-                    <label class="form-label">Service</label>
+                    <label class="form-label"> <i class='bx bxs-component bx-flashing bx-flip-vertical' ></i> Service</label>
                     <input type="text" id="service" name="service" class="form-control" placeholder="Service"
                       value="{{ context['profile_service'] }}">
                   </div>
                   <div class="col-sm-6">
-                    <label class="form-label"> Code Postal</label>
+                    <label class="form-label"><i class='bx bxl-codepen bx-flashing bx-flip-vertical' ></i> Code Postal</label>
                     <input type="text" id="zipcode" name="zipcode" class="form-control" placeholder="Code Postal"
                       value="{{ context['profile_zipcode']}}">
                   </div>
                 </div>
                 <div class="row mt-2">
                   <div class="col-sm-12">
-                    <label class="form-label">Adresse</label>
+                    <label class="form-label"> <i class='bx bxs-user-detail bx-flashing' ></i> Adresse</label>
                     <input type="text" id="Adresse" name="address" class="form-control"
                       value="{{ context['profile_address']}}">
                   </div>
                 </div>
               </div>
                 <br>
-                <button type="button" class="btn btn-primary" onclick="updateUserInfo()">Sauvegarder Informations</button>
+                <button type="button" class="btn btn-primary" onclick="updateUserInfo()"> <i class="fas fa-save"></i> Sauvegarder Informations</button>
               </div>
             </div>
           </form>
@@ -130,7 +135,7 @@
 {% if current_user.email %}
 <div class="card mt-4" id="password">
   <div class="card-header">
-    <h5>Changer de mot de passe</h5>
+    <h5><i class="fas fa-key"></i> Changer de mot de passe</h5>
   </div>
   <div class="card-body pt-0">
 
@@ -145,7 +150,7 @@
 
               <!-- Nouveau mot de passe -->
               <div class="form-group">
-                <label class="form-label">Nouveau mot de passe</label>
+                <label class="form-label"><i class='bx bx-sort-a-z bx-flashing' ></i> Nouveau mot de passe</label>
                 <div class="input-group">
                   <input class="form-control" id="id_password1" name="new_password" type="password" placeholder="Nouveau mot de passe" required>
                   <button type="button" class="btn btn-outline-secondary password-toggle-btn" onclick="togglePassword('id_password1')">
@@ -156,7 +161,7 @@
 
               <!-- Confirmer le nouveau mot de passe -->
               <div class="form-group">
-                <label class="form-label">Confirmer le nouveau mot de passe</label>
+                <label class="form-label"><i class='bx bx-check-double bx-flashing' ></i> Confirmer le nouveau mot de passe</label>
                 <div class="input-group">
                   <input class="form-control" id="id_password2" name="new_password2" type="password" placeholder="Confirmer le nouveau mot de passe" required>
                   <button type="button" class="btn btn-outline-secondary password-toggle-btn" onclick="togglePassword('id_password2')">
@@ -164,16 +169,17 @@
                   </button>
                 </div>
               </div>
-              <h5 class="mt-5">Exigences du mot de passe</h5>
-              <ul class="text-muted ps-4 mb-0 float-start">
-                <li>
-                  <span class="text-sm">Un caractère spécial, minimum un chiffre</span>
-                </li>
-                <li>
-                  <span class="text-sm">Minimum 6 caractères, et une Majuscule</span>
+              <h5 class="mt-5"><i class="fas fa-exclamation-triangle"></i>Exigences du mot de passe</h5>
+              <ul class="text-muted ps-4 mb-0 float-start" >
+                <li  >
+                  <i class="fas fa-check"></i> Doit contenir au moins 8 caractères.<br>
+                  <i class="fas fa-check"></i> Doit contenir au moins une lettre majuscule.<br>
+                  <i class="fas fa-check"></i> Doit contenir au moins un chiffre.<br>
+                  <i class="fas fa-check"></i> Doit contenir au moins un caractère spécial.
+          
                 </li>
               </ul>
-              <button type="button" class="btn btn-primary shadow-2 mb-4 bg-gradient-dark btn-sm float-end mt-6 mb-0" onclick="changePassword()">Modifier le mot de passe</button>
+              <button type="button" class="btn btn-primary shadow-2 mb-4 bg-gradient-dark btn-sm float-end mt-6 mb-0" onclick="changePassword()"><i class="fas fa-lock fa-2x"></i> Modifier le mot de passe</button>
             </div>
           </form>
         </div>

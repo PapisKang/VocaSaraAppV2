@@ -7,33 +7,31 @@
   <title>Confirmation Page</title>
   <style>
     body {
-      font-family: math;
+      font-family: Arial, sans-serif;
       background-color: #f4f4f4;
-      margin: 0; /* Supprimer la marge par défaut du body */
-      min-height: 100vh; /* Occuper au moins 100% de la hauteur de la fenêtre */
-      display:inline-block;
-      flex-direction: column; /* Aligner les éléments verticalement */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    
-  .container {
-    display:;
-    justify-content: space-between;
-    max-width: 900px;
-    margin: 50px auto;
-    flex: 1; /* Utiliser l'espace restant pour la flexbox */
-    }  
-    
-    /* Le reste de votre CSS reste inchangé */
-    
+
+    .container {
+      max-width: 900px;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(3, 0, 0, 0.1);
+      text-align: left;
+      
+    }
+
     h2 {
-      color: #2dbdff;
-    }
-    h3{
       color: #2dbdff;
     }
 
     p {
-      
       margin-bottom: 20px;
     }
 
@@ -49,12 +47,11 @@
 
     .image-container {
       text-align: right;
-      display:flex;
       margin-top: 20px; /* Ajout d'une marge au-dessus de l'image */
     }
 
     .image-container img {
-      max-width: 20%;
+      max-width: 60%;
       height: auto;
       border-radius: 8px;
       display: block; /* Pour éviter un léger espace en bas de l'image */
@@ -74,10 +71,6 @@
       .image-container img {
         display: none; /* Cacher l'image sur les petits écrans */
       }
-      .indented-paragraph {
-    margin-left: 20px; /* Vous pouvez ajuster cette valeur selon vos préférences */
-}
-
     }
   </style>
 </head>
@@ -89,7 +82,7 @@
     <p>L'explication fournie dans le texte vise à sensibiliser les utilisateurs sur les limites et les challenges associés à la classification d'images par les modèles d'intelligence artificielle.</p>
 
     <h3>Quantité de données d'entraînement limitée :</h3>
-    <p>Les modèles d'intelligence artificielle, y compris ceux utilisés pour la classification d'images, dépendent fortement des données sur lesquelles ils sont entraînés. Si le modèle a été entraîné sur une quantité limitée de données, il peut ne pas être capable de </br> généraliser efficacement à des situations nouvelles ou différentes. Un modèle qui a été entraîné sur une diversité insuffisante d'images peut avoir des difficultés à reconnaître des motifs inattendus ou des exemples atypiques.</p>
+    <p>Les modèles d'intelligence artificielle, y compris ceux utilisés pour la classification d'images, dépendent fortement des données sur lesquelles ils sont entraînés. Si le modèle a été entraîné sur une quantité limitée de données, il peut ne pas être capable de généraliser efficacement à des situations nouvelles ou différentes. Un modèle qui a été entraîné sur une diversité insuffisante d'images peut avoir des difficultés à reconnaître des motifs inattendus ou des exemples atypiques.</p>
 
     <h3>Classification non garantie à 100% :</h3>
     <p>Même avec une quantité importante de données d'entraînement, la classification d'images par des modèles d'IA n'est généralement pas garantie à 100%. Cela est dû à la complexité de certaines tâches de classification et à la variabilité naturelle des données. Il est important de comprendre que les modèles d'IA ne sont pas infaillibles et peuvent parfois produire des prédictions incorrectes.</p>
@@ -100,8 +93,8 @@
     <p>En résumé, l'idée est de souligner que même les modèles d'IA avancés ne sont pas infaillibles, et qu'il est essentiel d'adopter une approche prudente lors de l'utilisation de ces modèles. La vérification manuelle des résultats de la classification et le tri préalable des données contribuent à garantir une utilisation plus fiable et précise des modèles d'IA, en particulier dans des domaines où la précision est cruciale.</p>
     
     <h3>Options :</h3>
-    <button onclick="handleButtonClick('visible')"><i class="fas fa-eye"></i> Rapport Visible</button>
-    <button onclick="handleButtonClick('invisible')"><i class="fas fa-eye-slash"></i> Rapport Invisible</button>
+    <button onclick="handleButtonClick('visible')"> <i class="fas fa-eye"></i> Rapport Visible</button>
+    <button onclick="handleButtonClick('invisible')"> <i class="fas fa-eye-slash"></i> Rapport Invisible</button>
     
   </div>
   

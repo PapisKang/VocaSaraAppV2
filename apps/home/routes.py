@@ -17,8 +17,9 @@ import zlib
 import base64
 import logging
 import os
-
 import base64
+from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible
+from flask import render_template, jsonify, send_file
 
 
 
@@ -81,17 +82,33 @@ def generation_rapport_form():
     troncons_existants = Troncon.query.all()
     return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants)
 
-# Route pour traiter le formulaire
 @blueprint.route('/generate_rapport', methods=['POST'])
 def generate_rapport():
+    feeders_existants = Feeder.query.all()
+    troncons_existants = Troncon.query.all()
+
     feeder_nom = request.form.get('feeder') or request.form.get('feederInput')
     troncon_nom = request.form.get('troncon') or request.form.get('tronconInput')
-    date_debut = datetime.strptime(request.form['dateDebut'], '%Y-%m-%d')
-    date_fin = datetime.strptime(request.form['dateFin'], '%Y-%m-%d')
+    date_debut_str = request.form.get('dateDebut')
+    date_fin_str = request.form.get('dateFin')
     operateur = current_user.email
-    groupement_troncon = request.form['groupementTroncon']
-    zone = request.form['zone']
+    groupement_troncon = request.form.get('groupementTroncon')
+    zone = request.form.get('zone')
 
+    # Vérifier si les champs obligatoires sont vides
+    if not feeder_nom or not troncon_nom or not date_debut_str or not date_fin_str or not groupement_troncon or not zone:
+        return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants, error_message='Veuillez remplir tous les champs obligatoires.')
+
+    # Vérifier si les champs de date sont vides
+    if not date_debut_str or not date_fin_str:
+        return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants, error_message='Veuillez remplir les champs de date.')
+
+    try:
+        date_debut = datetime.strptime(date_debut_str, '%Y-%m-%d')
+        date_fin = datetime.strptime(date_fin_str, '%Y-%m-%d')
+    except ValueError:
+        return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants, error_message='Format de date incorrect.')
+    
     existing_feeder = Feeder.query.filter_by(Nom=feeder_nom).first()
     if existing_feeder:
         feeder_id = existing_feeder.id
@@ -122,12 +139,11 @@ def generate_rapport():
     db.session.add(new_report)
     db.session.commit()
 
-        # Ajouter l'id du rapport généré aux cookies
+    # Ajouter l'id du rapport généré aux cookies
     response = redirect(url_for('home_blueprint.confirmation_page'))
     response.set_cookie('rapportGenereId', str(new_report.id))
     
     return response
-
 
 # Nouvelle route pour afficher la page avec les deux boutons et le texte explicatif
 @blueprint.route('/confirmation_page', methods=['GET'])
@@ -140,10 +156,39 @@ def apropos():
     return render_template('home/apropos.html', segment='apropos')
 
 
-@blueprint.route('/localisation_page')
-def localisation_page():
-    return render_template('home/localisation_defauts.html')
+
 
 @blueprint.route('/acceuil')
 def acceuil():
     return render_template('home/acceuil.html')
+
+
+
+@blueprint.route('/get_map_data')
+def get_map_data():
+    # Récupérer les données nécessaires de la base de données
+    image_points = ImageUploadVisible.query.all()
+
+    # Préparer les données pour la carte
+    map_data = []
+    for point in image_points:
+        data = {
+            'latitude': point.latitude,
+            'longitude': point.longitude,
+            'type_defaut': point.type_defaut,
+            'feeder': point.feeder,
+            'troncon': point.troncon,
+            'zone': point.zone,
+            'filename': point.filename,
+            'nom_operateur': point.nom_operateur,
+            'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'image_binary': point.data
+
+        }
+        map_data.append(data)
+
+    return jsonify(map_data)
+
+@blueprint.route('/localisation_page')
+def localisation_page():
+    return render_template('home/localisation_defauts.html')
