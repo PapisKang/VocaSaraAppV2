@@ -8,6 +8,25 @@
     <!-- Ajout des liens vers les fichiers CSS de Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        /* CSS pour adapter la taille de la photo de profil */
+        @media (max-width: 576px) {
+            /* Styles pour les écrans de petite taille (mobile) */
+            .rounded-profile-img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        @media (min-width: 577px) {
+            /* Styles pour les écrans de taille moyenne et plus grande */
+            .rounded-profile-img {
+                max-width: 50%; /* Ajustez la largeur selon vos besoins */
+                height: auto;
+            }
+        }
+    </style>
 </head>
 {%include 'home/index.html'%}
 <body class="bg-light">
@@ -26,7 +45,7 @@
         <hr class="my-4">
 
         {% if user_profile.image %}
-            <img src="data:image/jpeg;base64,{{ user_profile.image }}" alt="Profile Picture" class="img-fluid rounded">
+            <img src="data:image/jpeg;base64,{{ user_profile.image }}" alt="Profile Picture" class="img-fluid rounded rounded-profile-img">
         {% endif %}
     </div>
 
