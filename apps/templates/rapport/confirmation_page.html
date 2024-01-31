@@ -3,27 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confirmation Page</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background: linear-gradient(45deg, #2193b0, #6dd5ed);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
       margin: 0;
       padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+  }
 
+  @keyframes gradient {
+      0% {
+          background-position: 0% 50%;
+      }
+      50% {
+          background-position: 100% 50%;
+      }
+      100% {
+          background-position: 0% 50%;
+      }
+  }
+
+  .custom-container {
+      border: 2px solid white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+  }
     .container {
-      max-width: 900px;
-      padding: 15px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(3, 0, 0, 0.1);
-      text-align: left;
+      display:;
+    justify-content: space-between;
+    max-width: 900px;
+    margin: 40px auto;
+    flex: 1; /* Utiliser l'espace restant pour la flexbox */
       
     }
 
@@ -72,12 +89,15 @@
         display: none; /* Cacher l'image sur les petits écrans */
       }
     }
+    h3{
+      color: #2dbdff;
+    }
   </style>
 </head>
 {%include 'home/index.html'%}
 <body>
 
-  <div class="container">
+  <div class="container custom-container">
     <h2>Important</h2>
     <p>L'explication fournie dans le texte vise à sensibiliser les utilisateurs sur les limites et les challenges associés à la classification d'images par les modèles d'intelligence artificielle.</p>
 
@@ -92,16 +112,20 @@
 
     <p>En résumé, l'idée est de souligner que même les modèles d'IA avancés ne sont pas infaillibles, et qu'il est essentiel d'adopter une approche prudente lors de l'utilisation de ces modèles. La vérification manuelle des résultats de la classification et le tri préalable des données contribuent à garantir une utilisation plus fiable et précise des modèles d'IA, en particulier dans des domaines où la précision est cruciale.</p>
     
-    <h3>Options :</h3>
+    <h3>Options :</h3><br>
     <button onclick="handleButtonClick('visible')"> <i class="fas fa-eye"></i> Rapport Visible</button>
     <button onclick="handleButtonClick('invisible')"> <i class="fas fa-eye-slash"></i> Rapport Invisible</button>
     
   </div>
-  
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+
   <!-- Ajout de l'image à droite -->
-  <div class="image-container">
+ <!-- <div class="image-container">
     <img src="{{ config.ASSETS_ROOT }}/img/illustrations/IA.jpg" alt="Image explicative" loading="lazy">
-  </div>
+  </div>  -->
 
   <script>
     // Fonction pour définir un cookie avec une durée d'expiration

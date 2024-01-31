@@ -6,28 +6,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+   
+
+
+    <style>
+
+        .iframe-container {
+            border: 3px dotted #c7d8ea; /* Couleur de la bordure, ajustez selon vos préférences */
+            margin: auto; /* Centre l'élément horizontalement */
+            width: 80%; /* Ajuste la largeur selon vos préférences */
+            max-width: 800px; /* Limite la largeur maximale */
+            padding: 20px; /* Ajoute un padding à l'intérieur de la bordure */
+            background-color: white; /* Fond blanc, ajustez selon vos préférences */
+        }
+        body {
+            font-family: 'Arial', sans-serif; /* Choisir une police de caractères adaptée */
+            background-color: #f8f9fa; /* Couleur de fond, ajustez selon vos préférences */
+            color: #343a40; /* Couleur du texte, ajustez selon vos préférences */
+        }
+
+        .custom-title {
+            font-size: 2.5rem; /* Taille de la police, ajustez selon vos préférences */
+            font-weight: bold; /* Gras */
+            text-align: center; /* Centrer le texte */
+            margin-top: 50px; /* Espace en haut */
+            margin-bottom: 30px; /* Espace en bas */
+            color: #007bff; /* Couleur du titre, ajustez selon vos préférences */
+        }
+        
+    </style>
 </head>
 {%include 'home/index.html'%}
 <body>
     <div class="container">
         <div class="text-center mt-4 mb-5">
-            <h1 class="display-4">À PROPOS DE VOCA SARA-SUARL</h1>
+            <h1 class="display-4 custom-title">À PROPOS DE VOCA SARA-SUARL</h1>
+
         </div>
 
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <section class="bg-white rounded shadow-sm mb-4 p-4">
-                    <h2 class="h4">Bienvenue chez VOCA SARA-SUARL</h2>
+                    <h2 class="h4"><i class='bx bxs-home-circle bx-burst' ></i> Bienvenue chez VOCA SARA-SUARL</h2>
                     <p class="blinking-text">VOCA SARA-SUARL est une nouvelle PME créée par Monsieur Yiékiédion Raphael SARA en 2021 à Dakar, naissant d’une véritable passion des drones et de la robotique. En effet, l’entreprise VOCA SARA-SUARL agit dans la réalisation et la conception des inspections par drones, notamment dans le secteur de l’énergie avec les visites et inspections du réseau aérien HTA et BT de la SENELEC par drones, mais aussi dans le secteur agricole, industriel, pétrolier, multimédia, etc.</p>
                 </section>
 
                 <section class="bg-white rounded shadow-sm mb-4 p-4">
-                    <h2 class="h4">Évolution de l'entreprise</h2>
+                    <h2 class="h4"> <i class='bx bx-up-arrow-circle bx-burst' ></i> Évolution de l'entreprise</h2>
                     <p>Par ailleurs, elle a d’abord vu le jour sous le nom de Volantis en 2018 en statut de GIE, et au fil du temps, elle a signé en 2019 avec la SENELEC sur le projet portant inspections et visites par drones des lignes du réseau aérien HTA. Ensuite, en 2020, elle change de statut juridique pour devenir une SARL, avec pour ambition de bien pouvoir développer ses activités et d'être en adéquation avec ses différents métiers. En fin, Volantis SARL a décidé en 2021 de changer de dénomination sociale et de statut juridique pour devenir VOCA SARA-SUARL.</p>
                 </section>
 
                 <section class="bg-white rounded shadow-sm mb-4 p-4">
-                    <h2 class="h4">Nos Compétences</h2>
+                    <h2 class="h4"> <i class='bx bx-book-reader bx-burst' ></i> Nos Compétences</h2>
                     <p>Cependant, notre savoir-faire et nos compétences reposent sur l’ingéniosité en inspections par drones via notre Centre de Traitement and d’Analyse de Données (CTAD), nos compétences du terrain and d’un personnel expérimenté and motivé. En outre, quel que soit votre projet, l’entreprise VOCA SARA-SUARL vous accompagne, identifie l’ensemble de vos besoins and vous propose des solutions à votre attente afin de réaliser une maintenance préventive or curative.</p>
                 </section>
             </div>
@@ -35,22 +66,23 @@
 
         <div class="text-center">
             <h2 class="mb-4">Contactez-nous</h2>
-            <form method="POST" action="/envoyer_message" class="col-lg-6 offset-lg-3">
+            <form method="POST" action="/envoyer_message" class="col-lg-6 offset-lg-3 border rounded p-4" style="background-color: white;">
                 <div class="form-group">
-                    <label for="nom">Nom :</label>
+                    <label for="nom"><i class="fas fa-user"></i> Nom :</label>
                     <input type="text" id="nom" name="nom" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="email">Email :</label>
+                    <label for="email"> <i class="fas fa-envelope"></i> Email :</label>
                     <input type="email" id="email" name="email" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="message">Message :</label>
+                    <label for="message"> <i class="fas fa-comment"></i> Message :</label>
                     <textarea id="message" name="message" class="form-control" rows="4" required></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Envoyer</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Envoyer</button>
             </form>
         </div>
+        
 
         <div class="text-center mt-5">
             <h3 class="mb-3">DIAYANTE BA NAW</h3>
