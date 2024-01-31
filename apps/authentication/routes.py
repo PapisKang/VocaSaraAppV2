@@ -810,9 +810,9 @@ def upload_and_traitement_visible():
     os.makedirs(user_upload_path)
 
     # Charger le modèle d'apprentissage automatique et les étiquettes de classe
-    model_path = 'apps/IA/model/trained_tensorflow_model_MobileNetV2_normal.h5'
+    model_path = 'apps/IA/model/trained_tensorflow_model_MobileNetV2_normalV2.h5'
     model = load_model(model_path)
-    class_labels_path = 'apps/IA/label/class_labels_normal.txt'
+    class_labels_path = 'apps/IA/label/class_labels_normalv2.txt'
     with open(class_labels_path, 'r') as f:
         class_labels = f.read().splitlines()
 

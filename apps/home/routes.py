@@ -20,7 +20,8 @@ import os
 import base64
 from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible
 from flask import render_template, jsonify, send_file
-
+import json
+from sqlalchemy import func
 
 
 @blueprint.route('/<template>')
@@ -192,3 +193,41 @@ def get_map_data():
 @blueprint.route('/localisation_page')
 def localisation_page():
     return render_template('home/localisation_defauts.html')
+
+@blueprint.route('/statistiques')
+def statistiques():
+    # Récupérer les statistiques des types de défauts avec les informations supplémentaires
+    type_defaut_stats = db.session.query(
+        ImageUploadVisible.type_defaut,
+        ImageUploadVisible.nom_operateur,
+        ImageUploadVisible.feeder,
+        ImageUploadVisible.troncon,
+        ImageUploadVisible.zone,
+        db.func.count(ImageUploadVisible.type_defaut)
+    ).group_by(
+        ImageUploadVisible.type_defaut,
+        ImageUploadVisible.nom_operateur,
+        ImageUploadVisible.feeder,
+        ImageUploadVisible.troncon,
+        ImageUploadVisible.zone
+    ).all()
+
+    # Convertir les données en format approprié pour le graphique
+    labels = [row[0] for row in type_defaut_stats]
+    values = [row[5] for row in type_defaut_stats]
+
+    # Préparer les données pour le frontend
+    data = {
+        'labels': labels,
+        'values': values,
+        'operateurs': [row[1] for row in type_defaut_stats],
+        'feeders': [row[2] for row in type_defaut_stats],
+        'troncons': [row[3] for row in type_defaut_stats],
+        'zones': [row[4] for row in type_defaut_stats],
+    }
+
+    # Convertir les données en JSON
+    data_json = json.dumps(data)
+
+    # Rendre la page HTML avec les données
+    return render_template('statistics/statistics.html', data=data_json)
