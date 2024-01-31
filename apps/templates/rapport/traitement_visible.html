@@ -88,10 +88,6 @@
         .results-container .card {
             margin-bottom: 20px;
         }
-        h2{
-            color: cornflowerblue;
-            font-family: math;
-        }
     </style>
 </head>
 {%include 'home/index.html'%}
@@ -100,7 +96,9 @@
     <div class="container">
         <div class="upload-container">
             <h2 class="text-center mb-4">Chargement d'images Normale</h2>
+
             <p class="text-center mb-3"> <i class='bx bxs-hourglass-top bx-sm bx-spin'></i> Cette opération peut prendre du temps</p>
+
 
             <form action="{{ url_for('authentication_blueprint.upload_and_traitement_visible') }}" method="post"
                 enctype="multipart/form-data">
@@ -108,12 +106,14 @@
                     <label for="file-input" class="mb-3">
                         <img src="{{ config.ASSETS_ROOT }}/img/illustrations/3204121.jpg" alt="Illustration"
                             id="illustration" loading="lazy">
-                        <p> <i class="fas fa-image"></i> Cliquez ici pour sélectionner une image</p>
+                        <p>Cliquez ici pour sélectionner une image</p>
                     </label>
                 </div>
                 <input type="file" name="file" multiple id="file-input" style="display: none;">
                 <progress value="0" max="100" id="progress-bar" class="w-100 my-2"></progress>
                 <button type="submit" class="btn btn-primary btn-block"> <i class="fas fa-download"></i> Télécharger</button>
+
+               
             </form>
             <div class="preview-container" id="preview-container"></div>
             <div class="selected-count" id="selected-count"></div>
