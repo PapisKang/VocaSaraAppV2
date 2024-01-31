@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+	<link rel="icon" type="image/png" href="../../static/assets/img/vocasara/logoo.png" >
 	<!-- Boxicons -->
 	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
 	<!-- Ajoutez cette balise dans la section HEAD de votre document pour inclure SweetAlert2 pour la boîte de dialogue -->
@@ -21,63 +21,78 @@
  <section id="sidebar">
 	<a href="#" class="brand">
 		<img src="{{ config.ASSETS_ROOT }}/img/vocasara/logo.png" alt="Vocasara Logo" class="logo-img">
-		<span class="text">Vocasara</span>
+		<span class="text">VOCASARA</span>
+
 	</a>
 
 	<ul class="side-menu top">
 		<li class="active">
 			<a href="/acceuil">
-				<i class='bx bx-home' ></i>
+				<i class='bx bxs-dashboard bx-sm bx-burst' ></i>
+
 				<span class="text">Acceuil</span>
 			</a>
 		</li>
 		<li>
 			<a href="/generation_rapport">
-				<i class='bx bx-file' ></i>
+				<i class='bx bxs-shopping-bag-alt bx-sm ' ></i>
 				<span class="text">Traitement</span>
 			</a>
 		</li>
 		<li>
 			<a href="/localisation_page">
-				<i class='bx bx-map' ></i>
+				<i class='bx bxs-doughnut-chart bx-sm ' ></i>
+			
 				<span class="text">Localisation</span>
 			</a>
 		</li>
 		<li>
 			<a href="#">
-				<i class='bx bx-chart' ></i>
-				<span class="text">Statistique</span>
+
+				<i class='bx bx-line-chart-down bx-sm ' ></i>
+				<span class="text">Statistiques</span>
 			</a>
 		</li>
 		<li>
 			<a href="#">
-				<i class='bx bx-group' ></i>
+
+				<i class='bx bx-sort-alt-2 bx-sm ' ></i>
 				<span class="text">Inspections</span>
 			</a>
 		</li>
 		<li>
 			<a href="/apropos">
-				<i class='bx bx-info-circle' ></i>
+
+				<i class='bx bx-layer bx-sm ' ></i>
+
 				<span class="text">A propos</span>
 			</a>
 		</li>
 
 		<li>
 			<a href="{{ url_for('authentication_blueprint.user_profile') }}">
-				<i class='bx bx-cog' ></i>
+
+				<i class='bx bxs-cog bx-sm'></i>
+
+				
 				<span class="text">Mon Profil</span>
 			</a>
 		</li>
 		<li>
 			<a href="photo_upload">
-				<i class='bx bx-image' ></i>
+
+				<i class='bx bx-user-plus bx-sm bx-border-circle  bx-fade-left' ></i>
+
+			
 				<span class="text">Photo</span>
 			</a>
 		</li>
 	<li>
 
 		<a href="{{ url_for('authentication_blueprint.logout') }}" class="logout">
-			<i class='bx bx-log-out-circle' ></i>
+
+			<i class='bx bxs-log-out-circle bx-md bx-tada' ></i>
+
 			<span class="text">Déconnexion</span>
 		</a>
 	</ul>

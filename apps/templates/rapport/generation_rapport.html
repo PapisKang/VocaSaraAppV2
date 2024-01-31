@@ -58,6 +58,12 @@
       color: #ff0000;
       display: none;
     }
+    h2{
+      font-family: cursive;
+      color: cornflowerblue;
+      
+    }
+
     
   </style>
 </head>
@@ -70,7 +76,8 @@
       <h2>FORMULAIRE DE RAPPORT</h2>
       <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
       <form id="rapportForm" action="{{ url_for('home_blueprint.generate_rapport') }}" method="POST">
-        <label for="feeder">Feeder:</label>
+
+        <label for="feeder"> <i class="fas fa-rss"></i> Feeder:</label>
         <select id="feeder" name="feeder">
           <option value="" disabled selected>Choisissez un feeder existant ou saisissez-en un nouveau</option>
           {% for feeder in feeders_existants %}
@@ -79,7 +86,8 @@
         </select>
         <input type="text" id="feederInput" name="feederInput" placeholder="Saisissez le feeder">
         
-        <label for="troncon">Troncon:</label>
+
+        <label for="troncon">  <i class="fas fa-road"></i> Troncon:</label>
         <select id="troncon" name="troncon">
           <option value="" disabled selected>Choisissez un troncon existant ou saisissez-en un nouveau</option>
           {% for troncon in troncons_existants %}
@@ -94,10 +102,13 @@
         <label for="dateFin">Date de visite - Fin:</label>
         <input type="date" id="dateFin" name="dateFin" required>
 
-        <label for="operateur">Nom de l'opérateur:</label>
+
+        <label for="operateur"> <i class="fas fa-user"></i> Nom de l'opérateur:</label>
         <input type="text" id="operateur" name="operateur" value="{{ current_user.username }}" readonly required>
 
-        <label for="zone">Zone:</label>
+        <label for="zone"> <i class="fas fa-map-marker-alt"></i> Zone:</label>
+
+       
         <select id="zone" name="zone" required>
           <option value="" disabled selected>Choisissez une zone</option>
           <option value="DRS">DRS</option>
@@ -109,7 +120,9 @@
         <label for="groupementTroncon">Groupement troncon:</label>
         <input type="text" id="groupementTroncon" name="groupementTroncon">
 
-        <button type="submit" onclick="saveFormData()">Confirmer</button>
+
+        <button type="submit" onclick="saveFormData()"> <i class="fa-fw fas fa-check"></i>  Confirmer</button>
+
         
 
       </form>
