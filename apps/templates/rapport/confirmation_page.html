@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <title>Confirmation Page</title>
   <style>
     body {
@@ -33,13 +32,16 @@
       margin-top: 20px;
       background-color: rgba(255, 255, 255, 0.8);
   }
-  .container {
-    display:;
-    justify-content: space-between;
-    max-width: 900px;
-    margin: 50px auto;
-    flex: 1; /* Utiliser l'espace restant pour la flexbox */
-    }  
+    .container {
+      max-width: 900px;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(3, 0, 0, 0.1);
+      text-align: left;
+      
+    }
+
     h2 {
       color: #2dbdff;
     }
@@ -108,7 +110,7 @@
 
     <p>En résumé, l'idée est de souligner que même les modèles d'IA avancés ne sont pas infaillibles, et qu'il est essentiel d'adopter une approche prudente lors de l'utilisation de ces modèles. La vérification manuelle des résultats de la classification et le tri préalable des données contribuent à garantir une utilisation plus fiable et précise des modèles d'IA, en particulier dans des domaines où la précision est cruciale.</p>
     
-    <h3>Options :</h3><br>
+    <h3>Options :</h3>
     <button onclick="handleButtonClick('visible')"> <i class="fas fa-eye"></i> Rapport Visible</button>
     <button onclick="handleButtonClick('invisible')"> <i class="fas fa-eye-slash"></i> Rapport Invisible</button>
 

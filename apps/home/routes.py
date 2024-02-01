@@ -150,9 +150,13 @@ def generate_rapport():
 def confirmation_page():
     return render_template('rapport/confirmation_page.html')
 
+
 @blueprint.route('/apropos')
 def apropos():
     return render_template('home/apropos.html', segment='apropos')
+
+
+
 
 @blueprint.route('/acceuil')
 def acceuil():
