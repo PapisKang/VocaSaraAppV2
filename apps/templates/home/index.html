@@ -14,6 +14,30 @@
 	<link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/css/sidebar.css">
 	<title>Vocasara</title>
 </head>
+<style>
+	@media only screen and (max-width: 768px) {
+		/* Styles spécifiques aux petits écrans */
+		#sidebar {
+			display:block; /* Masquer la barre latérale par défaut sur les petits écrans */
+		}
+
+		nav {
+			justify-content: space-between;
+		}
+
+		nav form {
+			display: none; /* Masquer le formulaire de recherche par défaut sur les petits écrans */
+		}
+
+		nav .notification {
+			margin-right: 10px; /* Espacement pour la notification sur les petits écrans */
+		}
+
+		nav .bx-menu {
+			display:contents; /* Afficher l'icône du menu sur les petits écrans */
+		}
+	}
+</style>
 <body>
 
 

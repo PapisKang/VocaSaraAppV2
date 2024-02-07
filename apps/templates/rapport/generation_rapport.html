@@ -64,6 +64,41 @@
       color: cornflowerblue;
       
     }
+    /* Styles pour les petits écrans */
+  /* Masquer l'image sur les petits écrans */
+@media only screen and (max-width: 600px) {
+  #illustration {
+    display: none;
+  }
+
+  /* Ajuster la largeur du formulaire et le centrer */
+  .container-form {
+    width: 80%;
+    margin-left: 70px;
+    margin-right: 20px;
+    
+  }
+
+  /* Ajuster la taille des étiquettes sur les petits écrans */
+  label {
+    font-size: 14px;
+  }
+
+  /* Ajuster la largeur des champs de saisie et des listes déroulantes */
+  input[type="text"],
+  input[type="date"],
+  select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+
+  /* Ajuster la largeur du bouton */
+  button {
+    width: 100%;
+  }
+}
+
   </style>
 </head>
 {%include 'home/index.html'%}
