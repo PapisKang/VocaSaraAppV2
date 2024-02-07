@@ -7,57 +7,84 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       background-color: #f4f4f4;
-      margin: 0; /* Supprimer la marge par défaut du body */
-      min-height: 100vh; /* Occuper au moins 100% de la hauteur de la fenêtre */
+      margin: 0;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column; /* Aligner les éléments verticalement */
+      flex-direction: column;
     }
-
+    
     .container-main {
       display: flex;
-      justify-content: space-between;
-      max-width: 1200px;
-      margin: 50px auto;
-      flex: 1; /* Utiliser l'espace restant pour la flexbox */
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 10px; /* Réduction de la marge supérieure */
     }
-
+    
     .container-form {
-      flex: 1;
-      padding: 20px;
-      background-color: #fff;
+      width: 100%;
+      max-width: 600px;
+      padding: 10px; /* Réduction de l'espacement intérieur */
+      background-color: #ffffff;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-
-    #illustration {
-      max-width: 60%;
-      height: auto;
-    }
-
+    
     form {
       display: grid;
-      gap: 10px;
+      gap: 15px; /* Réduction de l'espacement entre les éléments du formulaire */
     }
-
+    
     label {
+      color: #007bff;
       font-weight: bold;
     }
-
+    
+    input,
+    select {
+      width: 100%;
+      padding: 8px; /* Réduction de la taille du padding */
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      transition: border-color 0.3s ease;
+    }
+    
+    input:focus,
+    select:focus {
+      border-color: #007bff;
+    }
+    
     button {
-      background-color: #4caf50;
+      background-color: #28a745;
       color: #fff;
-      padding: 10px;
+      padding: 10px; /* Réduction de la taille du padding */
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-
+    
+    button:hover {
+      background-color: #218838;
+    }
+    
     .error-message {
       color: #ff0000;
       display: none;
     }
+    
+    @media (max-width: 768px) {
+      .container-form {
+        width: 100%;
+        margin: 0;
+      }
+      input,
+      select {
+        width: 100%;
+      }
+    }
+    
     
   </style>
 </head>
@@ -110,20 +137,10 @@
         <input type="text" id="groupementTroncon" name="groupementTroncon">
 
         <button type="submit" onclick="saveFormData()">Confirmer</button>
-        
-
+      
       </form>
 
     </div>
-    <!-- Ajout du message pour demander l'autorisation des cookies -->
-<div id="cookie-consent-message" style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #333; color: #fff; padding: 10px; text-align: center; z-index: 1000;">
-  En utilisant ce site, vous acceptez l'utilisation de cookies pour améliorer votre expérience de navigation. <a href="#" onclick="acceptCookies()">J'accepte</a>
-</div>
-
-
-    <img src="{{ config.ASSETS_ROOT }}/img/illustrations/3129554.jpg" alt="Illustration"
-         id="illustration" loading="lazy">
-  </div>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.1/dist/umd/popper.min.js"></script>

@@ -38,22 +38,60 @@
 			</a>
 		</li>
 		<li>
-			<a href="/localisation_page">
-				<i class='bx bx-map' ></i>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-chart'></i>
 				<span class="text">Localisation</span>
+				<i class='bx bx-chevron-down'></i>
 			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/localisation_defauts_invisible_page">
+						<span class="text">Invisible</span>
+					</a>
+				</li>
+				<li>
+					<a href="/localisation_page">
+						<span class="text">Visible</span>
+					</a>
+				</li>
+			</ul>
 		</li>
 		<li>
-			<a href="/statistiques">
-				<i class='bx bx-chart' ></i>
-				<span class="text">Statistique</span>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-file'></i>
+				<span class="text">Statistiques</span>
+				<i class='bx bx-chevron-down'></i>
 			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/statistics_invisible">
+						<span class="text">Invisible</span>
+					</a>
+				</li>
+				<li>
+					<a href="/statistiques">
+						<span class="text">Visible</span>
+					</a>
+				</li>
+			</ul>
 		</li>
 		<li>
-			<a href="#">
-				<i class='bx bx-group' ></i>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-group'></i>
 				<span class="text">Inspections</span>
+				<i class='bx bx-chevron-down'></i>
 			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/rapport_id_page">
+						<span class="text">Inspections Générés</span>
+					</a>
+				</li>
+					<a href="#">
+						<span class="text">Généré un Rapport</span>
+					</a>
+				</li>
+			</ul>
 		</li>
 		<li>
 			<a href="/apropos">
@@ -61,27 +99,36 @@
 				<span class="text">A propos</span>
 			</a>
 		</li>
-
 		<li>
-			<a href="{{ url_for('authentication_blueprint.user_profile') }}">
-				<i class='bx bx-cog' ></i>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-cog'></i>
 				<span class="text">Mon Profil</span>
+				<i class='bx bx-chevron-down'></i>
 			</a>
+			<ul class="submenu">
+				<li>
+					<a href="{{ url_for('authentication_blueprint.user_profile') }}">
+						<span class="text">Informations</span>
+					</a>
+				</li>
+				<li>
+					<a href="photo_upload">
+						<span class="text">Photo</span>
+					</a>
+				</li>
+			</ul>
 		</li>
-		<li>
-			<a href="photo_upload">
-				<i class='bx bx-image' ></i>
-				<span class="text">Photo</span>
-			</a>
-		</li>
-	<li>
+		
 
-		<a href="{{ url_for('authentication_blueprint.logout') }}" class="logout">
-			<i class='bx bx-log-out-circle' ></i>
-			<span class="text">Déconnexion</span>
-		</a>
-	</ul>
+		<li class="logout">
+			<a href="{{ url_for('authentication_blueprint.logout') }}">
+				<i class='bx bx-log-out-circle'></i>
+				<span class="text">Déconnexion</span>
+			</a>
+		</li>
+		</ul>
 </section>
+
 <!-- SIDEBAR -->
 
 <!-- CONTENT -->
@@ -107,7 +154,13 @@
 	</section>
 	<!-- CONTENT -->
 	
-
+<!-- COOKIE CONSENT BANNER -->
+<div id="cookie-consent-banner">
+	<p>Nous utilisons des cookies pour améliorer votre expérience sur notre site. En continuant à naviguer, vous acceptez notre utilisation des cookies.</p>
+	<button id="accept-cookies-btn">Accepter les cookies</button>
+  </div>
+  <!-- COOKIE CONSENT BANNER -->
+  
 	<script >
 		const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
 allSideMenu.forEach(item=> {
@@ -166,7 +219,32 @@ switchMode.addEventListener('change', function () {
 		document.body.classList.remove('dark');
 	}
 })
+const submenuToggles = document.querySelectorAll('.submenu-toggle');
 
+submenuToggles.forEach(toggle => {
+	toggle.addEventListener('click', function (event) {
+		event.preventDefault();
+		const submenu = this.nextElementSibling;
+		submenu.classList.toggle('active');
+	});
+});
+document.addEventListener('DOMContentLoaded', function () {
+    const cookieBanner = document.getElementById('cookie-consent-banner');
+    const acceptCookiesBtn = document.getElementById('accept-cookies-btn');
+
+    // Vérifier si le consentement aux cookies a déjà été donné
+    if (!localStorage.getItem('cookieConsent')) {
+      cookieBanner.style.display = 'block';
+    }
+
+    acceptCookiesBtn.addEventListener('click', function () {
+      // Cacher le bandeau des cookies
+      cookieBanner.style.display = 'none';
+
+      // Enregistrer le consentement dans le stockage local
+      localStorage.setItem('cookieConsent', 'true');
+    });
+  });
 </script>
 	</script>
 </body>

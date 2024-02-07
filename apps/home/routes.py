@@ -18,11 +18,11 @@ import base64
 import logging
 import os
 import base64
-from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible
+from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible,RapportGenere
 from flask import render_template, jsonify, send_file
 import json
 from sqlalchemy import func
-
+from sqlalchemy import select
 
 @blueprint.route('/<template>')
 @login_required
@@ -167,12 +167,13 @@ def acceuil():
 
 @blueprint.route('/get_map_data')
 def get_map_data():
-    # Récupérer les données nécessaires de la base de données
-    image_points = ImageUploadVisible.query.all()
+    page = request.args.get('page', default=1, type=int)
+    per_page = request.args.get('per_page', default=20, type=int)
 
-    # Préparer les données pour la carte
+    image_points = ImageUploadVisible.query.paginate(page=page, per_page=per_page, error_out=False)
+
     map_data = []
-    for point in image_points:
+    for point in image_points.items:
         data = {
             'latitude': point.latitude,
             'longitude': point.longitude,
@@ -184,11 +185,11 @@ def get_map_data():
             'nom_operateur': point.nom_operateur,
             'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
             'image_binary': point.data
-
         }
         map_data.append(data)
 
     return jsonify(map_data)
+
 
 @blueprint.route('/localisation_page')
 def localisation_page():
@@ -231,3 +232,28 @@ def statistiques():
 
     # Rendre la page HTML avec les données
     return render_template('statistics/statistics.html', data=data_json)
+
+
+@blueprint.route('/localisation_defauts_invisible_page')
+def localisation_defauts_invisible_page():
+    return render_template('/home/localisation_defauts_invisible.html')
+
+
+@blueprint.route('/statistics_invisible')
+def statistics_invisible():
+    return render_template('/statistics/statistics_invisible.html')
+
+@blueprint.route('/rapport_id_page')
+def rapport_id_page():
+    rapports = RapportGenere.query.all()
+    return render_template('rapport/rapport_id_page.html',  rapports=rapports)
+
+
+@blueprint.route('/mes_inspections/<int:rapport_id>', methods=['GET'])
+def mes_inspections(rapport_id):
+    rapport = RapportGenere.query.get(rapport_id)
+    if rapport:
+        images_visibles = ImageUploadVisible.query.filter_by(rapport_genere_id=rapport_id).all()
+        return render_template('rapport/mes_inspections.html', rapport=rapport, images_visibles=images_visibles)
+    else:
+        return redirect(url_for('authentication_blueprint.index'))

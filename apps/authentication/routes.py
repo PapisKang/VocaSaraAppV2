@@ -923,3 +923,8 @@ def compress_image(file_path, quality=60):
         print(f"Error compressing image: {e}")
         print(traceback.format_exc())  # Imprime la trace complète de l'erreur
         return None
+    
+@login_required
+@blueprint.route("/upload_page_invisible")
+def upload_page_invisible():
+    return render_template('rapport/traitement_invisible.html')
