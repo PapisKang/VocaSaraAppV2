@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 from apps.home import blueprint
-from flask import render_template, request,Flask,redirect,request,url_for
+from flask import render_template,Flask,redirect,request,url_for
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from apps import db
@@ -18,11 +18,15 @@ import base64
 import logging
 import os
 import base64
-from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible,RapportGenere
+from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible,RapportGenere,DocumentRapportGenere
 from flask import render_template, jsonify, send_file
 import json
 from sqlalchemy import func
 from sqlalchemy import select
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Alignment, Font, Border, Side
+import io
+
 
 @blueprint.route('/<template>')
 @login_required
@@ -257,3 +261,105 @@ def mes_inspections(rapport_id):
         return render_template('rapport/mes_inspections.html', rapport=rapport, images_visibles=images_visibles)
     else:
         return redirect(url_for('authentication_blueprint.index'))
+
+@blueprint.route('/generate_resume_rapport_page')
+def generate_resume_rapport_page():
+    rapports = RapportGenere.query.all()
+    return render_template('rapport/creer_un_rapport.html',  rapports=rapports)
+
+
+@blueprint.route('/generate_resume_rapport' ,methods = ['GET'])
+def generate_resume_rapport():
+    # Récupérer les données depuis la base de données ImageUploadVisible
+    image_data = ImageUploadVisible.query.filter_by(nom_operateur=nom_operateur).all()
+    curent_date = datetime.now().strftime("%Y-%m-%d")
+    
+        # Récupérer les paramètres de la requête
+    last_image_data = ImageUploadInvisible.query.order_by(ImageUploadInvisible.upload_date.desc()).first()
+    
+    # Charger les normes_conseils des défauts à partir du fichier JSON
+    with open('./apps/phrase_normes_conseils/normes_conseils.json', encoding='utf-8') as f:
+        normes_conseils_data = json.load(f)
+
+        # Utiliser les valeurs récupérées de la base de données
+    feeder = last_image_data.feeder
+    date = datetime.now().strftime("%Y-%m-%d")  # Convert the date to a string with the format "YYYY-MM-DD"
+    nom_operateur = last_image_data.nom_operateur
+    zone = last_image_data.zone
+    
+    # Créer une copie du fichier
+    wb_copy = load_workbook('./apps/Exemple_rapport/resume_rapport_visibles_exemple.xlsx')
+    feuille_copy = wb_copy.active
+
+    # Écrire dans les cellules spécifiques du fichier d'origine
+    feuille_copy['A8'] = "Feeder : " + feeder
+    feuille_copy['F3'] = "Date : " + date
+    feuille_copy['G6'] = "Nom opérateur : " + nom_operateur
+    feuille_copy['G8'] = "Zone : " + zone
+    # Définir les styles de cellule
+    font = Font(name='Calibri', size=18)
+    alignment = Alignment(horizontal='center', vertical='center')
+    border = Border(top=Side(border_style='thick'),
+                    bottom=Side(border_style='thick'),
+                    left=Side(border_style='thick'),
+                    right=Side(border_style='thick'))
+    
+    # Générer des données pour chaque colonne
+    row_num = 12
+    for image_info in image_data:
+        # Logique pour les normes_conseils_data I et J
+        defauts = image_info.type_defaut.split("/")  # Divise les défauts par "/"
+        defauts = [defaut.strip() + '/' for defaut in defauts]  # Supprime les espaces blancs avant et après chaque défaut et ajoute "/"
+        colonne_I_values = []
+        colonne_J_values = []
+
+        for defaut in defauts:
+            if defaut in normes_conseils_data:
+                colonne_I_values.append(normes_conseils_data[defaut]['I'])
+                colonne_J_values.append(normes_conseils_data[defaut]['J'])
+
+        feuille_copy[f'A{row_num}'] = image_info.upload_date  # Date/Heure
+        feuille_copy[f'B{row_num}'] = feeder  # feeder
+        feuille_copy[f'C{row_num}'] = image_info.troncon  # troncon
+        feuille_copy[f'D{row_num}'] = ""  # longeur (à remplacer par la vraie valeur)
+        feuille_copy[f'E{row_num}'] = image_info.filename  # Nom de l'image
+        latitude_nom = "Latitude"
+        longitude_nom = "Longitude"
+        feuille_copy[f'F{row_num}'] = f"{latitude_nom} {float(image_info.latitude):.8f}, {longitude_nom} {float(image_info.longitude):.8f}"
+        feuille_copy[f'G{row_num}'] = image_info.type_defaut  # Défaut de l'image
+        feuille_copy[f'H{row_num}'] = ""  # urgences (à remplacer par la vraie valeur)
+        # Écriture des valeurs dans les colonnes I et J
+        feuille_copy[f'I{row_num}'] = ', '.join(colonne_I_values)
+        feuille_copy[f'J{row_num}'] = ', '.join(colonne_J_values)
+        feuille_copy[f'K{row_num}'] = row_num - 11  # Compter de 1 à n
+
+        # Appliquer les styles aux cellules
+        for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']:
+            cell = feuille_copy[f'{col}{row_num}']
+            cell.alignment = alignment
+            cell.font = font
+            cell.border = border
+
+        # Définir la hauteur des lignes
+        feuille_copy.row_dimensions[row_num].height = 138
+
+        row_num += 1  # Incrémenter le numéro de ligne
+
+    # Appliquer le style au titre "Urgences"
+    cell_title = feuille_copy['H11']
+    cell_title.fill = openpyxl.styles.PatternFill(fill_type='solid', fgColor='FF0000')  # Rouge
+    cell_title.font = Font(color="FFFFFF", bold=True)  # Texte blanc en gras
+    nom_du_fichier = "Resume_des_rapport_visibles_du_feeder_{}_du_{}_par{}.xlsx".format(feeder, curent_date, nom_operateur)
+    # Enregistrer le fichier Excel en mémoire
+    excel_file = io.BytesIO()
+    wb_copy.save(excel_file)
+    excel_file.seek(0)
+
+    # Enregistrer le fichier dans la base de données
+    document = DocumentRapportGenere(
+        nom_operateur=nom_operateur,
+        nom_du_rapport=nom_du_fichier,
+        data=excel_file.read()
+    )
+    db.session.add(document)
+    db.session.commit()
