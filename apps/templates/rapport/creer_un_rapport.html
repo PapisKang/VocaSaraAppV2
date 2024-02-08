@@ -103,12 +103,24 @@
 </head>
 {%include 'home/index.html'%}
 <body>
-    <h1>Inspections Générées</h1>
+    <h1>Créer un rapport</h1>
+    <!-- Add this at the top of your HTML body -->
+{% if success_message %}
+<div style="color: green; text-align: center; font-weight: bold;">
+    {{ success_message }}
+</div>
+{% endif %}
 
+{% if error_message %}
+<div style="color: red; text-align: center; font-weight: bold;">
+    {{ error_message }}
+</div>
+{% endif %}
     <div class="search-container">
         <input type="text" class="search-box" id="searchInput" placeholder="Rechercher...">
     </div>
-
+    <!-- Bouton pour générer les rapports sélectionnés -->
+    <button id="generateReportBtn">Créer le rapport</button>
     <div style="overflow-x:auto;">
         <table id="rapportTable">
             <thead>
