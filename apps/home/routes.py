@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 from apps.home import blueprint
-from flask import render_template,Flask,redirect,request,url_for
+from flask import render_template, Flask, redirect, request, url_for
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from apps import db
@@ -9,7 +9,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, SelectField
 from wtforms.validators import DataRequired
 from datetime import datetime
-from apps.authentication.models import Troncon,Feeder,RapportGenere
+from apps.authentication.models import Troncon, Feeder, RapportGenere
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 from io import BytesIO
@@ -18,7 +18,7 @@ import base64
 import logging
 import os
 import base64
-from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible,RapportGenere,DocumentRapportGenere
+from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible, RapportGenere, DocumentRapportGenere
 from flask import render_template, jsonify, send_file
 import json
 from sqlalchemy import func
@@ -38,12 +38,12 @@ def route_template(template):
             template += '.html'
 
         # Detect the current page
-        segment, active_menu, parent, segment_name = get_segment( request )
+        segment, active_menu, parent, segment_name = get_segment(request)
 
         # Serve the file (if exists) from app/templates/home/FILE.html
         return render_template(
-            "home/" + template, 
-            segment=segment, 
+            "home/" + template,
+            segment=segment,
             active_menu=active_menu,
             parent=parent,
             segment_name=segment_name
@@ -57,36 +57,37 @@ def route_template(template):
 
 
 # Helper - Extract current page name from request
-def get_segment( request ): 
+def get_segment(request):
 
     try:
 
-        segment     = request.path.split('/')[-1]
+        segment = request.path.split('/')[-1]
         active_menu = None
         parent = ""
         segment_name = ""
 
         core = segment.split('.')[0]
-        
 
         if segment == '':
-            segment     = 'index'
- 
+            segment = 'index'
+
         parent = core.split('-')[0] if core.split('-')[0] else ""
         segment_name = core
-
 
         return segment, active_menu, parent, segment_name
 
     except:
-        return 'index', ''  
+        return 'index', ''
 
 # Route pour afficher le formulaire et les listes déroulantes
+
+
 @blueprint.route('/generation_rapport', methods=['GET'])
 def generation_rapport_form():
     feeders_existants = Feeder.query.all()
     troncons_existants = Troncon.query.all()
     return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants)
+
 
 @blueprint.route('/generate_rapport', methods=['POST'])
 def generate_rapport():
@@ -94,7 +95,8 @@ def generate_rapport():
     troncons_existants = Troncon.query.all()
 
     feeder_nom = request.form.get('feeder') or request.form.get('feederInput')
-    troncon_nom = request.form.get('troncon') or request.form.get('tronconInput')
+    troncon_nom = request.form.get(
+        'troncon') or request.form.get('tronconInput')
     date_debut_str = request.form.get('dateDebut')
     date_fin_str = request.form.get('dateFin')
     operateur = current_user.email
@@ -114,7 +116,7 @@ def generate_rapport():
         date_fin = datetime.strptime(date_fin_str, '%Y-%m-%d')
     except ValueError:
         return render_template('rapport/generation_rapport.html', feeders_existants=feeders_existants, troncons_existants=troncons_existants, error_message='Format de date incorrect.')
-    
+
     existing_feeder = Feeder.query.filter_by(Nom=feeder_nom).first()
     if existing_feeder:
         feeder_id = existing_feeder.id
@@ -148,10 +150,12 @@ def generate_rapport():
     # Ajouter l'id du rapport généré aux cookies
     response = redirect(url_for('home_blueprint.confirmation_page'))
     response.set_cookie('rapportGenereId', str(new_report.id))
-    
+
     return response
 
 # Nouvelle route pour afficher la page avec les deux boutons et le texte explicatif
+
+
 @blueprint.route('/confirmation_page', methods=['GET'])
 def confirmation_page():
     return render_template('rapport/confirmation_page.html')
@@ -162,12 +166,9 @@ def apropos():
     return render_template('home/apropos.html', segment='apropos')
 
 
-
-
 @blueprint.route('/acceuil')
 def acceuil():
     return render_template('home/acceuil.html')
-
 
 
 @blueprint.route('/get_map_data')
@@ -175,7 +176,8 @@ def get_map_data():
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=20, type=int)
 
-    image_points = ImageUploadVisible.query.paginate(page=page, per_page=per_page, error_out=False)
+    image_points = ImageUploadVisible.query.paginate(
+        page=page, per_page=per_page, error_out=False)
 
     map_data = []
     for point in image_points.items:
@@ -200,36 +202,25 @@ def get_map_data():
 def localisation_page():
     return render_template('home/localisation_defauts.html')
 
+
 @blueprint.route('/statistiques')
 def statistiques():
     # Récupérer les statistiques des types de défauts avec les informations supplémentaires
     type_defaut_stats = db.session.query(
         ImageUploadVisible.type_defaut,
-        ImageUploadVisible.nom_operateur,
-        ImageUploadVisible.feeder,
-        ImageUploadVisible.troncon,
-        ImageUploadVisible.zone,
-        db.func.count(ImageUploadVisible.type_defaut)
+        db.func.count().label('defaut_count')  # Utilisation de label pour renommer la colonne résultante
     ).group_by(
-        ImageUploadVisible.type_defaut,
-        ImageUploadVisible.nom_operateur,
-        ImageUploadVisible.feeder,
-        ImageUploadVisible.troncon,
-        ImageUploadVisible.zone
+        ImageUploadVisible.type_defaut
     ).all()
 
     # Convertir les données en format approprié pour le graphique
     labels = [row[0] for row in type_defaut_stats]
-    values = [row[5] for row in type_defaut_stats]
+    values = [row.defaut_count for row in type_defaut_stats]  # Utilisation du label renommé
 
     # Préparer les données pour le frontend
     data = {
         'labels': labels,
         'values': values,
-        'operateurs': [row[1] for row in type_defaut_stats],
-        'feeders': [row[2] for row in type_defaut_stats],
-        'troncons': [row[3] for row in type_defaut_stats],
-        'zones': [row[4] for row in type_defaut_stats],
     }
 
     # Convertir les données en JSON
@@ -248,6 +239,7 @@ def localisation_defauts_invisible_page():
 def statistics_invisible():
     return render_template('/statistics/statistics_invisible.html')
 
+
 @blueprint.route('/rapport_id_page')
 def rapport_id_page():
     rapports = RapportGenere.query.all()
@@ -258,10 +250,12 @@ def rapport_id_page():
 def mes_inspections(rapport_id):
     rapport = RapportGenere.query.get(rapport_id)
     if rapport:
-        images_visibles = ImageUploadVisible.query.filter_by(rapport_genere_id=rapport_id).all()
+        images_visibles = ImageUploadVisible.query.filter_by(
+            rapport_genere_id=rapport_id).all()
         return render_template('rapport/mes_inspections.html', rapport=rapport, images_visibles=images_visibles)
     else:
         return redirect(url_for('authentication_blueprint.index'))
+
 
 @blueprint.route('/generate_resume_rapport_page')
 def generate_resume_rapport_page():
@@ -269,30 +263,34 @@ def generate_resume_rapport_page():
     return render_template('rapport/creer_un_rapport.html',  rapports=rapports)
 
 
-@blueprint.route('/generate_resume_rapport' ,methods = ['GET'])
+@blueprint.route('/generate_resume_rapport', methods=['GET'])
 def generate_resume_rapport():
     success_message = None
     error_message = None
     try:
         # Récupérer les données depuis la base de données ImageUploadVisible
         curent_date = datetime.now().strftime("%Y-%m-%d")
-        
-            # Récupérer les paramètres de la requête
-        last_image_data = ImageUploadVisible.query.order_by(ImageUploadVisible.upload_date.desc()).first()
-        
+
+        # Récupérer les paramètres de la requête
+        last_image_data = ImageUploadVisible.query.order_by(
+            ImageUploadVisible.upload_date.desc()).first()
+
         # Charger les normes_conseils des défauts à partir du fichier JSON
         with open('./apps/phrase_normes_conseils/normes_conseils.json', encoding='utf-8') as f:
             normes_conseils_data = json.load(f)
 
             # Utiliser les valeurs récupérées de la base de données
         feeder = last_image_data.feeder
-        date = datetime.now().strftime("%Y-%m-%d")  # Convert the date to a string with the format "YYYY-MM-DD"
+        # Convert the date to a string with the format "YYYY-MM-DD"
+        date = datetime.now().strftime("%Y-%m-%d")
         nom_operateur = last_image_data.nom_operateur
         zone = last_image_data.zone
-        image_data = ImageUploadVisible.query.filter_by(nom_operateur=nom_operateur).all()
-        
+        image_data = ImageUploadVisible.query.filter_by(
+            nom_operateur=nom_operateur).all()
+
         # Créer une copie du fichier
-        wb_copy = load_workbook('./apps/Exemple_rapport/resume_rapport_visibles_exemple.xlsx')
+        wb_copy = load_workbook(
+            './apps/Exemple_rapport/resume_rapport_visibles_exemple.xlsx')
         feuille_copy = wb_copy.active
 
         # Écrire dans les cellules spécifiques du fichier d'origine
@@ -307,19 +305,22 @@ def generate_resume_rapport():
                         bottom=Side(border_style='thick'),
                         left=Side(border_style='thick'),
                         right=Side(border_style='thick'))
-        
+
         # Générer des données pour chaque colonne
         row_num = 12
         for image_info in image_data:
             # Logique pour les normes_conseils_data I et J
             # Logique pour les normes_conseils_data I et J
             if image_info.type_defaut is not None:
-                defauts = image_info.type_defaut.split("/")  # Divise les défauts par "/"
-                defauts = [defaut.strip() + '/' for defaut in defauts]  # Supprime les espaces blancs avant et après chaque défaut et ajoute "/"
+                defauts = image_info.type_defaut.split(
+                    "/")  # Divise les défauts par "/"
+                # Supprime les espaces blancs avant et après chaque défaut et ajoute "/"
+                defauts = [defaut.strip() + '/' for defaut in defauts]
             else:
                 # Handle the case where image_info.type_defaut is None
                 # You might want to log a warning or handle it in a way that makes sense for your application
-                error_message = ("Warning: image_info.type_defaut est None (valeur nul) pour image_info with upload_date:", image_info.upload_date)
+                error_message = (
+                    "Warning: image_info.type_defaut est None (valeur nul) pour image_info with upload_date:", image_info.upload_date)
             colonne_I_values = []
             colonne_J_values = []
 
@@ -331,13 +332,16 @@ def generate_resume_rapport():
             feuille_copy[f'A{row_num}'] = image_info.upload_date  # Date/Heure
             feuille_copy[f'B{row_num}'] = feeder  # feeder
             feuille_copy[f'C{row_num}'] = image_info.troncon  # troncon
-            feuille_copy[f'D{row_num}'] = ""  # longeur (à remplacer par la vraie valeur)
+            # longeur (à remplacer par la vraie valeur)
+            feuille_copy[f'D{row_num}'] = ""
             feuille_copy[f'E{row_num}'] = image_info.filename  # Nom de l'image
             latitude_nom = "Latitude"
             longitude_nom = "Longitude"
             feuille_copy[f'F{row_num}'] = f"{latitude_nom} {float(image_info.latitude):.8f}, {longitude_nom} {float(image_info.longitude):.8f}"
-            feuille_copy[f'G{row_num}'] = image_info.type_defaut  # Défaut de l'image
-            feuille_copy[f'H{row_num}'] = ""  # urgences (à remplacer par la vraie valeur)
+            # Défaut de l'image
+            feuille_copy[f'G{row_num}'] = image_info.type_defaut
+            # urgences (à remplacer par la vraie valeur)
+            feuille_copy[f'H{row_num}'] = ""
             # Écriture des valeurs dans les colonnes I et J
             feuille_copy[f'I{row_num}'] = ', '.join(colonne_I_values)
             feuille_copy[f'J{row_num}'] = ', '.join(colonne_J_values)
@@ -357,9 +361,12 @@ def generate_resume_rapport():
 
         # Appliquer le style au titre "Urgences"
         cell_title = feuille_copy['H11']
-        cell_title.fill = openpyxl.styles.PatternFill(fill_type='solid', fgColor='FF0000')  # Rouge
-        cell_title.font = Font(color="FFFFFF", bold=True)  # Texte blanc en gras
-        nom_du_fichier = "Resume_des_rapport_visibles_du_feeder_{}_du_{}_par_{}.xlsx".format(feeder, curent_date, nom_operateur)
+        cell_title.fill = openpyxl.styles.PatternFill(
+            fill_type='solid', fgColor='FF0000')  # Rouge
+        # Texte blanc en gras
+        cell_title.font = Font(color="FFFFFF", bold=True)
+        nom_du_fichier = "Resume_des_rapport_visibles_du_feeder_{}_du_{}_par_{}.xlsx".format(
+            feeder, curent_date, nom_operateur)
         # Enregistrer le fichier Excel en mémoire
         excel_file = io.BytesIO()
         wb_copy.save(excel_file)
@@ -380,10 +387,12 @@ def generate_resume_rapport():
 
     return render_template('rapport/creer_un_rapport.html', rapports=rapports, success_message=success_message, error_message=error_message)
 
+
 @blueprint.route('/mes_rapports')
 def mes_rapports():
     rapports = DocumentRapportGenere.query.all()
     return render_template('rapport/mes_rapports.html', rapports=rapports)
+
 
 @blueprint.route('/telecharger_rapport/<int:rapport_id>')
 def telecharger_rapport(rapport_id):
