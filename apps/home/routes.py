@@ -176,8 +176,10 @@ def get_map_data():
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=20, type=int)
 
-    image_points = ImageUploadVisible.query.paginate(
-        page=page, per_page=per_page, error_out=False)
+    image_points = ImageUploadVisible.query.filter(
+        ImageUploadVisible.type_defaut.isnot(None),
+        ImageUploadVisible.type_defaut != ""
+    ).paginate(page=page, per_page=per_page, error_out=False)
 
     map_data = []
     for point in image_points.items:
@@ -198,6 +200,7 @@ def get_map_data():
     return jsonify(map_data)
 
 
+
 @blueprint.route('/localisation_page')
 def localisation_page():
     return render_template('home/localisation_defauts.html')
@@ -208,26 +211,33 @@ def statistiques():
     # Récupérer les statistiques des types de défauts avec les informations supplémentaires
     type_defaut_stats = db.session.query(
         ImageUploadVisible.type_defaut,
-        db.func.count().label('defaut_count')  # Utilisation de label pour renommer la colonne résultante
+        db.func.count().label('defaut_count')
+    ).filter(
+        ImageUploadVisible.type_defaut.isnot(None)  # Exclude rows where type_defaut is null
     ).group_by(
         ImageUploadVisible.type_defaut
     ).all()
 
-    # Convertir les données en format approprié pour le graphique
+    # Récupérer les dates
+    dates = db.session.query(ImageUploadVisible.upload_date).all()
+
+    # Convertir les données en format approprié pour les graphiques
     labels = [row[0] for row in type_defaut_stats]
-    values = [row.defaut_count for row in type_defaut_stats]  # Utilisation du label renommé
+    values = [row.defaut_count for row in type_defaut_stats]
 
     # Préparer les données pour le frontend
     data = {
         'labels': labels,
         'values': values,
+        'dates': dates,
     }
 
     # Convertir les données en JSON
-    data_json = json.dumps(data)
+    data_json = json.dumps(data, default=str)
 
     # Rendre la page HTML avec les données
     return render_template('statistics/statistics.html', data=data_json)
+
 
 
 @blueprint.route('/localisation_defauts_invisible_page')
@@ -279,7 +289,7 @@ def generate_resume_rapport():
         with open('./apps/phrase_normes_conseils/normes_conseils.json', encoding='utf-8') as f:
             normes_conseils_data = json.load(f)
 
-            # Utiliser les valeurs récupérées de la base de données
+        # Utiliser les valeurs récupérées de la base de données
         feeder = last_image_data.feeder
         # Convert the date to a string with the format "YYYY-MM-DD"
         date = datetime.now().strftime("%Y-%m-%d")
@@ -309,55 +319,47 @@ def generate_resume_rapport():
         # Générer des données pour chaque colonne
         row_num = 12
         for image_info in image_data:
-            # Logique pour les normes_conseils_data I et J
-            # Logique pour les normes_conseils_data I et J
-            if image_info.type_defaut is not None:
-                defauts = image_info.type_defaut.split(
-                    "/")  # Divise les défauts par "/"
-                # Supprime les espaces blancs avant et après chaque défaut et ajoute "/"
+            if image_info.type_defaut is not None and image_info.type_defaut.strip() != "":
+                defauts = image_info.type_defaut.split("/")
                 defauts = [defaut.strip() + '/' for defaut in defauts]
-            else:
-                # Handle the case where image_info.type_defaut is None
-                # You might want to log a warning or handle it in a way that makes sense for your application
-                error_message = (
-                    "Warning: image_info.type_defaut est None (valeur nul) pour image_info with upload_date:", image_info.upload_date)
-            colonne_I_values = []
-            colonne_J_values = []
+                
+                colonne_I_values = []
+                colonne_J_values = []
 
-            for defaut in defauts:
-                if defaut in normes_conseils_data:
-                    colonne_I_values.append(normes_conseils_data[defaut]['I'])
-                    colonne_J_values.append(normes_conseils_data[defaut]['J'])
+                for defaut in defauts:
+                    if defaut in normes_conseils_data:
+                        colonne_I_values.append(normes_conseils_data[defaut]['I'])
+                        colonne_J_values.append(normes_conseils_data[defaut]['J'])
 
-            feuille_copy[f'A{row_num}'] = image_info.upload_date  # Date/Heure
-            feuille_copy[f'B{row_num}'] = feeder  # feeder
-            feuille_copy[f'C{row_num}'] = image_info.troncon  # troncon
-            # longeur (à remplacer par la vraie valeur)
-            feuille_copy[f'D{row_num}'] = ""
-            feuille_copy[f'E{row_num}'] = image_info.filename  # Nom de l'image
-            latitude_nom = "Latitude"
-            longitude_nom = "Longitude"
-            feuille_copy[f'F{row_num}'] = f"{latitude_nom} {float(image_info.latitude):.8f}, {longitude_nom} {float(image_info.longitude):.8f}"
-            # Défaut de l'image
-            feuille_copy[f'G{row_num}'] = image_info.type_defaut
-            # urgences (à remplacer par la vraie valeur)
-            feuille_copy[f'H{row_num}'] = ""
-            # Écriture des valeurs dans les colonnes I et J
-            feuille_copy[f'I{row_num}'] = ', '.join(colonne_I_values)
-            feuille_copy[f'J{row_num}'] = ', '.join(colonne_J_values)
-            feuille_copy[f'K{row_num}'] = row_num - 11  # Compter de 1 à n
+                feuille_copy[f'A{row_num}'] = image_info.upload_date  # Date/Heure
+                feuille_copy[f'B{row_num}'] = feeder  # feeder
+                feuille_copy[f'C{row_num}'] = image_info.troncon  # troncon
+                # longeur (à remplacer par la vraie valeur)
+                feuille_copy[f'D{row_num}'] = ""
+                feuille_copy[f'E{row_num}'] = image_info.filename  # Nom de l'image
+                latitude_nom = "Latitude"
+                longitude_nom = "Longitude"
+                feuille_copy[f'F{row_num}'] = f"{latitude_nom} {float(image_info.latitude):.8f}, {longitude_nom} {float(image_info.longitude):.8f}"
+                # Défaut de l'image
+                feuille_copy[f'G{row_num}'] = image_info.type_defaut
+                # urgences (à remplacer par la vraie valeur)
+                feuille_copy[f'H{row_num}'] = ""
+                # Écriture des valeurs dans les colonnes I et J
+                feuille_copy[f'I{row_num}'] = ', '.join(colonne_I_values)
+                feuille_copy[f'J{row_num}'] = ', '.join(colonne_J_values)
+                feuille_copy[f'K{row_num}'] = row_num - 11  # Compter de 1 à n
 
-            # Appliquer les styles aux cellules
-            for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']:
-                cell = feuille_copy[f'{col}{row_num}']
-                cell.alignment = alignment
-                cell.font = font
-                cell.border = border
+                # Appliquer les styles aux cellules
+                for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']:
+                    cell = feuille_copy[f'{col}{row_num}']
+                    cell.alignment = alignment
+                    cell.font = font
+                    cell.border = border
 
-            # Définir la hauteur des lignes
-            feuille_copy.row_dimensions[row_num].height = 138
+                # Définir la hauteur des lignes
+                feuille_copy.row_dimensions[row_num].height = 138
 
-            row_num += 1  # Incrémenter le numéro de ligne
+                row_num += 1  # Incrémenter le numéro de ligne
 
         # Appliquer le style au titre "Urgences"
         cell_title = feuille_copy['H11']

@@ -817,7 +817,7 @@ def upload_and_traitement_visible():
         class_labels = f.read().splitlines()
 
     # Ajout de la déclaration pour threshold
-    threshold = 0.5  # Vous pouvez ajuster cette valeur en fonction de vos besoins
+    threshold = 0.4  # Vous pouvez ajuster cette valeur en fonction de vos besoins
 
     rapport_genere_id = None  # Déclarer rapport_genere_id à l'extérieur de la boucle
 
