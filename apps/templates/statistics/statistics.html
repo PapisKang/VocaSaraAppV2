@@ -1,60 +1,75 @@
 <!-- statistiques.html -->
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Statistiques des Types de Défauts</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Ajoutez votre CSS ici */
-        .chart-container {
-            width: 600px;
-            margin: auto;
-        }
+      /* Ajoutez votre CSS ici */
+      .chart-container {
+        width: 600px;
+        margin: auto;
+      }
     </style>
-</head>
-{%include 'home/index.html'%}
-<body>
+  </head>
+  {%include 'home/index.html'%}
+  <body>
     <div class="chart-container">
-        <canvas id="defautChart"></canvas>
+      <canvas id="defautChart"></canvas>
     </div>
     <script>
-        // Récupérer les données passées par Flask
-        var data = JSON.parse('{{ data | safe }}');
-    
-        // Générer des couleurs aléatoires pour chaque segment de pie chart
-        var randomColors = Array.from({ length: data.labels.length }, () => '#' + Math.floor(Math.random()*16777215).toString(16));
+      // Récupérer les données passées par Flask
+      var data = JSON.parse("{{ data | safe }}");
 
-        // Créer le graphique
-        var ctx = document.getElementById('defautChart').getContext('2d');
-        var defautChart = new Chart(ctx, {
-            type: 'pie', // ou 'line', 'bar', etc.
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: 'Nombre de Défauts',
-                    data: data.values,
-                    backgroundColor: randomColors,
-                    borderColor: 'rgba(255, 255, 255, 1)', // Bordure des segments
-                    borderWidth: 1
-                }]
+      // Générer des couleurs aléatoires pour chaque segment de pie chart
+      var randomColors = Array.from(
+        { length: data.labels.length },
+        () => "#" + Math.floor(Math.random() * 16777215).toString(16)
+      );
+
+      // Créer le graphique
+      var ctx = document.getElementById("defautChart").getContext("2d");
+      var defautChart = new Chart(ctx, {
+        type: "pie", // ou 'line', 'bar', etc.
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              label: "Nombre de Défauts",
+              data: data.values,
+              backgroundColor: randomColors,
+              borderColor: "rgba(255, 255, 255, 1)", // Bordure des segments
+              borderWidth: 1,
             },
-            options: {
-                tooltips: {
-                    callbacks: {
-                        label: function (tooltipItem, data) {
-                            var label = data.labels[tooltipItem.index];
-                            var operateur = data.operateurs[tooltipItem.index];
-                            var feeder = data.feeders[tooltipItem.index];
-                            var troncon = data.troncons[tooltipItem.index];
-                            var zone = data.zones[tooltipItem.index];
-    
-                            return label + ' - Opérateur: ' + operateur + ', Feeder: ' + feeder + ', Tronçon: ' + troncon + ', Zone: ' + zone;
-                        }
-                    }
-                }
-            }
-        });
+          ],
+        },
+        options: {
+          tooltips: {
+            callbacks: {
+              label: function (tooltipItem, data) {
+                var label = data.labels[tooltipItem.index];
+                var operateur = data.operateurs[tooltipItem.index];
+                var feeder = data.feeders[tooltipItem.index];
+                var troncon = data.troncons[tooltipItem.index];
+                var zone = data.zones[tooltipItem.index];
+
+                return (
+                  label +
+                  " - Opérateur: " +
+                  operateur +
+                  ", Feeder: " +
+                  feeder +
+                  ", Tronçon: " +
+                  troncon +
+                  ", Zone: " +
+                  zone
+                );
+              },
+            },
+          },
+        },
+      });
     </script>
-</body>
+  </body>
 </html>

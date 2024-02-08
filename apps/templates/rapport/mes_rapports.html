@@ -1,0 +1,105 @@
+<!-- Mes Rapports HTML (mes_rapports.html) -->
+
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mes Rapports</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        margin-bottom: 10px;
+      }
+      .rapport-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+      }
+      .rapport-link:hover {
+        color: #0069d9;
+      }
+      .rapport-icon {
+        margin-right: 10px;
+      }
+      .message {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        text-align: center;
+      }
+
+      .success-message {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .error-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      @media only screen and (max-width: 600px) {
+        h1 {
+          font-size: 24px;
+        }
+        .rapport-link {
+          flex-direction: column;
+        }
+        .rapport-icon {
+          margin-bottom: 10px;
+        }
+      }
+    </style>
+  </head>
+  {%include 'home/index.html'%}
+  <body>
+    <h1>Mes Rapports</h1>
+
+    {% if rapports %}
+    <ul>
+      {% for rapport in rapports %}
+      <li>
+        <a
+          href="{{ url_for('home_blueprint.telecharger_rapport', rapport_id=rapport.id) }}"
+          class="rapport-link"
+        >
+          <i class="fas fa-file-excel rapport-icon"></i>
+          <strong>{{ rapport.nom_du_rapport }}</strong> - {{
+          rapport.date_de_creation }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>Aucun rapport disponible.</p>
+    {% endif %}
+
+    <!-- ... Le reste du HTML ... -->
+
+    {% if 'download_message' in session %}
+    <div class="message success-message">
+      {{ session.pop('download_message') }}
+    </div>
+    {% endif %} {% if 'error_message' in session %}
+    <div class="message error-message">{{ session.pop('error_message') }}</div>
+    {% endif %}
+  </body>
+</html>

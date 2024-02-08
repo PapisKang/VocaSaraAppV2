@@ -1,161 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inspections Générées</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 20px;
-            background-color: #fff; /* Couleur de fond par défaut */
-            color: #333; /* Couleur de texte par défaut */
-        }
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 20px;
+        background-color: #fff; /* Couleur de fond par défaut */
+        color: #333; /* Couleur de texte par défaut */
+      }
 
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            overflow-x: auto;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        overflow-x: auto;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
 
-        th, td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 10px;
-            white-space: nowrap;
-        }
+      th,
+      td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 10px;
+        white-space: nowrap;
+      }
 
-        th {
-            background-color: #f2f2f2;
-        }
+      th {
+        background-color: #f2f2f2;
+      }
 
-        .search-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+      .search-container {
+        text-align: center;
+        margin-bottom: 20px;
+      }
 
+      .search-box {
+        padding: 8px;
+        width: 70%;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+
+      @media (max-width: 600px) {
         .search-box {
-            padding: 8px;
-            width: 70%;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
+          width: 100%;
         }
+      }
 
-        @media (max-width: 600px) {
-            .search-box {
-                width: 100%;
-            }
-        }
+      /* Thème sombre */
+      body.dark-mode {
+        background-color: #333; /* Couleur de fond en mode sombre */
+        color: #fff; /* Couleur de texte en mode sombre */
+      }
 
-        /* Thème sombre */
-        body.dark-mode {
-            background-color: #333; /* Couleur de fond en mode sombre */
-            color: #fff; /* Couleur de texte en mode sombre */
-        }
+      body.dark-mode table {
+        border-color: #555; /* Couleur de bordure de tableau en mode sombre */
+      }
 
-        body.dark-mode table {
-            border-color: #555; /* Couleur de bordure de tableau en mode sombre */
-        }
+      body.dark-mode th {
+        background-color: #444; /* Couleur de fond des en-têtes de tableau en mode sombre */
+        color: #fff; /* Couleur de texte des en-têtes de tableau en mode sombre */
+      }
 
-        body.dark-mode th {
-            background-color: #444; /* Couleur de fond des en-têtes de tableau en mode sombre */
-            color: #fff; /* Couleur de texte des en-têtes de tableau en mode sombre */
-        }
+      body.dark-mode .search-box {
+        background-color: #444; /* Couleur de fond de la boîte de recherche en mode sombre */
+        color: #fff; /* Couleur de texte de la boîte de recherche en mode sombre */
+        border: 1px solid #666; /* Couleur de bordure de la boîte de recherche en mode sombre */
+      }
 
-        body.dark-mode .search-box {
-            background-color: #444; /* Couleur de fond de la boîte de recherche en mode sombre */
-            color: #fff; /* Couleur de texte de la boîte de recherche en mode sombre */
-            border: 1px solid #666; /* Couleur de bordure de la boîte de recherche en mode sombre */
-        }
+      /* Style pour les cases à cocher */
+      .custom-checkbox {
+        display: inline-block;
+        vertical-align: middle;
+        margin: 0 5px;
+      }
 
-        /* Style pour les cases à cocher */
-        .custom-checkbox {
-            display: inline-block;
-            vertical-align: middle;
-            margin: 0 5px;
-        }
+      /* Style pour le bouton "Créer le rapport" */
+      #generateReportBtn {
+        margin-top: 10px;
+        padding: 10px;
+        border: none;
+        background-color: #007bff;
+        color: #fff;
+        cursor: pointer;
+        border-radius: 5px;
+      }
 
-        /* Style pour le bouton "Créer le rapport" */
-        #generateReportBtn {
-            margin-top: 10px;
-            padding: 10px;
-            border: none;
-            background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        #generateReportBtn:hover {
-            background-color: #0056b3;
-        }
+      #generateReportBtn:hover {
+        background-color: #0056b3;
+      }
     </style>
-</head>
-{%include 'home/index.html'%}
-<body>
+  </head>
+  {%include 'home/index.html'%}
+  <body>
     <h1>Créer un rapport</h1>
     <!-- Add this at the top of your HTML body -->
-{% if success_message %}
-<div style="color: green; text-align: center; font-weight: bold;">
-    {{ success_message }}
-</div>
-{% endif %}
-
-{% if error_message %}
-<div style="color: red; text-align: center; font-weight: bold;">
-    {{ error_message }}
-</div>
-{% endif %}
+    {% if success_message %}
+    <div style="color: green; text-align: center; font-weight: bold">
+      {{ success_message }}
+    </div>
+    {% endif %} {% if error_message %}
+    <div style="color: red; text-align: center; font-weight: bold">
+      {{ error_message }}
+    </div>
+    {% endif %}
     <div class="search-container">
-        <input type="text" class="search-box" id="searchInput" placeholder="Rechercher...">
+      <input
+        type="text"
+        class="search-box"
+        id="searchInput"
+        placeholder="Rechercher..."
+      />
     </div>
     <!-- Bouton pour générer les rapports sélectionnés -->
     <button id="generateReportBtn">Créer le rapport</button>
-    <div style="overflow-x:auto;">
-        <table id="rapportTable">
-            <thead>
-                <tr>
-                    <th>Nom Opérateur</th>
-                    <th>Feeder</th>
-                    <th>Tronçon</th>
-                    <th>Date Début</th>
-                    <th>Date Fin</th>
-                    <th>Zone</th>
-                    <th>Groupement Tronçon</th>
-                    <th>Date Created</th>
-                    <th>Date Modified</th>
-                    <!-- Remplacez l'icône "Voir Images" par des cases à cocher -->
-                    <th>Sélectionner</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for rapport in rapports %}
-                    <tr>
-                        <td>{{ rapport.nom_operateur }}</td>
-                        <td>{{ rapport.feeder }}</td>
-                        <td>{{ rapport.troncon }}</td>
-                        <td>{{ rapport.date_debut }}</td>
-                        <td>{{ rapport.date_fin }}</td>
-                        <td>{{ rapport.zone }}</td>
-                        <td>{{ rapport.groupement_troncon }}</td>
-                        <td>{{ rapport.date_created }}</td>
-                        <td>{{ rapport.date_modified }}</td>
-                        <!-- Remplacez l'icône par une case à cocher -->
-                        <td><input type="checkbox" class="custom-checkbox" name="selectedReports" value="{{ rapport.id }}"></td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div style="overflow-x: auto">
+      <table id="rapportTable">
+        <thead>
+          <tr>
+            <th>Nom Opérateur</th>
+            <th>Feeder</th>
+            <th>Tronçon</th>
+            <th>Date Début</th>
+            <th>Date Fin</th>
+            <th>Zone</th>
+            <th>Groupement Tronçon</th>
+            <th>Date Created</th>
+            <th>Date Modified</th>
+            <!-- Remplacez l'icône "Voir Images" par des cases à cocher -->
+            <th>Sélectionner</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rapport in rapports %}
+          <tr>
+            <td>{{ rapport.nom_operateur }}</td>
+            <td>{{ rapport.feeder }}</td>
+            <td>{{ rapport.troncon }}</td>
+            <td>{{ rapport.date_debut }}</td>
+            <td>{{ rapport.date_fin }}</td>
+            <td>{{ rapport.zone }}</td>
+            <td>{{ rapport.groupement_troncon }}</td>
+            <td>{{ rapport.date_created }}</td>
+            <td>{{ rapport.date_modified }}</td>
+            <!-- Remplacez l'icône par une case à cocher -->
+            <td>
+              <input
+                type="checkbox"
+                class="custom-checkbox"
+                name="selectedReports"
+                value="{{ rapport.id }}"
+              />
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
     <!-- Bouton pour générer les rapports sélectionnés -->
@@ -163,36 +177,38 @@
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $("#searchInput").on("keyup", function () {
-                var value = $(this).val().toLowerCase();
-                $("#rapportTable tbody tr").filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-                });
-            });
-
-            // Gestion du bouton "Créer le rapport"
-            $("#generateReportBtn").click(function () {
-                var selectedReports = [];
-                // Récupérer les rapports sélectionnés
-                $("input[name='selectedReports']:checked").each(function () {
-                    selectedReports.push($(this).val());
-                });
-
-                // Si au moins un rapport est sélectionné
-                if (selectedReports.length > 0) {
-                    // Rediriger vers la route Flask pour générer les rapports
-                    window.location.href = "{{ url_for('home_blueprint.generate_resume_rapport') }}?selected_reports=" + selectedReports.join(",");
-                } else {
-                    alert("Veuillez sélectionner au moins un rapport.");
-                }
-            });
-
-            // Gestion du bouton de bascule en mode sombre
-            $("#darkModeToggle").click(function () {
-                $("body").toggleClass("dark-mode");
-            });
+      $(document).ready(function () {
+        $("#searchInput").on("keyup", function () {
+          var value = $(this).val().toLowerCase();
+          $("#rapportTable tbody tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+          });
         });
+
+        // Gestion du bouton "Créer le rapport"
+        $("#generateReportBtn").click(function () {
+          var selectedReports = [];
+          // Récupérer les rapports sélectionnés
+          $("input[name='selectedReports']:checked").each(function () {
+            selectedReports.push($(this).val());
+          });
+
+          // Si au moins un rapport est sélectionné
+          if (selectedReports.length > 0) {
+            // Rediriger vers la route Flask pour générer les rapports
+            window.location.href =
+              "{{ url_for('home_blueprint.generate_resume_rapport') }}?selected_reports=" +
+              selectedReports.join(",");
+          } else {
+            alert("Veuillez sélectionner au moins un rapport.");
+          }
+        });
+
+        // Gestion du bouton de bascule en mode sombre
+        $("#darkModeToggle").click(function () {
+          $("body").toggleClass("dark-mode");
+        });
+      });
     </script>
-</body>
+  </body>
 </html>

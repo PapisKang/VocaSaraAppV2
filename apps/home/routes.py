@@ -379,3 +379,23 @@ def generate_resume_rapport():
         error_message = f"Une erreur s'est produite : {str(e)}"
 
     return render_template('rapport/creer_un_rapport.html', rapports=rapports, success_message=success_message, error_message=error_message)
+
+@blueprint.route('/mes_rapports')
+def mes_rapports():
+    rapports = DocumentRapportGenere.query.all()
+    return render_template('rapport/mes_rapports.html', rapports=rapports)
+
+@blueprint.route('/telecharger_rapport/<int:rapport_id>')
+def telecharger_rapport(rapport_id):
+    try:
+        rapport = DocumentRapportGenere.query.get_or_404(rapport_id)
+        message = f"Téléchargement du rapport '{rapport.nom_du_rapport}' réussi."
+        return send_file(
+            io.BytesIO(rapport.data),
+            as_attachment=True,
+            download_name=f"{rapport.nom_du_rapport}.xlsx"
+        )
+    except Exception as e:
+        error_message = f"Erreur lors du téléchargement du rapport : {str(e)}"
+        rapports = DocumentRapportGenere.query.all()
+        return render_template('rapport/mes_rapports.html', error_message=error_message, message=message, rapports=rapports)
