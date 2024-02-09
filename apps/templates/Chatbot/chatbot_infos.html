@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbots basés sur le Deep Learning</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+    
+            color: black;
+            text-align: center;
+            padding: 1em;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        code {
+            background-color: #f8f8f8;
+            padding: 2px 4px;
+            border: 1px solid #ddd;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1em;
+        
+        }
+    </style>
+</head>
+{% include 'home/index.html' %}
+<body>
+    <header>
+        <h1>Chatbots basés sur le Deep Learning</h1>
+    </header>
+
+    <main>
+        <h2>Introduction</h2>
+        <p>Les chatbots ont évolué de simples programmes qui répondaient à des commandes spécifiques à des systèmes plus sophistiqués utilisant le deep learning pour comprendre et répondre aux questions des utilisateurs.</p>
+
+        <h2>Fonctionnement du Chatbot</h2>
+        <p>Notre chatbot se distingue par son approche de question-réponse sans génération de phrases. Il est capable de se souvenir des interactions en les enregistrant dans une base de données, facilitant ainsi des conversations plus fluides.</p>
+
+        <p>Le chatbot est bilingue, passant automatiquement du français à l'anglais. Il a été formé sur des données spécifiques, notamment le guide du technicien de la Senelec. Bien que la quantité de données ne soit pas immense, le chatbot peut comprendre et répondre en fonction du contexte.</p>
+
+        <h2>Contexte et Enchaînement</h2>
+        <p>Contrairement à certains chatbots génératifs, notre modèle comprend le contexte de la phrase précédente grâce à son entraînement préalable sur des contextes similaires. Il peut maintenir une discussion en restant dans le contexte pendant un maximum de 3 phrases dans sa version actuelle.</p>
+
+        <p>Cette version est actuellement expérimentale, mais des améliorations sont prévues dans les versions futures pour optimiser les performances du chatbot.</p>
+
+        <h2>Enregistrement des Conversations</h2>
+        <p>Les conversations sont enregistrées dans le but d'analyser et de réentraîner le chatbot. Il est important de noter que le nom de l'utilisateur est crypté pour protéger la vie privée. Ainsi, aucune information personnelle n'est accessible, et VocaSara n'en sera pas responsable.</p>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 VocaSara - Tous droits réservés</p>
+    </footer>
+</body>
+</html>

@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-
 from apps.home import blueprint
 from flask import render_template, Flask, redirect, request, url_for
 from flask_login import login_required
@@ -410,3 +409,101 @@ def telecharger_rapport(rapport_id):
         error_message = f"Erreur lors du téléchargement du rapport : {str(e)}"
         rapports = DocumentRapportGenere.query.all()
         return render_template('rapport/mes_rapports.html', error_message=error_message, message=message, rapports=rapports)
+
+
+
+#chatbot./////////////////
+import uuid
+import secrets
+from apps.home.chatbot import get_response
+from flask_limiter import Limiter
+import logging
+from flask_cors import CORS
+
+
+CORS(blueprint)  # Add this line to enable CORS for your blueprint
+# Define your model for the remember table
+class Remember(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.String(255))
+    phrase = db.Column(db.Text)
+
+# Vérifier si le dossier existe, sinon le créer
+log_folder = './log'
+if not os.path.exists(log_folder):
+    os.makedirs(log_folder)
+    
+# Configuration du logging
+logging.basicConfig(filename='./log/crash.log', level=logging.ERROR)
+
+# Configuration du logging
+access_logger = logging.getLogger('access')
+access_logger.setLevel(logging.INFO)
+file_handler = logging.FileHandler('./log/access.log')
+access_logger.addHandler(file_handler)
+
+limiter = Limiter(blueprint, default_limits=["200 per day", "100 per hour"])
+
+def generate_secret_key():
+    return secrets.token_urlsafe()
+
+@blueprint.route('/chatbot')
+def chatbot():
+    return render_template('Chatbot/chatbot.html')
+
+# Ajouter un log lorsqu'un utilisateur se connecte
+@blueprint.before_request
+def log_request():
+    access_logger.info('Accès à l\'URL : %s', request.url)
+
+def generate_session_id():
+    return str(uuid.uuid4())
+
+# Fonction pour récupérer l'identifiant de session et l'identifiant de l'utilisateur
+def get_user_ids():
+    session_id = request.cookies.get('session_id')
+    user_id = request.cookies.get('user_id')
+    if not session_id:
+        session_id = generate_session_id()
+    if not user_id:
+        user_id = generate_session_id()
+    return session_id, user_id
+
+@blueprint.route('/predict', methods=['POST'])
+@limiter.limit("20 per minute")
+def predict():
+    try:
+        message = request.get_json().get('message')
+        session_id, user_id = get_user_ids()
+        response = get_response(session_id, user_id, message)
+        message = {"answer": response}
+        resp = jsonify(message)
+        resp.set_cookie('session_id', session_id, httponly=True, secure=True, samesite='Strict')
+        resp.set_cookie('user_id', user_id, httponly=True, secure=True, samesite='Strict')
+        return resp
+    except Exception as e:
+        logging.exception('Une erreur s\'est produite :')
+        return jsonify({'error': str(e)}), 500
+
+
+@blueprint.route('/save-phrase', methods=['POST'])
+def save_phrase():
+    try:
+        user_id = request.cookies.get('user_id')
+        phrase = request.get_json().get('phrase')
+
+        # Create a new Remember instance and add it to the session
+        remember_instance = Remember(user_id=user_id, phrase=phrase)
+        db.session.add(remember_instance)
+        db.session.commit()
+
+        return jsonify({'success': 'Phrase saved successfully.'})
+    except Exception as e:
+        logging.exception('Une erreur s\'est produite :')
+        return jsonify({'error': 'Une erreur s\'est produite.'}), 500
+
+#chatbot #§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+@blueprint.route('/chatbot_info')
+def chatbot_info():
+    return render_template('/Chatbot/chatbot_infos.html')

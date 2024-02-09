@@ -4,20 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Chatbot (IA)</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='cookie.css') }}">
+    <link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/css/chatbot_style.css">
+    <link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/css/chatbot_cookie.css">
 </head>
-
 <body>
     <div class="container">
         <div class="chatbox">
             <div class="chatbox__support">
                 <div class="chatbox__header">
                     <div class="chatbox__image--header">
-                        <img src="{{ url_for('static', filename='images/ffg.png') }}" alt="image">
+                        <img src="{{ config.ASSETS_ROOT }}/img/chatbot/ffg.png" alt="image">
                     </div>
                     <div class="chatbox__content--header">
-                        <p class="chatbox__description--header">Bonjour je suis.. comment puis-je vous aider?</p>
+                        <p class="chatbox__description--header">Bonjour je suis Vocabot comment puis-je vous aider? Vocabot ver--1 test</p>
+      
                     </div>
                 </div>
                 <div class="chatbox__messages">
@@ -25,16 +25,15 @@
                 </div>
                 <div class="chatbox__footer">
                     <input type="text" placeholder="Écrivez un message...">
-
-                    <button type="button" class="clear_button"><img
-                            src="{{ url_for('static', filename='images/icons8-supprimer-28.png') }}"
+                                        <button type="button" class="clear_button"><img
+                            src="{{ config.ASSETS_ROOT }}/img/chatbot/delete.png"
                             alt="effacer"></button>
                     <button type="submit" class="chatbox__send--footer send__button"><img
-                            src="{{ url_for('static', filename='images/icons8-envoye-28.png') }}" alt="envoi"></button>
+                            src="{{ config.ASSETS_ROOT }}/img/chatbot/send.png" alt="envoi"></button>
                 </div>
             </div>
             <div class="chatbox__button">
-                <button><img src="{{ url_for('static', filename='images/icons8-chatbot-48.png') }}" /></button>
+                <button><img src="{{ config.ASSETS_ROOT }}/img/chatbot/chatbot.png" /></button>
             </div>
         </div>
     </div>
@@ -67,12 +66,14 @@
             setTimeout(showCookieConsent, 1000);
         }
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <script>
         $SCRIPT_ROOT = {{ request.script_root | tojson }};
     </script>
-    <script type="text/javascript" src="{{ url_for('static', filename='app.js') }}"></script>
-
+    <script type="text/javascript" src="{{ config.ASSETS_ROOT }}/js/chatbot.js"></script>
+    
 </body>
 
 </html>
