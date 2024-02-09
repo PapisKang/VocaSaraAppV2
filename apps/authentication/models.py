@@ -1,7 +1,3 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
 
 from flask import abort
 from flask_login import UserMixin, current_user
@@ -296,5 +292,16 @@ class ImageUploadInvisible(db.Model):
     rapport_genere = db.relationship('RapportGenere', back_populates='images_upload_invisible')
     
 
+<<<<<<< HEAD
+=======
+class DocumentRapportGenere(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nom_operateur = db.Column(db.String(64), nullable=False, default=None)
+    nom_du_rapport = db.Column(db.String(255), nullable=False)
+    date_de_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    data = db.Column(db.LargeBinary)
+        # Foreign key reference
+    rapport_genere_id = db.Column(db.Integer, db.ForeignKey('RapportGenere.id'))
+>>>>>>> Prince-Gildas
 
 

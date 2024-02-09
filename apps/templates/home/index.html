@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +14,9 @@
 	<link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/css/sidebar.css">
 	<title>Vocasara</title>
 </head>
+{%include 'Chatbot/chatbot.html'%}
 <body>
+<<<<<<< HEAD
 
 
 	<!-- SIDEBAR -->
@@ -154,6 +156,243 @@ if(window.innerWidth < 768) {
 	searchForm.classList.remove('show');
 }
 
+=======
+
+
+ <!-- SIDEBAR -->
+ <section id="sidebar">
+	<a href="#" class="brand">
+		<img src="{{ config.ASSETS_ROOT }}/img/vocasara/logo.png" alt="Vocasara Logo" class="logo-img">
+		<span class="text">Vocasara</span>
+	</a>
+
+	<ul class="side-menu top">
+		<li class="active">
+			<a href="/acceuil">
+				<i class='bx bx-home' ></i>
+				<span class="text">Acceuil</span>
+			</a>
+		</li>
+		<li>
+			<a href="/generation_rapport">
+				<i class='bx bx-file' ></i>
+				<span class="text">Traitement</span>
+			</a>
+		</li>
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-chart'></i>
+				<span class="text">Localisation</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/localisation_defauts_invisible_page">
+						<i class='bx bx-hide'></i>
+						<span class="text">Invisible</span>
+					</a>
+				</li>
+				<li>
+					<a href="/localisation_page">
+						<i class='bx bx-show'></i>
+						<span class="text">Visible</span>
+					</a>
+				</li>
+				
+			</ul>
+		</li>
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-file'></i>
+				<span class="text">Statistiques</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/statistics_invisible">
+						<i class='bx bx-show'></i>
+						<span class="text">Invisible</span>
+					</a>
+				</li>
+				<li>
+					<a href="/statistiques">
+						<i class='bx bx-hide'></i>
+						<span class="text">Visible</span>
+					</a>
+				</li>
+			</ul>
+		</li>
+		
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-file'></i>
+				<span class="text">Inspections</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/rapport_id_page">
+						<i class='bx bx-list-ul'></i>
+						<span class="text">Inspections Générés</span>
+					</a>
+				</li>
+				<li>
+					<a href="/generate_resume_rapport_page">
+						<i class='bx bx-file'></i>
+						<span class="text">Généré un Rapport</span>
+					</a>
+				</li>
+				
+				<!-- Ajoutez le nouveau bouton "Mes rapports" ici -->
+				<li>
+					<a href="/mes_rapports">
+						<i class='bx bx-file'></i>
+						<span class="text">Mes rapports</span>
+					</a>
+				</li>
+			</ul>
+		</li>
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-cog'></i>
+				<span class="text">Informations</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/apropos">
+						<i class='bx bx-info-circle'></i>
+						<span class="text">A propos</span>
+					</a>
+				</li>
+				<li>
+					<a href="">
+						<i class='bx bx-code'></i>
+						<span class="text">Version</span>
+					</a>
+				</li>
+				<li>
+					<a href="/confidentialite">
+						<i class='bx bx-shield'></i>
+						<span class="text">Confidentialité</span>
+					</a>
+				</li>
+				<li>
+					<a href="/chatbot_info">
+						<i class='bx bx-chat'></i>
+						<span class="text">Chatbot</span>
+					</a>
+				</li>
+			</ul>
+		</li>
+		
+			
+		</li>
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-cog'></i>
+				<span class="text">Mon Profil</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="{{ url_for('authentication_blueprint.user_profile') }}">
+						<i class='bx bx-user'></i>
+						<span class="text">Informations</span>
+					</a>
+				</li>
+				<li>
+					<a href="photo_upload">
+						<i class='bx bx-camera'></i>
+						<span class="text">Photo</span>
+					</a>
+				</li>
+			</ul>
+			
+		</li>
+		
+
+		<li class="logout">
+			<a href="{{ url_for('authentication_blueprint.logout') }}">
+				<i class='bx bx-log-out-circle'></i>
+				<span class="text">Déconnexion</span>
+			</a>
+		</li>
+		</ul>
+</section>
+
+<!-- SIDEBAR -->
+
+<!-- CONTENT -->
+<section id="content">
+	<!-- NAVBAR -->
+	<nav>
+		<i class='bx bx-menu' ></i>
+		<form action="#">
+			<div class="form-input">
+				<input type="search" placeholder="Rechercher...">
+				<button type="submit" class="search-btn"><i class='bx bx-search' ></i></button>
+			</div>
+		</form>
+		<input type="checkbox" id="switch-mode" hidden>
+		<label for="switch-mode" class="switch-mode"></label>
+	</nav>
+	<!-- NAVBAR -->
+
+	</section>
+	<!-- CONTENT -->
+	
+<!-- COOKIE CONSENT BANNER -->
+<div id="cookie-consent-banner">
+	<p>Nous utilisons des cookies pour améliorer votre expérience sur notre site. En continuant à naviguer, vous acceptez notre utilisation des cookies.</p>
+	<button id="accept-cookies-btn">Accepter les cookies</button>
+  </div>
+  <!-- COOKIE CONSENT BANNER -->
+  
+	<script >
+		const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+allSideMenu.forEach(item=> {
+	const li = item.parentElement;
+
+	item.addEventListener('click', function () {
+		allSideMenu.forEach(i=> {
+			i.parentElement.classList.remove('active');
+		})
+		li.classList.add('active');
+	})
+});
+
+// TOGGLE SIDEBAR
+const menuBar = document.querySelector('#content nav .bx.bx-menu');
+const sidebar = document.getElementById('sidebar');
+menuBar.addEventListener('click', function () {
+	sidebar.classList.toggle('hide');
+})
+
+const searchButton = document.querySelector('#content nav form .form-input button');
+const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
+const searchForm = document.querySelector('#content nav form');
+
+searchButton.addEventListener('click', function (e) {
+	if(window.innerWidth < 576) {
+		e.preventDefault();
+		searchForm.classList.toggle('show');
+		if(searchForm.classList.contains('show')) {
+			searchButtonIcon.classList.replace('bx-search', 'bx-x');
+		} else {
+			searchButtonIcon.classList.replace('bx-x', 'bx-search');
+		}
+	}
+})
+
+if(window.innerWidth < 768) {
+	sidebar.classList.add('hide');
+} else if(window.innerWidth > 576) {
+	searchButtonIcon.classList.replace('bx-x', 'bx-search');
+	searchForm.classList.remove('show');
+}
+
+>>>>>>> Prince-Gildas
 window.addEventListener('resize', function () {
 	if(this.innerWidth > 576) {
 		searchButtonIcon.classList.replace('bx-x', 'bx-search');
@@ -169,7 +408,36 @@ switchMode.addEventListener('change', function () {
 		document.body.classList.remove('dark');
 	}
 })
+<<<<<<< HEAD
 
+=======
+const submenuToggles = document.querySelectorAll('.submenu-toggle');
+
+submenuToggles.forEach(toggle => {
+	toggle.addEventListener('click', function (event) {
+		event.preventDefault();
+		const submenu = this.nextElementSibling;
+		submenu.classList.toggle('active');
+	});
+});
+document.addEventListener('DOMContentLoaded', function () {
+    const cookieBanner = document.getElementById('cookie-consent-banner');
+    const acceptCookiesBtn = document.getElementById('accept-cookies-btn');
+
+    // Vérifier si le consentement aux cookies a déjà été donné
+    if (!localStorage.getItem('cookieConsent')) {
+      cookieBanner.style.display = 'block';
+    }
+
+    acceptCookiesBtn.addEventListener('click', function () {
+      // Cacher le bandeau des cookies
+      cookieBanner.style.display = 'none';
+
+      // Enregistrer le consentement dans le stockage local
+      localStorage.setItem('cookieConsent', 'true');
+    });
+  });
+>>>>>>> Prince-Gildas
 </script>
 	</script>
 </body>

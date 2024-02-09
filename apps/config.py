@@ -28,9 +28,12 @@ class Config(object):
 
     DEFAULT_IMAGE_URL =  'static/assets/images/'
   
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> Prince-Gildas
     basedir = os.path.abspath(os.path.dirname(__file__))
 
     # Set up the App SECRET_KEY

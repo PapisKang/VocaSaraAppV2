@@ -37,7 +37,11 @@ html {
 
 body.dark {
 	--light: #0C0C1E;
+<<<<<<< HEAD
 	--grey: #060714;
+=======
+	--grey: #a7a7a7;
+>>>>>>> Prince-Gildas
 	--dark: #FBFBFB;
 }
 
@@ -47,9 +51,12 @@ body {
 }
 
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> Prince-Gildas
 /* SIDEBAR */
 #sidebar {
 	position: fixed;
@@ -68,7 +75,11 @@ body {
 	display: none;
 }
 #sidebar.hide {
+<<<<<<< HEAD
 	width: 60px;
+=======
+	width: 1px;
+>>>>>>> Prince-Gildas
 }
 #sidebar .brand {
 	font-size: 24px;
@@ -178,12 +189,28 @@ body {
 	width: calc(100% - 60px);
 	left: 60px;
 }
+<<<<<<< HEAD
 
 /* NAVBAR */
 #content nav {
 	height: 56px;
 	background: var(--light);
 	padding: 0 24px;
+=======
+#sidebar .side-menu li ul.submenu {
+    display: none;
+    padding-left: 20px;
+}
+
+#sidebar .side-menu li ul.submenu.active {
+    display: block;
+}
+/* NAVBAR */
+#content nav {
+	height: 46px;
+
+	padding: 0 94px;
+>>>>>>> Prince-Gildas
 	display: flex;
 	align-items: center;
 	grid-gap: 24px;
@@ -197,11 +224,18 @@ body {
 	content: '';
 	position: absolute;
 	width: 40px;
+<<<<<<< HEAD
 	height: 40px;
 	bottom: -40px;
 	left: 0;
 	border-radius: 50%;
 	box-shadow: -20px -20px 0 var(--light);
+=======
+	height: 80px;
+	bottom: -40px;
+	left: 0;
+
+>>>>>>> Prince-Gildas
 }
 #content nav a {
 	color: var(--dark);
@@ -219,7 +253,11 @@ body {
 }
 #content nav form {
 	max-width: 400px;
+<<<<<<< HEAD
 	width: 100%;
+=======
+	width: 40%;
+>>>>>>> Prince-Gildas
 	margin-right: auto;
 }
 #content nav form .form-input {
@@ -272,12 +310,16 @@ body {
 	justify-content: center;
 	align-items: center;
 }
+<<<<<<< HEAD
 #content nav .profile img {
 	width: 36px;
 	height: 36px;
 	object-fit: cover;
 	border-radius: 50%;
 }
+=======
+
+>>>>>>> Prince-Gildas
 #content nav .switch-mode {
 	display: block;
 	min-width: 50px;
@@ -401,10 +443,43 @@ body {
 	color: var(--dark);	
 }
 
+<<<<<<< HEAD
 
 
 
 
+=======
+#cookie-consent-banner {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+	height: 10%;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    z-index: 1000;
+  }
+
+  #cookie-consent-banner p {
+    margin: 0;
+  }
+
+  #cookie-consent-banner button {
+    background-color: #27c2ff;
+    color: #fff;
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+	
+  }
+
+  #cookie-consent-banner button:hover {
+    background-color: #45a049;
+  }
+>>>>>>> Prince-Gildas
 
 @media screen and (max-width: 768px) {
 	#sidebar {
