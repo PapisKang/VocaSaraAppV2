@@ -302,5 +302,3 @@ class DocumentRapportGenere(db.Model):
     rapport_genere_id = db.Column(db.Integer, db.ForeignKey('RapportGenere.id'))
 
 
-
-
