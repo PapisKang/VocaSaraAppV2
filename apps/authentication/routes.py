@@ -62,6 +62,7 @@ from keras.models import load_model
 import matplotlib.pyplot as plt
 from fractions import Fraction
 from flask import Markup
+
 # classification d'images chargement du model
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -297,7 +298,11 @@ def photo_upload():
                 image_url = user_profile.image
 
     user_profile = UserProfile.query.filter_by(user=current_user.id).first()
+<<<<<<< HEAD
     return render_template('home/index.html', user_profile=user_profile)
+=======
+    return render_template('accounts/profile.html', user_profile=user_profile)
+>>>>>>> Prince-Gildas
 #///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
 
 @blueprint.route('/user_list', methods=['GET'])
@@ -794,6 +799,7 @@ def results_page(rapport_genere_id):
 
 
 # Mettez à jour la route pour traiter les images
+@login_required
 @blueprint.route('/upload_and_traitement_visible', methods=['POST'])
 def upload_and_traitement_visible():
     
@@ -810,9 +816,9 @@ def upload_and_traitement_visible():
     os.makedirs(user_upload_path)
 
     # Charger le modèle d'apprentissage automatique et les étiquettes de classe
-    model_path = 'apps/IA/model/trained_tensorflow_model_MobileNetV2_normal.h5'
+    model_path = 'apps/IA/model/trained_tensorflow_model_MobileNetV2_normalV2.h5'
     model = load_model(model_path)
-    class_labels_path = 'apps/IA/label/class_labels_normal.txt'
+    class_labels_path = 'apps/IA/label/class_labels_normalv2.txt'
     with open(class_labels_path, 'r') as f:
         class_labels = f.read().splitlines()
 
@@ -923,3 +929,8 @@ def compress_image(file_path, quality=60):
         print(f"Error compressing image: {e}")
         print(traceback.format_exc())  # Imprime la trace complète de l'erreur
         return None
+    
+@login_required
+@blueprint.route("/upload_page_invisible")
+def upload_page_invisible():
+    return render_template('rapport/traitement_invisible.html')

@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confirmation Page</title>
+  <!-- Link Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
+<<<<<<< HEAD
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f4;
@@ -44,40 +47,28 @@
       margin-right: 10px;
     }
 
+=======
+    /* Custom CSS */
+>>>>>>> Prince-Gildas
     .image-container {
-      text-align: right;
       margin-top: 20px; /* Ajout d'une marge au-dessus de l'image */
     }
 
+    
     .image-container img {
-      max-width: 60%;
+      max-width: 50%;
       height: auto;
       border-radius: 8px;
       display: block; /* Pour éviter un léger espace en bas de l'image */
       margin: 0 auto; /* Centrer l'image */
-    }
-
-    @media only screen and (max-width: 600px) {
-      /* Styles pour les petits écrans */
-      h2 {
-        font-size: 1.5em; /* Ajuster la taille du titre */
-      }
-
-      p {
-        font-size: 0.9em; /* Ajuster la taille du texte */
-      }
-
-      .image-container img {
-        display: none; /* Cacher l'image sur les petits écrans */
-      }
     }
   </style>
 </head>
 {%include 'home/index.html'%}
 <body>
 
-  <div class="container">
-    <h2>Important</h2>
+  <div class="container mt-5">
+    <h2 class="text-primary">Important</h2>
     <p>L'explication fournie dans le texte vise à sensibiliser les utilisateurs sur les limites et les challenges associés à la classification d'images par les modèles d'intelligence artificielle.</p>
 
     <h3>Quantité de données d'entraînement limitée :</h3>
@@ -92,16 +83,19 @@
     <p>En résumé, l'idée est de souligner que même les modèles d'IA avancés ne sont pas infaillibles, et qu'il est essentiel d'adopter une approche prudente lors de l'utilisation de ces modèles. La vérification manuelle des résultats de la classification et le tri préalable des données contribuent à garantir une utilisation plus fiable et précise des modèles d'IA, en particulier dans des domaines où la précision est cruciale.</p>
     
     <h3>Options :</h3>
-    <button onclick="handleButtonClick('visible')">Rapport Visible</button>
-    <button onclick="handleButtonClick('invisible')">Rapport Invisible</button>
-    
+    <div class="btn-group mb-3">
+      <button type="button" class="btn btn-primary" onclick="handleButtonClick('visible')">Rapport Visible</button>
+      <button type="button" class="btn btn-primary" onclick="handleButtonClick('invisible')">Rapport Invisible</button>
+    </div>
   </div>
   
   <!-- Ajout de l'image à droite -->
-  <div class="image-container">
+  <div class="container image-container">
     <img src="{{ config.ASSETS_ROOT }}/img/illustrations/IA.jpg" alt="Image explicative" loading="lazy">
   </div>
 
+  <!-- Link Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
   <script>
     // Fonction pour définir un cookie avec une durée d'expiration
     function setCookie(name, value, days) {
@@ -149,7 +143,7 @@
       if (selectedOption === 'visible') {
         window.location.href = '/upload_page';
       } else if (selectedOption === 'invisible') {
-        window.location.href = '/upload_page';
+        window.location.href = '/upload_page_invisible';
       }
     }
   
