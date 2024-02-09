@@ -27,6 +27,13 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, Border, Side
 import io
 
+# Ajouter un log lorsqu'un utilisateur se connecte
+@blueprint.before_request
+def log_request():
+    if current_user.is_authenticated:
+        access_logger.info('Utilisateur connecté : %s | Accès à l\'URL : %s', current_user.username, request.url)
+    else:
+        access_logger.info('Accès à l\'URL : %s', request.url)
 
 @blueprint.route('/<template>')
 @login_required
@@ -89,6 +96,7 @@ def generation_rapport_form():
 
 
 @blueprint.route('/generate_rapport', methods=['POST'])
+@login_required
 def generate_rapport():
     feeders_existants = Feeder.query.all()
     troncons_existants = Troncon.query.all()
@@ -154,18 +162,20 @@ def generate_rapport():
 
 # Nouvelle route pour afficher la page avec les deux boutons et le texte explicatif
 
-
+@login_required
 @blueprint.route('/confirmation_page', methods=['GET'])
 def confirmation_page():
     return render_template('rapport/confirmation_page.html')
 
 
 @blueprint.route('/apropos')
+@login_required
 def apropos():
     return render_template('home/apropos.html', segment='apropos')
 
 
 @blueprint.route('/acceuil')
+@login_required
 def acceuil():
     return render_template('home/acceuil.html')
 
@@ -201,11 +211,13 @@ def get_map_data():
 
 
 @blueprint.route('/localisation_page')
+@login_required
 def localisation_page():
     return render_template('home/localisation_defauts.html')
 
 
 @blueprint.route('/statistiques')
+@login_required
 def statistiques():
     # Récupérer les statistiques des types de défauts avec les informations supplémentaires
     type_defaut_stats = db.session.query(
@@ -240,10 +252,11 @@ def statistiques():
 
 
 @blueprint.route('/localisation_defauts_invisible_page')
+@login_required
 def localisation_defauts_invisible_page():
     return render_template('/home/localisation_defauts_invisible.html')
 
-
+ 
 @blueprint.route('/statistics_invisible')
 def statistics_invisible():
     return render_template('/statistics/statistics_invisible.html')
@@ -254,7 +267,7 @@ def rapport_id_page():
     rapports = RapportGenere.query.all()
     return render_template('rapport/rapport_id_page.html',  rapports=rapports)
 
-
+@login_required
 @blueprint.route('/mes_inspections/<int:rapport_id>', methods=['GET'])
 def mes_inspections(rapport_id):
     rapport = RapportGenere.query.get(rapport_id)
@@ -390,12 +403,14 @@ def generate_resume_rapport():
 
 
 @blueprint.route('/mes_rapports')
+@login_required
 def mes_rapports():
     rapports = DocumentRapportGenere.query.all()
     return render_template('rapport/mes_rapports.html', rapports=rapports)
 
 
 @blueprint.route('/telecharger_rapport/<int:rapport_id>')
+@login_required
 def telecharger_rapport(rapport_id):
     try:
         rapport = DocumentRapportGenere.query.get_or_404(rapport_id)
@@ -412,7 +427,8 @@ def telecharger_rapport(rapport_id):
 
 
 
-#chatbot./////////////////
+
+#chatbot./////////////////pas de login required ici
 import uuid
 import secrets
 from apps.home.chatbot import get_response
@@ -451,10 +467,6 @@ def generate_secret_key():
 def chatbot():
     return render_template('Chatbot/chatbot.html')
 
-# Ajouter un log lorsqu'un utilisateur se connecte
-@blueprint.before_request
-def log_request():
-    access_logger.info('Accès à l\'URL : %s', request.url)
 
 def generate_session_id():
     return str(uuid.uuid4())
@@ -502,8 +514,14 @@ def save_phrase():
         logging.exception('Une erreur s\'est produite :')
         return jsonify({'error': 'Une erreur s\'est produite.'}), 500
 
-#chatbot #§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+#chatbot //////////////////////////// pas de login required ici
 
 @blueprint.route('/chatbot_info')
+@login_required
 def chatbot_info():
     return render_template('/Chatbot/chatbot_infos.html')
+
+@blueprint.route('/confidentialite')
+@login_required
+def confidentialite():
+    return render_template('home/confidentialite.html')

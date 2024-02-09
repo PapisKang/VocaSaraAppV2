@@ -62,6 +62,7 @@ from keras.models import load_model
 import matplotlib.pyplot as plt
 from fractions import Fraction
 from flask import Markup
+
 # classification d'images chargement du model
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -794,6 +795,7 @@ def results_page(rapport_genere_id):
 
 
 # Mettez à jour la route pour traiter les images
+@login_required
 @blueprint.route('/upload_and_traitement_visible', methods=['POST'])
 def upload_and_traitement_visible():
     
