@@ -25,6 +25,8 @@
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
     <script>
         var map;
         var tileLayers = {};
@@ -72,7 +74,10 @@
         // Ajouter une couche de marqueurs pour afficher les points sur la carte
         var markersLayer = new L.LayerGroup();
         markersLayer.addTo(map);
-
+        // Utiliser le cluster de marqueurs
+        var markers = L.markerClusterGroup();
+        markers.addLayer(markersLayer);
+        map.addLayer(markers);
        // ...
 
 // Appeler la route Flask pour récupérer les données de la carte
@@ -97,7 +102,7 @@ fetch('/get_map_data')
         // Créer un marqueur pour chaque point
         data.forEach(point => {
             var marker = L.marker([point.latitude, point.longitude]).addTo(markersLayer);
-
+        
             marker.bindPopup(
                 `<strong>${point.type_defaut}</strong><br>
                 Feeder: ${point.feeder}<br>
@@ -108,9 +113,10 @@ fetch('/get_map_data')
                 Date: ${point.upload_date}<br>
                 latitude: ${point.latitude}<br>
                 longitude: ${point.longitude}<br>
-                <img src="data:image/png;base64,${point.image_binary}" alt="Uploaded Image" style="max-width:200px; max-height:200px;">`
+                <img src="data:image/png;base64,${point.image_binary}" alt="Uploaded Image" style="max-width:200px; max-height:200px;" loading="lazy">`
             );
         });
+        
 
         // Ajuster automatiquement le zoom avec une animation pour s'adapter à tous les marqueurs
         map.flyToBounds(markerCoordinates, { animate: true });
