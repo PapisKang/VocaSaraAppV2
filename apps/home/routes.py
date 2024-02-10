@@ -26,6 +26,7 @@ import openpyxl
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, Border, Side
 import io
+from apps.config import Config
 
 # Ajouter un log lorsqu'un utilisateur se connecte
 @blueprint.before_request
@@ -85,9 +86,8 @@ def get_segment(request):
     except:
         return 'index', ''
 
+
 # Route pour afficher le formulaire et les listes déroulantes
-
-
 @blueprint.route('/generation_rapport', methods=['GET'])
 def generation_rapport_form():
     feeders_existants = Feeder.query.all()
@@ -180,31 +180,101 @@ def acceuil():
     return render_template('home/acceuil.html')
 
 
+#./////////////////////// page de localisation de défuat§§§§§§§§§§
+@blueprint.route('/update_status/<int:image_id>', methods=['POST'])
+@login_required
+def update_status(image_id):
+    # Récupérer l'utilisateur connecté
+    user = current_user
+    # Récupérer le statut envoyé dans la requête
+    new_status = request.json.get('new_status')
+    # Récupérer l'image à mettre à jour
+    image = ImageUploadVisible.query.get(image_id)
+    if not image:
+        return jsonify({'error': 'Image not found'}), 404
+    # Mettre à jour les informations
+    image.status = new_status
+    image.updated_by = user.username  # Mettre à jour avec le nom d'utilisateur de l'utilisateur connecté
+    image.update_date = datetime.utcnow()  # Mettre à jour avec la date actuelle
+    # Sauvegarder les modifications dans la base de données
+    db.session.commit()
+    return jsonify({'success': 'Status updated successfully'}), 200
+
+@blueprint.route('/get_rapports')
+def get_rapports():
+    rapports = RapportGenere.query.all()
+    rapports_data = [
+        {
+            'id': rapport.id,
+            'nom_operateur': rapport.nom_operateur,
+            'feeder': rapport.feeder,
+            'troncon': rapport.troncon,
+            'date_debut': rapport.date_debut.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_fin': rapport.date_fin.strftime('%Y-%m-%d %H:%M:%S'),
+            'zone': rapport.zone,
+            'date_created': rapport.date_created.strftime('%Y-%m-%d %H:%M:%S')
+        }
+        for rapport in rapports
+    ]
+    return jsonify(rapports_data)
+
+
 @blueprint.route('/get_map_data')
 def get_map_data():
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=20, type=int)
 
-    image_points = ImageUploadVisible.query.filter(
-        ImageUploadVisible.type_defaut.isnot(None),
-        ImageUploadVisible.type_defaut != ""
-    ).paginate(page=page, per_page=per_page, error_out=False)
+    # Récupérer l'utilisateur connecté
+    user = current_user
+
+    # Récupérer le statut sélectionné (par défaut "en attente")
+    selected_status = request.args.get('status', default='en attente')
+
+    # Récupérer l'ID du rapport généré sélectionné
+    rapport_id = request.args.get('rapport_id')
+
+    # Initialiser image_points en fonction de la présence ou non de rapport_id
+    if rapport_id:
+        image_points = ImageUploadVisible.query.filter_by(rapport_genere_id=rapport_id)
+    else:
+        image_points = ImageUploadVisible.query
+
+    # Vérifier si l'utilisateur est un administrateur
+    if user.role == Config.USERS_ROLES['ADMIN']:
+        # Si l'utilisateur est un administrateur, récupérer toutes les données
+        image_points = image_points.filter(
+            ImageUploadVisible.type_defaut.isnot(None),
+            ImageUploadVisible.type_defaut != "",
+            ImageUploadVisible.status.isnot(None)  # Ajouter cette condition pour filtrer les points avec un statut non nul
+        ).paginate(page=page, per_page=per_page, error_out=False)
+    else:
+        # Sinon, récupérer seulement les données de l'utilisateur connecté
+        image_points = image_points.filter(
+            ImageUploadVisible.type_defaut.isnot(None),
+            ImageUploadVisible.type_defaut != "",
+            ImageUploadVisible.status.isnot(None)  # Ajouter cette condition pour filtrer les points avec un statut non nul
+            # Ajouter d'autres conditions si nécessaire pour filtrer par utilisateur
+        ).paginate(page=page, per_page=per_page, error_out=False)
 
     map_data = []
     for point in image_points.items:
-        data = {
-            'latitude': point.latitude,
-            'longitude': point.longitude,
-            'type_defaut': point.type_defaut,
-            'feeder': point.feeder,
-            'troncon': point.troncon,
-            'zone': point.zone,
-            'filename': point.filename,
-            'nom_operateur': point.nom_operateur,
-            'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'image_binary': point.data
-        }
-        map_data.append(data)
+        # Filtrer les points en fonction du statut sélectionné
+        if point.status == selected_status:
+            data = {
+                'imageId': point.id,
+                'latitude': point.latitude,
+                'longitude': point.longitude,
+                'type_defaut': point.type_defaut,
+                'feeder': point.feeder,
+                'troncon': point.troncon,
+                'zone': point.zone,
+                'filename': point.filename,
+                'nom_operateur': point.nom_operateur,
+                'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
+                'image_binary': point.data,
+                'status': point.status  
+            }
+            map_data.append(data)
 
     return jsonify(map_data)
 
@@ -215,6 +285,9 @@ def get_map_data():
 def localisation_page():
     return render_template('home/localisation_defauts.html')
 
+#./////////////////////// page de localisation de défuat§§§§§§§§§§
+
+#//////////////////////page de statistique.////////////////
 
 @blueprint.route('/statistiques')
 @login_required
@@ -251,6 +324,9 @@ def statistiques():
 
 
 
+#//////////////////////page de statistique.////////////////
+
+
 @blueprint.route('/localisation_defauts_invisible_page')
 @login_required
 def localisation_defauts_invisible_page():
@@ -260,6 +336,8 @@ def localisation_defauts_invisible_page():
 @blueprint.route('/statistics_invisible')
 def statistics_invisible():
     return render_template('/statistics/statistics_invisible.html')
+
+#./////////////////////////Partie inspections.///////////////
 
 
 @blueprint.route('/rapport_id_page')
@@ -405,9 +483,18 @@ def generate_resume_rapport():
 @blueprint.route('/mes_rapports')
 @login_required
 def mes_rapports():
-    rapports = DocumentRapportGenere.query.all()
-    return render_template('rapport/mes_rapports.html', rapports=rapports)
+    # Récupérer l'utilisateur connecté
+    user = current_user
 
+    # Vérifier si l'utilisateur est un administrateur
+    if user.role == Config.USERS_ROLES['ADMIN']:
+        # Si l'utilisateur est un administrateur, récupérer tous les rapports
+        rapports = DocumentRapportGenere.query.all()
+    else:
+        # Sinon, récupérer seulement les rapports de l'utilisateur connecté
+        rapports = DocumentRapportGenere.query.filter_by(user_id=user.id).all()
+
+    return render_template('rapport/mes_rapports.html', rapports=rapports)
 
 @blueprint.route('/telecharger_rapport/<int:rapport_id>')
 @login_required
@@ -425,7 +512,7 @@ def telecharger_rapport(rapport_id):
         rapports = DocumentRapportGenere.query.all()
         return render_template('rapport/mes_rapports.html', error_message=error_message, message=message, rapports=rapports)
 
-
+#./////////////////////////Partie inspections.///////////////
 
 
 #chatbot./////////////////pas de login required ici

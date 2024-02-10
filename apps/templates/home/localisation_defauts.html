@@ -1,133 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Leaflet Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
 
-        #map {
-            height: 100vh;
-        }
-    </style>
-</head>
-{% include 'home/index.html' %}
-<body>
+  #map {
+    height: 100vh;
+  }
 
+  /* Styles for the dropdown */
+  #statusDropdown {
+    padding: 8px;
+    margin-right: 10px;
+    font-size: 14px;
+  }
+
+  /* Styles for the popup button */
+  .popup-button {
+    padding: 8px;
+    margin-top: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+  }
+
+  /* Customize button colors based on status */
+  .popup-button-blue {
+    background-color: blue;
+  }
+
+  .popup-button-green {
+    background-color: green;
+  }
+
+  .popup-button-red {
+    background-color: red;
+  }
+
+  .popup-button-gray {
+    background-color: gray;
+  }
+</style>
+
+  </head>
+  {% include 'home/index.html' %}
+  <body>
+    <div>
+      <!-- Ajoutez ceci à l'endroit approprié dans votre HTML -->
+<div>
+  <label for="rapportsDropdown">Choisir le rapport généré :</label>
+  <select id="rapportsDropdown" onchange="updateMapByRapport()">
+    <!-- Les options seront ajoutées dynamiquement avec JavaScript -->
+  </select>
+</div>
+
+      <label for="statusDropdown">Choisir le statut :</label>
+      <select id="statusDropdown" onchange="updateMap()">
+        <option value="en attente">En attente</option>
+        <option value="corriger">Corriger</option>
+        <option value="annuler">Annuler</option>
+      </select>
+    </div>
     <div id="map"></div>
 
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
-        var map;
-        var tileLayers = {};
-        var currentMapType;
+      var map;
+      var tileLayers = {};
+      var currentMapType;
 
-        // Fonction pour créer et afficher la carte par défaut
-        function createDefaultMap() {
-            map = L.map('map', {
-                attributionControl: false
-            }).setView([14.6928, -17.4467], 6); // Centré sur Dakar avec un zoom par défaut
+      // Fonction pour créer et afficher la carte par défaut
+      function createDefaultMap() {
+        map = L.map("map", {
+          attributionControl: false,
+        }).setView([14.6928, -17.4467], 6); // Centré sur Dakar avec un zoom par défaut
 
-            var streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
-                maxZoom: 30,
-            });
+        var streetLayer = L.tileLayer(
+          "https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}",
+          {
+            maxZoom: 30,
+          }
+        );
 
-            var satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-                zIndex: 50,
-                opacity: 1,
-                maxZoom: 24,
-                subdomains: ["mt0", "mt1", "mt2", "mt3"]
-            });
+        var satelliteLayer = L.tileLayer(
+          "https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}",
+          {
+            zIndex: 50,
+            opacity: 1,
+            maxZoom: 24,
+            subdomains: ["mt0", "mt1", "mt2", "mt3"],
+          }
+        );
 
-            var argisSatelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                maxZoom: 17,
-            });
+        var argisSatelliteLayer = L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          {
+            maxZoom: 17,
+          }
+        );
 
-            tileLayers['Street Map'] = streetLayer;
-            tileLayers['Satellite'] = satelliteLayer;
-            tileLayers['Argis Satellite'] = argisSatelliteLayer;
+        tileLayers["Street Map"] = streetLayer;
+        tileLayers["Satellite"] = satelliteLayer;
+        tileLayers["Argis Satellite"] = argisSatelliteLayer;
 
-            streetLayer.addTo(map);
+        streetLayer.addTo(map);
 
-            // Ajouter un gestionnaire d'événements pour gérer le changement de type de carte
-            map.on('baselayerchange', function (eventLayer) {
-                currentMapType = eventLayer.name; // Mettre à jour le type de carte actuel
-            });
-
-            // Ajouter le contrôle de changement de couche
-            L.control.layers(tileLayers).addTo(map);
-        }
-
-        // Appeler la fonction pour créer la carte par défaut
-        createDefaultMap();
-
-        // Ajouter une couche de marqueurs pour afficher les points sur la carte
-        var markersLayer = new L.LayerGroup();
-        markersLayer.addTo(map);
-        // Utiliser le cluster de marqueurs
-        var markers = L.markerClusterGroup();
-        markers.addLayer(markersLayer);
-        map.addLayer(markers);
-       // ...
-
-// Appeler la route Flask pour récupérer les données de la carte
-fetch('/get_map_data')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP! Statut: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Données reçues :", data);  // Vérifier les données dans la console
-
-        if (data.length === 0) {
-            console.log("Aucune donnée à afficher sur la carte.");
-            return;
-        }
-
-        // Créer un tableau de coordonnées des marqueurs
-        var markerCoordinates = data.map(point => [point.latitude, point.longitude]);
-
-        // Créer un marqueur pour chaque point
-        data.forEach(point => {
-            var marker = L.marker([point.latitude, point.longitude]).addTo(markersLayer);
-        
-            marker.bindPopup(
-                `<strong>${point.type_defaut}</strong><br>
-                Feeder: ${point.feeder}<br>
-                Tronçon: ${point.troncon}<br>
-                Zone: ${point.zone}<br>
-                Filename: ${point.filename}<br>
-                Opérateur: ${point.nom_operateur}<br>
-                Date: ${point.upload_date}<br>
-                latitude: ${point.latitude}<br>
-                longitude: ${point.longitude}<br>
-                <img src="data:image/png;base64,${point.image_binary}" alt="Uploaded Image" style="max-width:200px; max-height:200px;" loading="lazy">`
-            );
+        // Ajouter un gestionnaire d'événements pour gérer le changement de type de carte
+        map.on("baselayerchange", function (eventLayer) {
+          currentMapType = eventLayer.name; // Mettre à jour le type de carte actuel
         });
+
+        // Ajouter le contrôle de changement de couche
+        L.control.layers(tileLayers).addTo(map);
+      }
+
+      // Appeler la fonction pour créer la carte par défaut
+      createDefaultMap();
+
+      // Ajouter une couche de marqueurs pour afficher les points sur la carte
+      var markersLayer = new L.LayerGroup();
+      markersLayer.addTo(map);
+      // Utiliser le cluster de marqueurs
+      var markers = L.markerClusterGroup();
+      markers.addLayer(markersLayer);
+      map.addLayer(markers);
+      // ...
+
+      // Appeler la route Flask sans filtre de statut pour récupérer toutes les données de la carte
+      fetch("/get_map_data")
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Erreur HTTP! Statut: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Données reçues :", data);
+
+          // Effacer les marqueurs existants
+          markersLayer.clearLayers();
+
+          // Mettre à jour la carte avec toutes les données récupérées
+          updateMarkers(data);
+        })
+        .catch((error) =>
+          console.error("Erreur lors de la récupération des données:", error)
+        );
+
+        function updateMarkers(data) {
+            data.forEach((point) => {
+                var marker = L.marker([point.latitude, point.longitude]).addTo(
+                    markersLayer
+                );
+        
+                console.log("Statut du point :", point.status);
+        
+                var popupContent = `<strong>${point.type_defaut}</strong><br>
+                                    Feeder: ${point.feeder}<br>
+                                    Tronçon: ${point.troncon}<br>
+                                    Zone: ${point.zone}<br>
+                                    Filename: ${point.filename}<br>
+                                    Opérateur: ${point.nom_operateur}<br>
+                                    Date: ${point.upload_date}<br>
+                                    latitude: ${point.latitude}<br>
+                                    longitude: ${point.longitude}<br>
+                                    <img src="data:image/png;base64,${point.image_binary}" alt="Uploaded Image" style="max-width:200px; max-height:200px;" loading="lazy">`;
+        
+                var buttonColor = getButtonColor(point.status);
+                console.log("Couleur du bouton :", buttonColor);
+        
+                // Utilisez la fonction createPopupButton pour générer le bouton de popup
+                popupContent += createPopupButton(point.imageId, point.status);
+        
+                marker.bindPopup(popupContent);
+            });
+        
+            var markerCoordinates = data.map((point) => [
+                point.latitude,
+                point.longitude,
+            ]);
+            map.flyToBounds(markerCoordinates, { animate: true });
+        }
         
 
-        // Ajuster automatiquement le zoom avec une animation pour s'adapter à tous les marqueurs
-        map.flyToBounds(markerCoordinates, { animate: true });
+      // Fonction pour obtenir la couleur du bouton en fonction du statut
+      function getButtonColor(status) {
+        switch (status) {
+          case "en attente":
+            return "blue";
+          case "corriger":
+            return "green";
+          case "annuler":
+            return "red";
+          default:
+            return "gray";
+        }
+      }
+
+      // Fonction pour mettre à jour la carte en fonction du statut sélectionné
+      function updateMap() {
+        // Récupérer le statut sélectionné
+        var selectedStatus = document.getElementById("statusDropdown").value;
+
+        // Appeler la route Flask avec le statut sélectionné pour récupérer les données de la carte
+        fetch("/get_map_data?status=" + selectedStatus)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Erreur HTTP! Statut: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Données reçues :", data);
+
+            // Effacer les marqueurs existants
+            markersLayer.clearLayers();
+
+            // Mettre à jour la carte avec les nouvelles données
+            updateMarkers(data);
+          })
+          .catch((error) =>
+            console.error("Erreur lors de la récupération des données:", error)
+          );
+      }
+
+      // ...
+
+      // Fonction pour mettre à jour le statut d'un point
+      function updateStatus(imageId, newStatus) {
+        // Appeler la route Flask pour mettre à jour le statut
+        fetch(`/update_status/${imageId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ new_status: newStatus }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Erreur HTTP! Statut: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Statut mis à jour avec succès :", data.success);
+            // Rafraîchir la carte après la mise à jour
+            updateMap();
+          })
+          .catch((error) =>
+            console.error("Erreur lors de la mise à jour du statut:", error)
+          );
+      }
+
+      // ...
+
+      // Fonction pour créer un bouton de popup avec SweetAlert2
+      function createPopupButton(imageId, status) {
+        var buttonColor = getButtonColor(status);
+        // Assurez-vous que l'ID de l'image est correctement transmis à la fonction showStatusDialog
+        return `<button style="background-color: ${buttonColor};" onclick="showStatusDialog(${imageId}, '${status}')">${status}</button>`;
+    }
+    
+      // Fonction pour afficher la boîte de dialogue de modification du statut
+      function showStatusDialog(imageId, currentStatus) {
+        Swal.fire({
+          title: "Choisir un nouveau statut",
+          input: "select",
+          inputOptions: {
+            "en attente": "En attente",
+            corriger: "Corriger",
+            annuler: "Annuler",
+          },
+          inputValue: currentStatus,
+          showCancelButton: true,
+          confirmButtonText: "Enregistrer",
+          cancelButtonText: "Annuler",
+          inputValidator: (value) => {
+            if (!value) {
+              return "Veuillez choisir un statut";
+            }
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Mettre à jour le statut avec la valeur sélectionnée
+            updateStatus(imageId, result.value);
+          }
+        });
+      }
+      // Ajoutez ceci à la fin de votre script JavaScript
+fetch("/get_rapports")
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP! Statut: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then((rapports) => {
+    // Remplissez la liste déroulante avec les rapports générés
+    var rapportsDropdown = document.getElementById("rapportsDropdown");
+    rapports.forEach((rapport) => {
+      var option = document.createElement("option");
+      option.value = rapport.id;
+      option.text = `${rapport.nom_operateur} - ${rapport.feeder} - ${rapport.troncon} - ${rapport.date_created}`;
+      rapportsDropdown.add(option);
+    });
+  })
+  .catch((error) =>
+    console.error("Erreur lors de la récupération des rapports générés:", error)
+  );
+
+// Fonction pour mettre à jour la carte en fonction du rapport généré sélectionné
+function updateMapByRapport() {
+  // Récupérer l'ID du rapport généré sélectionné
+  var selectedRapportId = document.getElementById("rapportsDropdown").value;
+
+  // Appeler la route Flask avec l'ID du rapport généré pour récupérer les données de la carte
+  fetch(`/get_map_data?rapport_id=${selectedRapportId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP! Statut: ${response.status}`);
+      }
+      return response.json();
     })
-    .catch(error => console.error('Erreur lors de la récupération des données:', error));
+    .then((data) => {
+      console.log("Données reçues :", data);
 
-// ...
+      // Effacer les marqueurs existants
+      markersLayer.clearLayers();
 
+      // Mettre à jour la carte avec les nouvelles données
+      updateMarkers(data);
+    })
+    .catch((error) =>
+      console.error("Erreur lors de la récupération des données:", error)
+    );
+}
 
     </script>
-
-</body>
-
+  </body>
 </html>

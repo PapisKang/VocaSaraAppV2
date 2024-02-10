@@ -47,7 +47,7 @@ class Users(db.Model, UserMixin):
     date_created    = db.Column(db.DateTime, default=dt.datetime.utcnow())
     date_modified   = db.Column(db.DateTime, default=db.func.current_timestamp(),
                                                onupdate=db.func.current_timestamp())
-    
+    rapports = db.relationship('DocumentRapportGenere', backref='user', lazy=True)
 
     
 
@@ -206,11 +206,6 @@ class TypeDefaut(db.Model):
     Libelle = Column(String(255))
 
 
-class StatutImageInspection(db.Model):
-    __tablename__ = 'StatutImageInspection'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
-
 class StatutInspection(db.Model):
     __tablename__ = 'StatutInspection'
     id = Column(Integer, primary_key=True)
@@ -257,19 +252,23 @@ class ImageUploadVisible(db.Model):
     compressed_size = db.Column(db.String(20)) 
     upload_date = db.Column(db.DateTime, default=datetime.utcnow)
     data = db.Column(LONGTEXT)
-    
     # Nouvelles colonnes pour la longueur, la largeur et le type de défaut
     longitude = db.Column(db.Float)
     latitude = db.Column(db.Float)
     type_defaut = db.Column(db.String(255))
-    
     feeder = db.Column(db.String(255), nullable=False)
     troncon = db.Column(db.String(255), nullable=False)
     zone = db.Column(db.String(255), nullable=False)
     type_image = db.Column(db.String(20), default='Visible')
+    # Nouvelle colonne pour le statut avec la valeur par défaut "en attente"
+    status = db.Column(db.String(20), default='en attente')
+    # Nouvelles colonnes pour le nom de la personne qui a mis à jour le statut et la date de mise à jour
+    updated_by = db.Column(db.String(64))
+    update_date = db.Column(db.DateTime)
     #Relation avec RapportGenere
     rapport_genere_id = db.Column(db.Integer, db.ForeignKey('RapportGenere.id'))
-    rapport_genere = db.relationship('RapportGenere', back_populates='images_upload_visible')  # Modifier ici
+    rapport_genere = db.relationship('RapportGenere', back_populates='images_upload_visible')
+
 
 
 # Définition du modèle ImageUploadInvisible
@@ -300,5 +299,5 @@ class DocumentRapportGenere(db.Model):
     data = db.Column(db.LargeBinary)
         # Foreign key reference
     rapport_genere_id = db.Column(db.Integer, db.ForeignKey('RapportGenere.id'))
-
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
