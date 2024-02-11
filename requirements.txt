@@ -78,4 +78,8 @@ pyspellchecker
 transformers
 langid
 Flask-Cors
+<<<<<<< HEAD
+>>>>>>> Prince-Gildas
+=======
+python-docx
 >>>>>>> Prince-Gildas
