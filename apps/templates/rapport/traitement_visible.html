@@ -1,90 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Image Upload</title>
     <!-- Linking Bootstrap CSS -->
+<<<<<<< HEAD
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" >
+=======
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+>>>>>>> Prince-Gildas
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+      }
 
-        .upload-container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin: 20px auto;
-            max-width: 600px;
-        }
+      .upload-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin: 20px auto;
+        max-width: 600px;
+      }
 
-        .center-container img {
-            width: 100%;
-            max-width: 300px;
-            height: auto;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            object-fit: cover;
-            cursor: pointer;
-        }
+      .center-container img {
+        width: 100%;
+        max-width: 300px;
+        height: auto;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        object-fit: cover;
+        cursor: pointer;
+      }
 
-        .center-container p {
-            font-size: 12px;
-            color: #333;
-        }
+      .center-container p {
+        font-size: 12px;
+        color: #333;
+      }
 
-        .preview-container {
-            display: flex;
-            flex-wrap: wrap;
-        }
+      .preview-container {
+        display: flex;
+        flex-wrap: wrap;
+      }
 
-        .preview-container img {
-            width: 100%;
-            max-width: 100px;
-            height: auto;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            object-fit: cover;
-        }
+      .preview-container img {
+        width: 100%;
+        max-width: 100px;
+        height: auto;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        object-fit: cover;
+      }
 
-        .preview-container .image-preview {
-            position: relative;
-        }
+      .preview-container .image-preview {
+        position: relative;
+      }
 
-        .preview-container .deselect-btn {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: red;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            cursor: pointer;
-        }
+      .preview-container .deselect-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: red;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        cursor: pointer;
+      }
 
-        .selected-count {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #333;
-        }
+      .selected-count {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #333;
+      }
 
-        .results-container {
-            margin-top: 50px;
-        }
+      .results-container {
+        margin-top: 50px;
+      }
 
-        .results-container h2 {
-            margin-bottom: 20px;
-        }
+      .results-container h2 {
+        margin-bottom: 20px;
+      }
 
+<<<<<<< HEAD
         .results-container .card {
             margin-bottom: 20px;
         }
@@ -126,12 +133,17 @@
   }
   
 
+=======
+      .results-container .card {
+        margin-bottom: 20px;
+      }
+>>>>>>> Prince-Gildas
     </style>
-</head>
-{%include 'home/index.html'%}
-<body>
-
+  </head>
+  {%include 'home/index.html'%}
+  <body>
     <div class="container">
+<<<<<<< HEAD
         <div class="upload-container">
             <h2 class="text-center mb-4">Chargement d'images Normale</h2>
 
@@ -156,36 +168,83 @@
             <div class="preview-container" id="preview-container"></div>
             <div class="selected-count" id="selected-count"></div>
         </div>
+=======
+      <div class="upload-container">
+        <h2 class="text-center mb-4">Chargement d'images Normale</h2>
+        <p class="text-center mb-3">Cette opération peut prendre du temps</p>
+
+        <form
+          action="{{ url_for('authentication_blueprint.upload_and_traitement_visible') }}"
+          method="post"
+          enctype="multipart/form-data"
+        >
+          <div class="center-container text-center">
+            <label for="file-input" class="mb-3">
+              <img
+                src="{{ config.ASSETS_ROOT }}/img/illustrations/3204121.jpg"
+                alt="Illustration"
+                id="illustration"
+                loading="lazy"
+              />
+              <p>Cliquez ici pour sélectionner une image</p>
+            </label>
+          </div>
+          <input
+            type="file"
+            name="file"
+            multiple
+            id="file-input"
+            style="display: none"
+          />
+          <progress
+            value="0"
+            max="100"
+            id="progress-bar"
+            class="w-100 my-2"
+          ></progress>
+          <button type="submit" class="btn btn-primary btn-block">
+            Télécharger
+          </button>
+        </form>
+        <div class="preview-container" id="preview-container"></div>
+        <div class="selected-count" id="selected-count"></div>
+      </div>
+>>>>>>> Prince-Gildas
     </div>
 
     <!-- Nouveau conteneur pour les images traitées et leurs prédictions -->
     <div class="container results-container">
-        <h2 class="text-center mb-4">Résultats du Traitement des Images</h2>
-        <div class="row">
-            <!-- Les résultats seront insérés ici -->
-            {% for image in images %}
-            <div class="col-md-4">
-                <div class="card">
-                    <img src="data:image/jpeg;base64,{{ image.data }}" class="card-img-top" alt="{{ image.filename }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ image.filename }}</h5>
-                        <p class="card-text">Prédictions pour {{ image.filename }}:</p>
-                        <ul class="list-group list-group-flush">
-                            {% if image.type_defaut %}
-                            <li class="list-group-item">Défaut: {{ image.type_defaut }}</li>
-                            {% else %}
-                            <li class="list-group-item">Aucun défaut détecté</li>
-                            {% endif %}
-                            {% if image.latitude and image.longitude %}
-                            <li class="list-group-item">Latitude: {{ image.latitude }}</li>
-                            <li class="list-group-item">Longitude: {{ image.longitude }}</li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                </div>
+      <h2 class="text-center mb-4">Résultats du Traitement des Images</h2>
+      <div class="row">
+        <!-- Les résultats seront insérés ici -->
+        {% for image in images %}
+        <div class="col-md-4">
+          <div class="card">
+            <img
+              src="data:image/jpeg;base64,{{ image.data }}"
+              class="card-img-top"
+              alt="{{ image.filename }}"
+            />
+            <div class="card-body">
+              <h5 class="card-title">{{ image.filename }}</h5>
+              <p class="card-text">Prédictions pour {{ image.filename }}:</p>
+              <ul class="list-group list-group-flush">
+                {% if image.type_defaut %}
+                <li class="list-group-item">Défaut: {{ image.type_defaut }}</li>
+                {% else %}
+                <li class="list-group-item">Aucun défaut détecté</li>
+                {% endif %} {% if image.latitude and image.longitude %}
+                <li class="list-group-item">Latitude: {{ image.latitude }}</li>
+                <li class="list-group-item">
+                  Longitude: {{ image.longitude }}
+                </li>
+                {% endif %}
+              </ul>
             </div>
-            {% endfor %}
+          </div>
         </div>
+        {% endfor %}
+      </div>
     </div>
 
     <!-- Linking Bootstrap JS and Popper.js (required for Bootstrap) -->
@@ -194,57 +253,57 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        document.getElementById('file-input').addEventListener('change', function (event) {
-            var previewContainer = document.getElementById('preview-container');
-            var selectedCount = document.getElementById('selected-count');
-            var progressBar = document.getElementById('progress-bar');
-            previewContainer.innerHTML = ''; // Clear existing previews
-            progressBar.value = 0;
+      document
+        .getElementById("file-input")
+        .addEventListener("change", function (event) {
+          var previewContainer = document.getElementById("preview-container");
+          var selectedCount = document.getElementById("selected-count");
+          var progressBar = document.getElementById("progress-bar");
+          previewContainer.innerHTML = ""; // Clear existing previews
+          progressBar.value = 0;
 
-            var files = event.target.files;
-            var selectedFiles = [];
+          var files = event.target.files;
+          var selectedFiles = [];
 
-            for (var i = 0; i < files.length; i++) {
-                (function (file) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        var div = document.createElement('div');
-                        div.className = 'image-preview';
-                        var img = document.createElement('img');
-                        img.src = e.target.result;
-                        var btn = document.createElement('button');
-                        btn.className = 'deselect-btn';
-                        btn.innerHTML = 'X';
-                        btn.onclick = function () {
-                            // Remove the file from the input
-                            var dt = new DataTransfer();
-                            var input = document.getElementById('file-input');
-                            var { files } = input;
-                            for (let i = 0; i < files.length; i++) {
-                                if (files[i] !== file) dt.items.add(files[i]);
-                            }
-                            input.files = dt.files;
-                            // Remove the image preview
-                            div.remove();
-                            // Update the selected files array
-                            selectedFiles.splice(selectedFiles.indexOf(file), 1);
-                            // Update the selected count
-                            selectedCount.innerHTML = `Nombre d'images sélectionnées : ${selectedFiles.length}`;
-                        };
-                        div.appendChild(img);
-                        div.appendChild(btn);
-                        previewContainer.appendChild(div);
-                        // Update the selected files array
-                        selectedFiles.push(file);
-                        // Update the selected count
-                        selectedCount.innerHTML = `Nombre d'images sélectionnées : ${selectedFiles.length}`;
-                    };
-                    reader.readAsDataURL(file);
-                })(files[i]);
-            }
+          for (var i = 0; i < files.length; i++) {
+            (function (file) {
+              var reader = new FileReader();
+              reader.onload = function (e) {
+                var div = document.createElement("div");
+                div.className = "image-preview";
+                var img = document.createElement("img");
+                img.src = e.target.result;
+                var btn = document.createElement("button");
+                btn.className = "deselect-btn";
+                btn.innerHTML = "X";
+                btn.onclick = function () {
+                  // Remove the file from the input
+                  var dt = new DataTransfer();
+                  var input = document.getElementById("file-input");
+                  var { files } = input;
+                  for (let i = 0; i < files.length; i++) {
+                    if (files[i] !== file) dt.items.add(files[i]);
+                  }
+                  input.files = dt.files;
+                  // Remove the image preview
+                  div.remove();
+                  // Update the selected files array
+                  selectedFiles.splice(selectedFiles.indexOf(file), 1);
+                  // Update the selected count
+                  selectedCount.innerHTML = `Nombre d'images sélectionnées : ${selectedFiles.length}`;
+                };
+                div.appendChild(img);
+                div.appendChild(btn);
+                previewContainer.appendChild(div);
+                // Update the selected files array
+                selectedFiles.push(file);
+                // Update the selected count
+                selectedCount.innerHTML = `Nombre d'images sélectionnées : ${selectedFiles.length}`;
+              };
+              reader.readAsDataURL(file);
+            })(files[i]);
+          }
         });
     </script>
-
-</body>
-
+  </body>
 </html>

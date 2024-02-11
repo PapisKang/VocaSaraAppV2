@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mes Rapports</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa; /* Couleur de fond */
+            margin: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff; /* Couleur du texte */
+            font-size: 1.5rem;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+            background-color: #fff; /* Couleur de fond des éléments de liste */
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre légère */
+        }
+
+        .rapport-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .rapport-link:hover {
+            color: #0056b3; /* Couleur du texte au survol */
+        }
+
+        .rapport-icon {
+            margin-right: 10px;
+            color: #007bff; /* Couleur de l'icône */
+        }
+
+        .message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .search-container input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .date-container {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            h1 {
+                font-size: 1.2rem;
+            }
+
+            .rapport-link {
+                flex-direction: column;
+                text-align: center;
+                font-size: 0.9rem;
+            }
+
+            .rapport-icon {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+  {%include 'home/index.html'%}
+    <h1>Mes Rapports</h1>
+    <!-- Barre de recherche -->
+    <div class="search-container">
+        <input type="text" id="search-bar" placeholder="Rechercher par nom de rapport">
+    </div>
+
+    <!-- Conteneur pour les résultats -->
+    <div id="result-container">
+        {% if rapports %}
+        <ul>
+            {% for rapport in rapports %}
+            <li class="rapport-item" data-date="{{ rapport.date_de_creation }}">
+                <a href="{{ url_for('home_blueprint.telecharger_rapport', rapport_id=rapport.id) }}" class="rapport-link">
+                    {% if rapport.type_de_fichier == 'excel' %}
+                    <i class="fas fa-file-excel rapport-icon"></i>
+                    {% elif rapport.type_de_fichier == 'word' %}
+                    <i class="fas fa-file-word rapport-icon"></i>
+                    {% else %}
+                    <i class="fas fa-file rapport-icon"></i>
+                    {% endif %}
+                    <strong>{{ rapport.nom_du_rapport }}</strong> - {{ rapport.date_de_creation }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>Aucun rapport disponible.</p>
+        {% endif %}
+    </div>
+
+    {% if 'download_message' in session %}
+    <div class="message success-message">
+        {{ session.pop('download_message') }}
+    </div>
+    {% endif %} {% if 'error_message' in session %}
+    <div class="message error-message">{{ session.pop('error_message') }}</div>
+    {% endif %}
+    <script>
+        $(document).ready(function () {
+            // Barre de recherche dynamique
+            $("#search-bar").on("keyup", function () {
+                var searchTerm = $(this).val().toLowerCase();
+                $(".rapport-item").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(searchTerm) > -1);
+                });
+            });
+            
+            // Regroupement par date (ex. : format 'DD/MM/YYYY')
+            var containers = {};
+            $(".rapport-item").each(function () {
+                var dateText = $(this).data("date").split(' ')[0]; // Extraction de la partie date uniquement
+                if (!containers[dateText]) {
+                    containers[dateText] = $("<div class='date-container'></div>").appendTo("#result-container");
+                }
+                $(this).appendTo(containers[dateText]);
+            });
+        });
+    </script>
+</body>
+</html>

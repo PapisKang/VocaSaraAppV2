@@ -17,7 +17,7 @@ class Email_config(object):
 class Config(object):
     
 
-    USERS_ROLES  = { 'ADMIN'  :1 , 'USER'      : 2 }
+    USERS_ROLES  = { 'ADMIN'  :1 , 'USER'      : 2 , 'TECHNICIEN':3}
     USERS_STATUS = { 'ACTIVE' :1 , 'SUSPENDED' : 2 }
     
     # USERS_STATUS = { 'ACTIVE' :1 , 'SUSPENDED' : 2 }
@@ -28,9 +28,6 @@ class Config(object):
 
     DEFAULT_IMAGE_URL =  'static/assets/images/'
   
-
-
-
     basedir = os.path.abspath(os.path.dirname(__file__))
 
     # Set up the App SECRET_KEY

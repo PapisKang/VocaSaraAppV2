@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Localisation des defauts</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            height: 100vh;
+        }
+    </style>
+</head>
+{% include 'home/index.html' %}
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script>
+        var map;
+        var tileLayers = {};
+        var currentMapType;
+
+        function createDefaultMap() {
+            map = L.map('map', {
+                attributionControl: false
+            }).setView([14.6928, -17.4467], 6);
+
+            var streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+                maxZoom: 30,
+            });
+
+            var satelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+                zIndex: 50,
+                opacity: 1,
+                maxZoom: 24,
+                subdomains: ["mt0", "mt1", "mt2", "mt3"]
+            });
+
+            var argisSatelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 17,
+            });
+
+            tileLayers['Street Map'] = streetLayer;
+            tileLayers['Satellite'] = satelliteLayer;
+            tileLayers['Argis Satellite'] = argisSatelliteLayer;
+
+            streetLayer.addTo(map);
+
+            map.on('baselayerchange', function (eventLayer) {
+                currentMapType = eventLayer.name;
+            });
+
+            L.control.layers(tileLayers).addTo(map);
+        }
+
+        createDefaultMap();
+
+ 
+    </script>
+
+</body>
+
+</html>

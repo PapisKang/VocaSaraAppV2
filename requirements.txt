@@ -64,6 +64,13 @@ piexif
 opencv-python
 keras
 pillow
-# flask_mysqldb
-# mysqlclient==2.1.1
-# psycopg2-binary 
+nltk
+fuzzywuzzy
+Flask-Limiter
+langdetect
+unidecode
+pyspellchecker
+transformers
+langid
+Flask-Cors
+python-docx

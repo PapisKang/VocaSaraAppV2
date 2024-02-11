@@ -8,53 +8,86 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       background-color: #f4f4f4;
-      margin: 0; /* Supprimer la marge par défaut du body */
-      min-height: 100vh; /* Occuper au moins 100% de la hauteur de la fenêtre */
+      margin: 0;
+      min-height: 100vh;
       display: flex;
-      flex-direction: column; /* Aligner les éléments verticalement */
+      flex-direction: column;
     }
-
+    
     .container-main {
       display: flex;
+<<<<<<< HEAD
       justify-content: space-between;
       max-width: 900px;
       margin: 50px auto;
       flex: 1; /* Utiliser l'espace restant pour la flexbox */
+=======
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 10px; /* Réduction de la marge supérieure */
+>>>>>>> Prince-Gildas
     }
-
+    
     .container-form {
+<<<<<<< HEAD
       flex: 1;
       padding: 20px;
       background-color: #fff;
       border-radius: 18px;
+=======
+      width: 100%;
+      max-width: 600px;
+      padding: 10px; /* Réduction de l'espacement intérieur */
+      background-color: #ffffff;
+      border-radius: 8px;
+>>>>>>> Prince-Gildas
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-
-    #illustration {
-      max-width: 60%;
-      height: auto;
-    }
-
+    
     form {
       display: grid;
-      gap: 10px;
+      gap: 15px; /* Réduction de l'espacement entre les éléments du formulaire */
     }
-
+    
     label {
+      color: #007bff;
       font-weight: bold;
     }
-
+    
+    input,
+    select {
+      width: 100%;
+      padding: 8px; /* Réduction de la taille du padding */
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      transition: border-color 0.3s ease;
+    }
+    
+    input:focus,
+    select:focus {
+      border-color: #007bff;
+    }
+    
     button {
+<<<<<<< HEAD
       background-color:cornflowerblue;
+=======
+      background-color: #28a745;
+>>>>>>> Prince-Gildas
       color: #fff;
-      padding: 10px;
+      padding: 10px; /* Réduction de la taille du padding */
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-
+    
+    button:hover {
+      background-color: #218838;
+    }
+    
     .error-message {
       color: #ff0000;
       display: none;
@@ -77,6 +110,7 @@
     margin-left: 70px;
     margin-right: 20px;
     
+<<<<<<< HEAD
   }
 
   /* Ajuster la taille des étiquettes sur les petits écrans */
@@ -99,10 +133,24 @@
   }
 }
 
+=======
+    @media (max-width: 768px) {
+      .container-form {
+        width: 100%;
+        margin: 0;
+      }
+      input,
+      select {
+        width: 100%;
+      }
+    }
+    
+    
+>>>>>>> Prince-Gildas
   </style>
 </head>
-{%include 'home/index.html'%}
 <body>
+{%include 'home/index.html'%}
 
   <div id="sidebar-container"></div>
   <div class="container-main">
@@ -148,20 +196,16 @@
         <label for="groupementTroncon"> <i class="fas fa-object-group"></i> Groupement troncon:</label>
         <input type="text" id="groupementTroncon" name="groupementTroncon">
 
+<<<<<<< HEAD
         <button type="submit" onclick="saveFormData()"> <i class="fa-fw fas fa-check"></i> Confirmer</button>
+=======
+        <button type="submit" onclick="saveFormData()">Confirmer</button>
+      
+>>>>>>> Prince-Gildas
       </form>
 
       <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
     </div>
-    <!-- Ajout du message pour demander l'autorisation des cookies -->
-<div id="cookie-consent-message" style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #333; color: #fff; padding: 10px; text-align: center; z-index: 1000;">
-  En utilisant ce site, vous acceptez l'utilisation de cookies pour améliorer votre expérience de navigation. <a href="#" onclick="acceptCookies()">J'accepte</a>
-</div>
-
-
-    <img src="{{ config.ASSETS_ROOT }}/img/illustrations/3129554.jpg" alt="Illustration"
-         id="illustration" loading="lazy">
-  </div>
 
   
 
