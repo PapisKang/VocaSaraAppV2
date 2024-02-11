@@ -64,6 +64,14 @@
     <!-- Les options seront ajoutées dynamiquement avec JavaScript -->
   </select>
 </div>
+<!-- Add this inside your HTML, where you want the dropdown to appear -->
+<div>
+  <label for="defaultTypeDropdown">Choisir le type de défaut :</label>
+  <select id="defaultTypeDropdown" onchange="updateMapByDefaultType()">
+    <!-- Options will be added dynamically with JavaScript -->
+  </select>
+</div>
+
 
       <label for="statusDropdown">Choisir le statut :</label>
       <select id="statusDropdown" onchange="updateMap()">
@@ -351,6 +359,58 @@ function updateMapByRapport() {
       console.error("Erreur lors de la récupération des données:", error)
     );
 }
+// Add this to the end of your JavaScript
+fetch("/get_default_types")
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP! Statut: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then((defaultTypes) => {
+    // Fill the dropdown with default types
+    var defaultTypeDropdown = document.getElementById("defaultTypeDropdown");
+    defaultTypes.forEach((defaultType) => {
+      var option = document.createElement("option");
+      option.value = defaultType;
+      option.text = defaultType;
+      defaultTypeDropdown.add(option);
+    });
+  })
+  .catch((error) =>
+    console.error("Erreur lors de la récupération des types de défauts:", error)
+  );
+
+// Function to update the map based on the selected default type
+function updateMapByDefaultType() {
+  // Get the selected default type
+  var selectedDefaultType = document.getElementById("defaultTypeDropdown").value;
+
+  // Call the Flask route with the selected default type to get map data
+  fetch(`/get_map_data?default_type=${selectedDefaultType}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP! Statut: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Données reçues :", data);
+
+      // Clear existing markers
+      markersLayer.clearLayers();
+
+      // Filter data based on the selected default type
+      var filteredData = data.filter((point) => point.type_defaut === selectedDefaultType);
+
+      // Update the map with new filtered data
+      updateMarkers(filteredData);
+    })
+    .catch((error) =>
+      console.error("Erreur lors de la récupération des données:", error)
+    );
+}
+
 
     </script>
   </body>

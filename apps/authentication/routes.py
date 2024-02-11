@@ -62,7 +62,7 @@ from keras.models import load_model
 import matplotlib.pyplot as plt
 from fractions import Fraction
 from flask import Markup
-
+import logging
 # classification d'images chargement du model
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -798,92 +798,98 @@ def results_page(rapport_genere_id):
 @login_required
 @blueprint.route('/upload_and_traitement_visible', methods=['POST'])
 def upload_and_traitement_visible():
+    try:
+        # Assurez-vous de récupérer le champ "file" comme une liste
+        files = request.files.getlist('file')
+
+        # Créer un identifiant unique pour le sous-répertoire
+        user_subdirectory = str(uuid.uuid4())
+
+        # Chemin du sous-répertoire dans le répertoire UPLOAD_FOLDER
+        user_upload_path = os.path.join(app.config['UPLOAD_FOLDER'], user_subdirectory)
+
+        # Créer le sous-répertoire
+        os.makedirs(user_upload_path)
+
+        # Charger le modèle d'apprentissage automatique et les étiquettes de classe
+        model_path = 'apps/IA/model/trained_tensorflow_model_MobileNetV2_normalV2.h5'
+        model = load_model(model_path)
+        class_labels_path = 'apps/IA/label/class_labels_normalv2.txt'
+        with open(class_labels_path, 'r') as f:
+            class_labels = f.read().splitlines()
+
+        # Ajout de la déclaration pour threshold
+        threshold = 0.5  # Vous pouvez ajuster cette valeur en fonction de vos besoins
+
+        rapport_genere_id = None  # Déclarer rapport_genere_id à l'extérieur de la boucle
+
+        for file in files:
+            try:
+                # Le traitement pour chaque fichier est similaire à votre code existant
+                filename = secure_filename(file.filename)
+
+                # Sauvegarder le fichier dans le sous-répertoire
+                file_path = os.path.join(user_upload_path, filename)
+                file.save(file_path)
+
+                # Préparer l'image pour la classification
+                img_array = prepare_image_from_path(file_path)
+                predictions = model.predict(img_array)
+                predicted_class_indices = np.where(predictions > threshold)[1]
+
+                # Extraire les coordonnées GPS si disponibles
+                gps_info = extract_gps_info(file_path)
+
+                # Compresser l'image
+                compressed_data = compress_image(file_path)
+
+                # Obtenir la taille de l'image originale
+                original_size = os.path.getsize(file_path)
+
+                # Créer une nouvelle instance de ImageUploadVisible avec les résultats
+                new_image = ImageUploadVisible(
+                    filename=filename,
+                    data=compressed_data,  # Stocker les données compressées
+                    original_size=convert_size(original_size),  # Stocker la taille originale
+                    compressed_size=convert_size(len(compressed_data)),  # Stocker la taille compressée
+                    nom_operateur=current_user.email,
+                    feeder=request.cookies.get('feeder'),
+                    troncon=request.cookies.get('troncon'),
+                    zone=request.cookies.get('zone'),
+                    groupement_troncon=request.cookies.get('groupementTroncon'),
+                    type_image=request.cookies.get('selectedOption'),
+                    latitude=gps_info['latitude'] if gps_info else None,
+                    longitude=gps_info['longitude'] if gps_info else None,
+                    type_defaut=class_labels[predicted_class_indices[0]] if predicted_class_indices.size > 0 else None
+                )
+
+                # Associer l'image au rapport généré
+                if rapport_genere_id is None:
+                    rapport_genere_id = request.cookies.get('rapportGenereId')
+                new_image.rapport_genere_id = rapport_genere_id
+
+                # Ajouter à la base de données (pas besoin de commit ici)
+                db.session.add(new_image)
+
+            except Exception as e:
+                logging.error(f"Error processing image {filename}: {e}")
+
+        # Ajouter le commit ici, après avoir traité tous les fichiers
+        db.session.commit()
+
+        # Supprimer le sous-répertoire après le traitement des images
+        shutil.rmtree(user_upload_path)
+
+        # Rendre le template avec le message de succès et les résultats
+        rapport_genere_id = request.cookies.get('rapportGenereId')
+        return redirect(url_for('authentication_blueprint.results_page', rapport_genere_id=rapport_genere_id))
+
+    except Exception as main_exception:
+        logging.error(f"Error in upload_and_traitement_visible route: {main_exception}")
+        # Ajoutez des logs spécifiques si nécessaire pour détailler l'erreur
+        return "Internal Server Error", 500  # Retourner une réponse d'erreur HTTP avec le code 500
     
-    # Assurez-vous de récupérer le champ "file" comme une liste
-    files = request.files.getlist('file')
-
-    # Créer un identifiant unique pour le sous-répertoire
-    user_subdirectory = str(uuid.uuid4())
-
-    # Chemin du sous-répertoire dans le répertoire UPLOAD_FOLDER
-    user_upload_path = os.path.join(app.config['UPLOAD_FOLDER'], user_subdirectory)
-
-    # Créer le sous-répertoire
-    os.makedirs(user_upload_path)
-
-    # Charger le modèle d'apprentissage automatique et les étiquettes de classe
-    model_path = 'apps/IA/model/trained_tensorflow_model_MobileNetV2_normalV2.h5'
-    model = load_model(model_path)
-    class_labels_path = 'apps/IA/label/class_labels_normalv2.txt'
-    with open(class_labels_path, 'r') as f:
-        class_labels = f.read().splitlines()
-
-    # Ajout de la déclaration pour threshold
-    threshold = 0.5  # Vous pouvez ajuster cette valeur en fonction de vos besoins
-
-    rapport_genere_id = None  # Déclarer rapport_genere_id à l'extérieur de la boucle
-
-    for file in files:
-        try:
-            # Le traitement pour chaque fichier est similaire à votre code existant
-            filename = secure_filename(file.filename)
-
-            # Sauvegarder le fichier dans le sous-répertoire
-            file_path = os.path.join(user_upload_path, filename)
-            file.save(file_path)
-
-            # Préparer l'image pour la classification
-            img_array = prepare_image_from_path(file_path)
-            predictions = model.predict(img_array)
-            predicted_class_indices = np.where(predictions > threshold)[1]
-
-            # Extraire les coordonnées GPS si disponibles
-            gps_info = extract_gps_info(file_path)
-            
-
-            # Compresser l'image
-            compressed_data = compress_image(file_path)
-
-            # Obtenir la taille de l'image originale
-            original_size = os.path.getsize(file_path)
-
-            # Créer une nouvelle instance de ImageUploadVisible avec les résultats
-            new_image = ImageUploadVisible(
-                filename=filename,
-                data=compressed_data,  # Stocker les données compressées
-                original_size=convert_size(original_size),  # Stocker la taille originale
-                compressed_size=convert_size(len(compressed_data)),  # Stocker la taille compressée
-                nom_operateur=current_user.email,
-                feeder=request.cookies.get('feeder'),
-                troncon=request.cookies.get('troncon'),
-                zone=request.cookies.get('zone'),
-                type_image=request.cookies.get('selectedOption'),
-                latitude=gps_info['latitude'] if gps_info else None,
-                longitude=gps_info['longitude'] if gps_info else None,
-                type_defaut=class_labels[predicted_class_indices[0]] if predicted_class_indices.size > 0 else None
-            )
-
-            # Associer l'image au rapport généré
-            if rapport_genere_id is None:
-                rapport_genere_id = request.cookies.get('rapportGenereId')
-            new_image.rapport_genere_id = rapport_genere_id
-
-            # Ajouter à la base de données (pas besoin de commit ici)
-            db.session.add(new_image)
-
-        except Exception as e:
-            print(f"Error processing image: {e}")
-
-    # Ajouter le commit ici, après avoir traité tous les fichiers
-    db.session.commit()
-
-    # Supprimer le sous-répertoire après le traitement des images
-    shutil.rmtree(user_upload_path)
-
-    # Rendre le template avec le message de succès et les résultats
-    rapport_genere_id = request.cookies.get('rapportGenereId')
-    return redirect(url_for('authentication_blueprint.results_page', rapport_genere_id=rapport_genere_id))
-
+    
 def convert_size(size_bytes):
     if size_bytes == 0:
         return "0B"

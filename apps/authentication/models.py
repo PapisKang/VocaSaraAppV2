@@ -47,9 +47,7 @@ class Users(db.Model, UserMixin):
     date_created    = db.Column(db.DateTime, default=dt.datetime.utcnow())
     date_modified   = db.Column(db.DateTime, default=db.func.current_timestamp(),
                                                onupdate=db.func.current_timestamp())
-    rapports = db.relationship('DocumentRapportGenere', backref='user', lazy=True)
-
-    
+ 
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
@@ -259,6 +257,7 @@ class ImageUploadVisible(db.Model):
     feeder = db.Column(db.String(255), nullable=False)
     troncon = db.Column(db.String(255), nullable=False)
     zone = db.Column(db.String(255), nullable=False)
+    groupement_troncon = db.Column(db.String(255), nullable=False)
     type_image = db.Column(db.String(20), default='Visible')
     # Nouvelle colonne pour le statut avec la valeur par défaut "en attente"
     status = db.Column(db.String(20), default='en attente')
@@ -296,8 +295,6 @@ class DocumentRapportGenere(db.Model):
     nom_operateur = db.Column(db.String(64), nullable=False, default=None)
     nom_du_rapport = db.Column(db.String(255), nullable=False)
     date_de_creation = db.Column(db.DateTime, default=datetime.utcnow)
-    data = db.Column(db.LargeBinary)
-        # Foreign key reference
-    rapport_genere_id = db.Column(db.Integer, db.ForeignKey('RapportGenere.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    data = db.Column(db.LargeBinary(length=1000000))
+    type_de_fichier = db.Column(db.String(10))
 

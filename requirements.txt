@@ -73,3 +73,4 @@ pyspellchecker
 transformers
 langid
 Flask-Cors
+python-docx
