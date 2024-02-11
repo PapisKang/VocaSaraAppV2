@@ -511,20 +511,20 @@ def generate_report_document():
             image = PILIMAGE.open(BytesIO(image_data_bytes))
 
             # Récupérer les informations sur les défauts
-            # Supposant que les défauts sont séparés par des barres obliques
-            defects = image_info.type_defaut.split('/')
-
-            for defect in defects:
-                defect = defect.strip()
-                # Accédez aux remarques et conseils depuis le fichier JSON
-                remarque = "Remarque par défaut"
-                conseil = "Conseil par défaut"
-                for defaut, info in normes_conseils_data.items():
-                    if defect in defaut:
-                        remarque = info.get("I", "Remarque par défaut")
-                        conseil = info.get("J", "Conseil par défaut")
-                        break
-
+            # Vérifier si type_defaut est None avant de le diviser
+            if image_info.type_defaut:
+                defects = image_info.type_defaut.split('/')
+                for defect in defects:
+                    defect = defect.strip()
+                    # Accédez aux remarques et conseils depuis le fichier JSON
+                    remarque = "Remarque par défaut"
+                    conseil = "Conseil par défaut"
+                    for defaut, info in normes_conseils_data.items():
+                        if defect in defaut:
+                            remarque = info.get("I", "Remarque par défaut")
+                            conseil = info.get("J", "Conseil par défaut")
+                            break
+                        
                 # Ajouter une page pour chaque défaut
                 document.add_page_break()
                 page = document.add_paragraph()
