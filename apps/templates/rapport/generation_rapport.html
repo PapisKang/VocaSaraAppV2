@@ -132,6 +132,12 @@
           <option value="DNO">DNO</option>
           <option value="DRE">DRE</option>
         </select>
+        <label for="type">Type:</label>
+        <select id="type" name="type" required>
+          <option value="" disabled selected>Choisissez le type</option>
+          <option value="Visible">Normal</option>
+          <option value="Invisible">Thermique</option>
+        </select>
         
         <label for="groupementTroncon">Groupement troncon:</label>
         <input type="text" id="groupementTroncon" name="groupementTroncon">
@@ -163,6 +169,7 @@
       const dateFin = encodeURIComponent(document.getElementById("dateFin").value);
       const operateur = encodeURIComponent(document.getElementById("operateur").value);
       const zone = encodeURIComponent(document.getElementById("zone").value);
+      const type = encodeURIComponent(document.getElementById("type").value);
       const groupementTroncon = encodeURIComponent(document.getElementById("groupementTroncon").value);
 
   // Encode les valeurs pour les cookies
@@ -182,10 +189,11 @@
       document.cookie = `dateFin=${dateFin}; path=/`;
       document.cookie = `operateur=${operateur}; path=/`;
       document.cookie = `zone=${zone}; path=/`;
+      document.cookie = `type=${type}; path=/`;
       document.cookie = `groupementTroncon=${groupementTroncon}; path=/`;
         // Soumettre le formulaire
             // Vérifier si les champs obligatoires sont vides
-    if (!feederValue || !tronconValue || !dateDebut || !dateFin || !groupementTroncon || !zone) {
+    if (!feederValue || !tronconValue || !dateDebut || !dateFin || !groupementTroncon || !zone || !type) {
       document.getElementById("errorMessage").style.display = "block";  // Afficher le message d'erreur
       return;  // Arrêter le traitement si des champs obligatoires sont vides
   }
@@ -236,6 +244,9 @@
       }
       if (formData.zone) {
         document.getElementById("zone").value = formData.zone;
+      }
+      if (formData.type) {
+        document.getElementById("type").value = formData.type;
       }
       if (formData.groupementTroncon) {
         document.getElementById("groupementTroncon").value = formData.groupementTroncon;

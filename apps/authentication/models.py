@@ -235,7 +235,7 @@ class RapportGenere(db.Model):
 
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
-
+    type_defaut = db.Column(db.String(255), nullable=False)
     # Relations avec les images visibles et invisibles
     images_upload_visible = db.relationship('ImageUploadVisible', back_populates='rapport_genere', cascade='all, delete-orphan')
     images_upload_invisible = db.relationship('ImageUploadInvisible', back_populates='rapport_genere', cascade='all, delete-orphan')
@@ -281,8 +281,9 @@ class ImageUploadInvisible(db.Model):
     upload_date = db.Column(db.DateTime, default=datetime.utcnow)
     data = db.Column(LONGTEXT)
     # Nouvelles colonnes pour la longueur, la largeur et le type de défaut
-    longitude = db.Column(db.Float)
-    latitude = db.Column(db.Float)
+    # Changer la déclaration de la colonne longitude dans le modèle ImageUploadInvisible
+    longitude = db.Column(db.String(20))
+    latitude = db.Column(db.String(20))
     type_defaut = db.Column(db.String(255))
     temperature = db.Column(db.String(255))
     feeder = db.Column(db.String(255), nullable=False)
@@ -295,6 +296,7 @@ class ImageUploadInvisible(db.Model):
     # Nouvelles colonnes pour le nom de la personne qui a mis à jour le statut et la date de mise à jour
     updated_by = db.Column(db.String(64))
     update_date = db.Column(db.DateTime)
+    display = db.Column(db.String(3), default='no')
     #Relation avec RapportGenere
     rapport_genere_id = db.Column(db.Integer, db.ForeignKey('RapportGenere.id'))
     rapport_genere = db.relationship('RapportGenere', back_populates='images_upload_invisible')
