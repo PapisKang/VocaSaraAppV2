@@ -33,8 +33,8 @@
       }
     </style>
   </head>
-  {%include 'home/index.html'%}
   <body>
+    {%include 'home/index.html'%}
     <div class="chart-container">
       <h2>Pie Chart - Répartition des Défauts</h2>
       <canvas id="defautChart"></canvas>
@@ -47,7 +47,7 @@
 
     <script>
       // Récupérer les données passées par Flask
-      var data = JSON.parse("{{ data | safe }}");
+      var data = JSON.parse(`{{ data | safe }}`);
 
       // Générer des couleurs aléatoires pour chaque segment de pie chart
       var randomColors = Array.from(

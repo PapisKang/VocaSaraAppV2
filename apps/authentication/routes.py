@@ -1131,7 +1131,7 @@ def extract_data_for_image(file_path):
         gray = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
         température = pytesseract.image_to_string(gray)  # température
         nom_image = os.path.basename(file_path).split('.')[0]
-        return (nom_image, coordonnée, température, coordinates[0], coordinates[1])
+        return (nom_image, coordonnée, température, coordinates[1], coordinates[0])
     except Exception as e:
         logging.error(
             'Erreur lors du traitement de l\'image {}: {}'.format(file_path, str(e)))
