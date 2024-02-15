@@ -363,10 +363,14 @@ def get_rapports_invisible():
 
 @blueprint.route('/get_default_types_invisible')
 def get_default_types_invisible():
-    # Query distinct default types from the database
-    default_types = db.session.query(ImageUploadInvisible.type_defaut).distinct().all()
+    # Query distinct default types from the database excluding "non_defaut"
+    default_types = db.session.query(ImageUploadInvisible.type_defaut).distinct().filter(
+        ImageUploadInvisible.type_defaut != "non_defaut"
+    ).all()
+
     default_types = [row[0] for row in default_types if row[0] is not None]
     return jsonify(default_types)
+
 
 
 @blueprint.route('/get_map_data_invisible')
@@ -384,6 +388,7 @@ def get_map_data_invisible():
         image_points = ImageUploadInvisible.query.filter_by(type_defaut=selected_default_type)
     else:
         image_points = ImageUploadInvisible.query
+
     # Récupérer le statut sélectionné (par défaut "en attente")
     selected_status = request.args.get('status', default='en attente')
 
@@ -395,12 +400,15 @@ def get_map_data_invisible():
         image_points = ImageUploadInvisible.query.filter_by(rapport_genere_id=rapport_id)
     else:
         image_points = ImageUploadInvisible.query
- 
+
     # Si l'utilisateur est un administrateur, récupérer toutes les données
     image_points = image_points.filter(
         ImageUploadInvisible.type_defaut.isnot(None),
         ImageUploadInvisible.type_defaut != "",
-        ImageUploadInvisible.status.isnot(None)  # Ajouter cette condition pour filtrer les points avec un statut non nul
+        ImageUploadInvisible.status.isnot(None),  # Ajouter cette condition pour filtrer les points avec un statut non nul
+        ImageUploadInvisible.display == 'yes',  # Ajouter cette condition pour filtrer les points avec display égal à 'yes'
+        ImageUploadInvisible.longitude.isnot(None),
+        ImageUploadInvisible.latitude.isnot(None),
     ).paginate(page=page, per_page=per_page, error_out=False)
 
     map_data = []
@@ -420,11 +428,12 @@ def get_map_data_invisible():
                 'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
                 'image_binary': point.data,
                 'temperature' : point.temperature,
-                'status': point.status  
+                'status': point.status
             }
             map_data.append(data)
 
     return jsonify(map_data)
+
 
 
 
@@ -550,12 +559,12 @@ def mes_inspections_invisible(rapport_id):
     else:
         return redirect(url_for('authentication_blueprint.index'))
 
-
 @blueprint.route('/generate_report_document_page')
 def generate_report_document_page():
-    rapports = RapportGenere.query.all()
-    return render_template('rapport/creer_un_rapport.html', rapports=rapports)
+    # Filtrer les rapports où type_defaut est "Visible"
+    rapports = RapportGenere.query.filter_by(type_defaut="Visible").all()
 
+    return render_template('rapport/creer_un_rapport.html', rapports=rapports)
 
 @blueprint.route('/generate_report_document', methods=['GET', 'POST'])
 def generate_report_document():
@@ -1043,6 +1052,14 @@ def telecharger_rapport(rapport_id):
         error_message = f"Erreur lors du téléchargement du rapport : {str(e)}"
         rapports = DocumentRapportGenere.query.all()
         return render_template('rapport/mes_rapports.html', error_message=error_message, rapports=rapports)
+
+
+#////////////////////////////////////////Generte invisible rapport////////////////
+
+@blueprint.route('/generate_report_document_page_invisible')
+def generate_report_document_page_invisible():
+    rapports = RapportGenere.query.filter_by(type_defaut="Invisible").all()
+    return render_template('rapport/creer_un_rapport_invisible.html', rapports=rapports)
 
 
 #./////////////////////////Partie inspections.///////////////
