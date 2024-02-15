@@ -123,6 +123,7 @@ def generate_rapport():
     operateur = current_user.email
     groupement_troncon = request.form.get('groupementTroncon')
     zone = request.form.get('zone')
+    type_defaut = request.form.get('type')
 
     # Vérifier si les champs obligatoires sont vides
     if not feeder_nom or not troncon_nom or not date_debut_str or not date_fin_str or not groupement_troncon or not zone:
@@ -163,7 +164,8 @@ def generate_rapport():
         date_debut=date_debut,
         date_fin=date_fin,
         zone=zone,
-        groupement_troncon=groupement_troncon
+        groupement_troncon=groupement_troncon,
+        type_defaut = type_defaut
     )
     db.session.add(new_report)
     db.session.commit()
@@ -219,7 +221,7 @@ def update_status(image_id):
 
 @blueprint.route('/get_rapports')
 def get_rapports():
-    rapports = RapportGenere.query.all()
+    rapports = RapportGenere.query.filter_by(type_defaut="Visible").all()
     rapports_data = [
         {
             'id': rapport.id,
@@ -269,23 +271,13 @@ def get_map_data():
         image_points = ImageUploadVisible.query.filter_by(rapport_genere_id=rapport_id)
     else:
         image_points = ImageUploadVisible.query
-
-    # Vérifier si l'utilisateur est un administrateur
-    if user.role == Config.USERS_ROLES['ADMIN']:
-        # Si l'utilisateur est un administrateur, récupérer toutes les données
-        image_points = image_points.filter(
-            ImageUploadVisible.type_defaut.isnot(None),
-            ImageUploadVisible.type_defaut != "",
-            ImageUploadVisible.status.isnot(None)  # Ajouter cette condition pour filtrer les points avec un statut non nul
-        ).paginate(page=page, per_page=per_page, error_out=False)
-    else:
-        # Sinon, récupérer seulement les données de l'utilisateur connecté
-        image_points = image_points.filter(
-            ImageUploadVisible.type_defaut.isnot(None),
-            ImageUploadVisible.type_defaut != "",
-            ImageUploadVisible.status.isnot(None)  # Ajouter cette condition pour filtrer les points avec un statut non nul
-            # Ajouter d'autres conditions si nécessaire pour filtrer par utilisateur
-        ).paginate(page=page, per_page=per_page, error_out=False)
+ 
+    # Si l'utilisateur est un administrateur, récupérer toutes les données
+    image_points = image_points.filter(
+        ImageUploadVisible.type_defaut.isnot(None),
+        ImageUploadVisible.type_defaut != "",
+        ImageUploadVisible.status.isnot(None)  # Ajouter cette condition pour filtrer les points avec un statut non nul
+    ).paginate(page=page, per_page=per_page, error_out=False)
 
     map_data = []
     for point in image_points.items:
@@ -317,6 +309,138 @@ def localisation_page():
     return render_template('home/localisation_defauts.html')
 
 #./////////////////////// page de localisation de défuat§§§§§§§§§§
+
+#./////////////////////// page de localisation de défaut invisible ////////////////////
+
+@blueprint.route('/localisation_defauts_invisible_page')
+@login_required
+def localisation_defauts_invisible_page():
+    return render_template('/home/localisation_defauts_invisible.html')
+
+
+
+@blueprint.route('/update_status_invisible/<int:image_id>', methods=['POST'])
+@login_required
+def update_status_invisible(image_id):
+    # Récupérer l'utilisateur connecté
+    user = current_user
+    # Récupérer le statut envoyé dans la requête
+    new_status = request.json.get('new_status')
+    # Récupérer l'image à mettre à jour
+    image = ImageUploadInvisible.query.get(image_id)
+    if not image:
+        return jsonify({'error': 'Image not found'}), 404
+    # Mettre à jour les informations
+    image.status = new_status
+    image.updated_by = user.username  # Mettre à jour avec le nom d'utilisateur de l'utilisateur connecté
+    image.update_date = datetime.utcnow()  # Mettre à jour avec la date actuelle
+    # Sauvegarder les modifications dans la base de données
+    db.session.commit()
+    return jsonify({'success': 'Status updated successfully'}), 200
+
+
+@blueprint.route('/get_rapports_invisible')
+def get_rapports_invisible():
+    # Filtrer les rapports où type_defaut est "Invisible"
+    rapports = RapportGenere.query.filter_by(type_defaut="Invisible").all()
+
+    # Créer la liste de données pour les rapports filtrés
+    rapports_data = [
+        {
+            'id': rapport.id,
+            'nom_operateur': rapport.nom_operateur,
+            'feeder': rapport.feeder,
+            'troncon': rapport.troncon,
+            'date_debut': rapport.date_debut.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_fin': rapport.date_fin.strftime('%Y-%m-%d %H:%M:%S'),
+            'zone': rapport.zone,
+            'date_created': rapport.date_created.strftime('%Y-%m-%d %H:%M:%S')
+        }
+        for rapport in rapports
+    ]
+
+    # Retourner les données en format JSON
+    return jsonify(rapports_data)
+
+
+@blueprint.route('/get_default_types_invisible')
+def get_default_types_invisible():
+    # Query distinct default types from the database excluding "non_defaut"
+    default_types = db.session.query(ImageUploadInvisible.type_defaut).distinct().filter(
+        ImageUploadInvisible.type_defaut != "non_defaut"
+    ).all()
+
+    default_types = [row[0] for row in default_types if row[0] is not None]
+    return jsonify(default_types)
+
+
+
+@blueprint.route('/get_map_data_invisible')
+def get_map_data_invisible():
+    page = request.args.get('page', default=1, type=int)
+    per_page = request.args.get('per_page', default=20, type=int)
+
+    # Récupérer l'utilisateur connecté
+    user = current_user
+    # Get the selected default type
+    selected_default_type = request.args.get('default_type')
+
+    # Query the data based on the selected default type
+    if selected_default_type:
+        image_points = ImageUploadInvisible.query.filter_by(type_defaut=selected_default_type)
+    else:
+        image_points = ImageUploadInvisible.query
+
+    # Récupérer le statut sélectionné (par défaut "en attente")
+    selected_status = request.args.get('status', default='en attente')
+
+    # Récupérer l'ID du rapport généré sélectionné
+    rapport_id = request.args.get('rapport_id')
+
+    # Initialiser image_points en fonction de la présence ou non de rapport_id
+    if rapport_id:
+        image_points = ImageUploadInvisible.query.filter_by(rapport_genere_id=rapport_id)
+    else:
+        image_points = ImageUploadInvisible.query
+
+    # Si l'utilisateur est un administrateur, récupérer toutes les données
+    image_points = image_points.filter(
+        ImageUploadInvisible.type_defaut.isnot(None),
+        ImageUploadInvisible.type_defaut != "",
+        ImageUploadInvisible.status.isnot(None),  # Ajouter cette condition pour filtrer les points avec un statut non nul
+        ImageUploadInvisible.display == 'yes',  # Ajouter cette condition pour filtrer les points avec display égal à 'yes'
+        ImageUploadInvisible.longitude.isnot(None),
+        ImageUploadInvisible.latitude.isnot(None),
+    ).paginate(page=page, per_page=per_page, error_out=False)
+
+    map_data = []
+    for point in image_points.items:
+        # Filtrer les points en fonction du statut sélectionné
+        if point.status == selected_status:
+            data = {
+                'imageId': point.id,
+                'latitude': point.latitude,
+                'longitude': point.longitude,
+                'type_defaut': point.type_defaut,
+                'feeder': point.feeder,
+                'troncon': point.troncon,
+                'zone': point.zone,
+                'filename': point.filename,
+                'nom_operateur': point.nom_operateur,
+                'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
+                'image_binary': point.data,
+                'temperature' : point.temperature,
+                'status': point.status
+            }
+            map_data.append(data)
+
+    return jsonify(map_data)
+
+
+
+
+#./////////////////////// page de localisation de défaut invisible ////////////////////
+ 
 
 #//////////////////////page de statistique.////////////////
 
@@ -357,24 +481,54 @@ def statistiques():
 
 #//////////////////////page de statistique.////////////////
 
-
-@blueprint.route('/localisation_defauts_invisible_page')
-@login_required
-def localisation_defauts_invisible_page():
-    return render_template('/home/localisation_defauts_invisible.html')
-
- 
 @blueprint.route('/statistics_invisible')
 def statistics_invisible():
-    return render_template('/statistics/statistics_invisible.html')
+    # Récupérer les statistiques des types de défauts avec les informations supplémentaires
+    type_defaut_stats = db.session.query(
+        ImageUploadInvisible.type_defaut,
+        db.func.count().label('defaut_count')
+    ).filter(
+        ImageUploadInvisible.type_defaut.isnot(None),  # Exclude rows where type_defaut is null
+        ImageUploadInvisible.type_defaut != "non_defaut",  # Exclude rows where type_defaut is "non_defaut"
+        ImageUploadInvisible.display != "no"  # Exclude rows where display is "no"
+    ).group_by(
+        ImageUploadInvisible.type_defaut
+    ).all()
+
+    # Récupérer les dates
+    dates = db.session.query(ImageUploadInvisible.upload_date).all()
+
+    # Convertir les données en format approprié pour les graphiques
+    labels = [row[0] for row in type_defaut_stats]
+    values = [row.defaut_count for row in type_defaut_stats]
+
+    # Préparer les données pour le frontend
+    data = {
+        'labels': labels,
+        'values': values,
+        'dates': dates,
+    }
+
+    # Convertir les données en JSON
+    data_json = json.dumps(data, default=str)
+    return render_template('/statistics/statistics_invisible.html', data=data_json)
+
+
 
 #./////////////////////////Partie inspections.///////////////
 
 
 @blueprint.route('/rapport_id_page')
 def rapport_id_page():
-    rapports = RapportGenere.query.all()
-    return render_template('rapport/rapport_id_page.html',  rapports=rapports)
+    type_defaut = "Visible"  # Remplacez cela par la valeur que vous souhaitez filtrer
+    rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
+    return render_template('rapport/rapport_id_page.html', rapports=rapports)
+
+@blueprint.route('/rapport_id_page_invisible')
+def rapport_id_page_invisible():
+    type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
+    rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
+    return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
 
 @login_required
 @blueprint.route('/mes_inspections/<int:rapport_id>', methods=['GET'])
@@ -388,11 +542,31 @@ def mes_inspections(rapport_id):
         return redirect(url_for('authentication_blueprint.index'))
 
 
+
+
+@login_required
+@blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
+def mes_inspections_invisible(rapport_id):
+    rapport = RapportGenere.query.get(rapport_id)
+    if rapport:
+        # Filtrer les images invisibles avec les conditions spécifiées
+        images_invisibles = ImageUploadInvisible.query.filter(
+            ImageUploadInvisible.rapport_genere_id == rapport_id,
+            ImageUploadInvisible.type_defaut.isnot(None),
+            ImageUploadInvisible.type_defaut != "non_defaut",
+            ImageUploadInvisible.display != "no"
+        ).all()
+
+        return render_template('rapport/mes_inspections_invisible.html', rapport=rapport, images_invisibles=images_invisibles)
+    else:
+        return redirect(url_for('authentication_blueprint.index'))
+
 @blueprint.route('/generate_report_document_page')
 def generate_report_document_page():
-    rapports = RapportGenere.query.all()
-    return render_template('rapport/creer_un_rapport.html', rapports=rapports)
+    # Filtrer les rapports où type_defaut est "Visible"
+    rapports = RapportGenere.query.filter_by(type_defaut="Visible").all()
 
+    return render_template('rapport/creer_un_rapport.html', rapports=rapports)
 
 @blueprint.route('/generate_report_document', methods=['GET', 'POST'])
 def generate_report_document():
@@ -880,6 +1054,14 @@ def telecharger_rapport(rapport_id):
         error_message = f"Erreur lors du téléchargement du rapport : {str(e)}"
         rapports = DocumentRapportGenere.query.all()
         return render_template('rapport/mes_rapports.html', error_message=error_message, rapports=rapports)
+
+
+#////////////////////////////////////////Generte invisible rapport////////////////
+
+@blueprint.route('/generate_report_document_page_invisible')
+def generate_report_document_page_invisible():
+    rapports = RapportGenere.query.filter_by(type_defaut="Invisible").all()
+    return render_template('rapport/creer_un_rapport_invisible.html', rapports=rapports)
 
 
 #./////////////////////////Partie inspections.///////////////

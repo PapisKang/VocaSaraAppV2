@@ -52,17 +52,25 @@ import uuid
 from werkzeug.utils import secure_filename
 from io import BytesIO
 import shutil
-
 import numpy as np
+
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from tensorflow.keras.models import load_model
 
-from keras.models import load_model
-import matplotlib.pyplot as plt
+
 from fractions import Fraction
 from flask import Markup
 import logging
+import pytesseract
+from urllib.parse import unquote
+import locale
+import math
+import traceback
+
+
+
 # classification d'images chargement du model
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -794,6 +802,7 @@ def results_page(rapport_genere_id):
     return render_template('rapport/traitement_visible.html', images=images)
 
 
+
 # Mettez à jour la route pour traiter les images
 @login_required
 @blueprint.route('/upload_and_traitement_visible', methods=['POST'])
@@ -812,9 +821,9 @@ def upload_and_traitement_visible():
         os.makedirs(user_upload_path)
 
         # Charger le modèle d'apprentissage automatique et les étiquettes de classe
-        model_path = 'apps/IA/model/trained_tensorflow_model_MobileNetV2_normalV2.h5'
+        model_path = './apps/IA/model/trained_tensorflow_model_MobileNetV2_normalV2.h5'
         model = load_model(model_path)
-        class_labels_path = 'apps/IA/label/class_labels_normalv2.txt'
+        class_labels_path = './apps/IA/label/class_labels_normalv2.txt'
         with open(class_labels_path, 'r') as f:
             class_labels = f.read().splitlines()
 
@@ -885,10 +894,16 @@ def upload_and_traitement_visible():
         return redirect(url_for('authentication_blueprint.results_page', rapport_genere_id=rapport_genere_id))
 
     except Exception as main_exception:
-        logging.error(f"Error in upload_and_traitement_visible route: {main_exception}")
-        # Ajoutez des logs spécifiques si nécessaire pour détailler l'erreur
-        return "Internal Server Error", 500  # Retourner une réponse d'erreur HTTP avec le code 500
-    
+        error_message = f"Error in upload_and_traitement_visible route: {main_exception}"
+        logging.error(error_message)
+        traceback.print_exc()  # Imprime la trace complète de l'exception
+
+        # Incluez des informations supplémentaires dans le message d'erreur
+        # Pour identifier plus facilement la source de l'erreur
+        error_message += f"\nAdditional Info: {str(main_exception)}"
+
+        # Relevez à nouveau l'exception pour la propager correctement
+        raise RuntimeError(error_message)
     
 def convert_size(size_bytes):
     if size_bytes == 0:
@@ -898,9 +913,6 @@ def convert_size(size_bytes):
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return "%s %s" % (s, size_name[i])
-
-
-import traceback
 
 # Mettez à jour la fonction compress_image pour retourner les données compressées sans sauvegarder sur le disque
 def compress_image(file_path, quality=60):
@@ -931,8 +943,198 @@ def compress_image(file_path, quality=60):
         print(f"Error compressing image: {e}")
         print(traceback.format_exc())  # Imprime la trace complète de l'erreur
         return None
-    
+
+
+# ................IMAAGE//////VISIBLE//////////   
+
+
+#§§§§§§§§§§§§§§§§§§IMAGE INVISIBLE§§§§§§§§§§§§§§§§§
+
+
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+from torchvision.models import mobilenet_v2  # Import de MobileNetV2
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+try:
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+except Exception as e:
+    print("Error can't find tesseract:", e)
+
+
 @login_required
 @blueprint.route("/upload_page_invisible")
 def upload_page_invisible():
     return render_template('rapport/traitement_invisible.html')
+
+
+@blueprint.route('/results_page_invisible/<rapport_genere_id>', methods=['GET'])
+def results_page_invisible(rapport_genere_id):
+    # Récupérer les images associées au rapport généré
+    images = ImageUploadInvisible.query.filter_by(
+        rapport_genere_id=rapport_genere_id).all()
+    return render_template('rapport/traitement_invisible.html', images=images)
+
+# Chargement du modèle pré-entraîné
+def load_model(num_classes):
+    model = mobilenet_v2(pretrained=True)  # Utiliser MobileNetV2
+    num_features = model.classifier[1].in_features
+    model.classifier[1] = nn.Linear(num_features, num_classes)
+    model.features[0][0] = nn.Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)  # Adapter l'entrée à 3 canaux
+    model._dropout = nn.Dropout(0.5)  # Choisir la valeur de dropout souhaitée
+
+    # Chargement des poids du modèle
+    model.load_state_dict(torch.load('./apps/IA/model/model_mobilenetv2_thermo.pt'))  # Assurez-vous d'avoir le bon nom de fichier
+    return model.to(device)
+
+
+# Transformation des images pour la classification
+def prepare_image_from_path(file_path):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    image = Image.open(file_path).convert('RGB')
+    img_tensor = transform(image).unsqueeze(0).to(device)
+    return img_tensor
+
+
+@blueprint.route('/upload_and_traitement_invisible', methods=['POST'])
+@login_required
+def upload_and_traitement_invisible():
+    try:
+        files = request.files.getlist('file')
+        user_subdirectory = str(uuid.uuid4())
+        user_upload_path = os.path.join(app.config['UPLOAD_FOLDER'], user_subdirectory)
+        os.makedirs(user_upload_path)
+
+        class_labels_path = './apps/IA/label/class_label_mobilenetv2_thermo.txt'
+        with open(class_labels_path, 'r') as f:
+            class_labels = f.read().splitlines()
+        num_classes = len(class_labels)
+
+        # Maintenant que num_classes est défini, vous pouvez appeler load_model
+        model = load_model(num_classes)
+
+        threshold = 0.5
+
+        rapport_genere_id = None
+
+        for file in files:
+            try:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(user_upload_path, filename)
+                file.save(file_path)
+
+                img_tensor = prepare_image_from_path(file_path)
+                model.eval()
+                with torch.no_grad():
+                    predictions = model(img_tensor)
+                    probabilities = torch.softmax(predictions, dim=1)[0]
+                    max_prob, predicted_class = torch.max(probabilities, dim=0)
+                    detected_defect = class_labels[predicted_class.item()]
+                    defect_prob = max_prob.item() * 100
+
+
+                    # Extract OCR data
+                    nom_image, coordonnee, temperature, latitude, longitude = extract_data_for_image(
+                        file_path)
+
+                    # Compress the image
+                    compressed_data = compress_image(file_path)
+
+                    # Get the size of the original image
+                    original_size = os.path.getsize(file_path)
+
+                    # Create a new instance of ImageUploadInvisible with the results
+                    new_image = ImageUploadInvisible(
+                        filename=filename,
+                        data=compressed_data,
+                        original_size=convert_size(original_size),
+                        compressed_size=convert_size(len(compressed_data)),
+                        nom_operateur=current_user.email,
+                        feeder=request.cookies.get('feeder'),
+                        troncon=request.cookies.get('troncon'),
+                        zone=request.cookies.get('zone'),
+                        groupement_troncon=request.cookies.get('groupementTroncon'),
+                        type_image=request.cookies.get('selectedOption'),
+                        latitude=latitude,
+                        longitude=longitude,
+                        type_defaut=detected_defect if defect_prob > threshold else None,
+                        temperature=temperature,
+                
+                    )
+
+                    if rapport_genere_id is None:
+                        rapport_genere_id = request.cookies.get('rapportGenereId')
+                    new_image.rapport_genere_id = rapport_genere_id
+
+                    db.session.add(new_image)
+
+            except Exception as e:
+                logging.error(f"Error processing image {filename}: {e}")
+
+        db.session.commit()
+        shutil.rmtree(user_upload_path)
+
+        rapport_genere_id = request.cookies.get('rapportGenereId')
+        return redirect(url_for('authentication_blueprint.results_page_invisible', rapport_genere_id=rapport_genere_id))
+
+    except Exception as main_exception:
+        error_message = f"Error in upload_and_traitement_visible route: {main_exception}"
+        logging.error(error_message)
+        traceback.print_exc()
+        error_message += f"\nAdditional Info: {str(main_exception)}"
+        raise RuntimeError(error_message)
+
+
+def apply_threshold(image, threshold_value):
+    _, thresholded = cv2.threshold(
+        image, threshold_value, 255, cv2.THRESH_BINARY)
+    return thresholded
+
+def remove_lines(image):
+    horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (24, 1))
+    vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 24))
+    horizontal_lines = cv2.morphologyEx(
+        image, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
+    vertical_lines = cv2.morphologyEx(
+        image, cv2.MORPH_OPEN, vertical_kernel, iterations=2)
+    lines = cv2.addWeighted(horizontal_lines, 1, vertical_lines, 1, 0)
+    return cv2.addWeighted(image, 1, lines, -1, 0)
+
+def extract_data_for_image(file_path):
+    try:
+        image = cv2.imread(file_path)
+        if image.shape[0] > 750 or image.shape[1] > 1624:
+            scale_factor = min(750 / image.shape[0], 1624 / image.shape[1])
+            image = cv2.resize(image, (0, 0), fx=scale_factor, fy=scale_factor)
+        # Coordinates extraction
+        x, y, w, h = 440, 690, 305, 38
+        crop_img = image[y:y + h, x:x + w]
+        gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
+        coordonnée = pytesseract.image_to_string(gray)  # coordonnée
+        pattern = r"[-]?\d+[.]\d+,\s*[-]?\d+[.]\d+"
+        matches = re.findall(pattern, coordonnée)
+        coordinates = matches[0].split(',') if len(matches) > 0 else ['', '']
+        # Temperature extraction
+        roi = (660, 550, 460, 37)
+        x, y, w, h = roi
+        if x + w > image.shape[1]:
+            w = image.shape[1] - x
+        if y + h > image.shape[0]:
+            h = image.shape[0] - y
+        roi_img = image[y:y + h, x:x + w]
+        gray = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
+        température = pytesseract.image_to_string(gray)  # température
+        nom_image = os.path.basename(file_path).split('.')[0]
+        return (nom_image, coordonnée, température, coordinates[1], coordinates[0])
+    except Exception as e:
+        logging.error(
+            'Erreur lors du traitement de l\'image {}: {}'.format(file_path, str(e)))
+        return ('', '', '', '', '')
+
+#§§§§§§§§§§§§§§§§§§IMAGE INVISIBLE§§§§§§§§§§§§§§§§§

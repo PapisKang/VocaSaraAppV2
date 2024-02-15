@@ -1,33 +1,109 @@
+<!-- statistiques.html -->
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page en construction</title>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Statistiques des Types de Défauts Invisible</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            padding: 50px;
-        }
+      /* Ajoutez votre CSS ici */
+      body {
+        font-family: Arial, sans-serif;
+      }
 
-        h1 {
-            color: #333;
-        }
+      .chart-container {
+        width: 100%;
+        max-width: 600px; /* Ajustez la largeur maximale selon vos besoins */
+        margin: auto;
+        padding: 20px;
+        margin-left: 250px;
+        margin-top: 50px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
 
-        p {
-            color: #777;
+      @media (min-width: 600px) {
+        .chart-container {
+          display: inline-block;
+          width: 48%; /* Ajustez la largeur selon vos besoins */
+          margin-right: 1%;
         }
+      }
     </style>
-</head>
-{%include 'home/index.html'%}
-<body>
+  </head>
+  <body>
+    {%include 'home/index.html'%}
+    <div class="chart-container">
+      <h2>Pie Chart - Répartition des Défauts</h2>
+      <canvas id="defautChart"></canvas>
+    </div>
 
-    <h1>Page en construction</h1>
-    <p>Nous travaillons actuellement sur cette page. Merci de revenir ultérieurement.</p>
+    <div class="chart-container">
+      <h2>Mixed Chart - Nombre de Défauts et Évolution</h2>
+      <canvas id="mixedChart"></canvas>
+    </div>
 
-</body>
+    <script>
+      // Récupérer les données passées par Flask
+      var data = JSON.parse(`{{ data | safe }}`);
 
+      // Générer des couleurs aléatoires pour chaque segment de pie chart
+      var randomColors = Array.from(
+        { length: data.labels.length },
+        () => "#" + Math.floor(Math.random() * 16777215).toString(16)
+      );
+
+      // Créer le graphique Pie
+      var defautCtx = document.getElementById("defautChart").getContext("2d");
+      var defautChart = new Chart(defautCtx, {
+        type: "pie",
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              label: "Nombre de Défauts",
+              data: data.values,
+              backgroundColor: randomColors,
+              borderColor: "rgba(255, 255, 255, 1)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          // options spécifiques au graphique Pie
+        },
+      });
+
+      // Créer le graphique Mixed
+      var mixedCtx = document.getElementById("mixedChart").getContext("2d");
+      var mixedChart = new Chart(mixedCtx, {
+        type: "bar",
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              label: "Nombre de Défauts",
+              data: data.values,
+              backgroundColor: randomColors,
+              borderColor: "rgba(255, 255, 255, 1)",
+              borderWidth: 1,
+            },
+            {
+              type: "line",
+              label: "Évolution des Défauts",
+              data: data.values,
+              borderColor: "blue",
+              borderWidth: 1,
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          // options spécifiques au graphique Mixed
+        },
+      });
+    </script>
+  </body>
 </html>
