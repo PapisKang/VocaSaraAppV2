@@ -1,3 +1,4 @@
+import io
 from docx import Document
 from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
@@ -5,7 +6,7 @@ import os
 from PIL import Image as PILIMAGE
 from io import BytesIO
 from datetime import date
-from flask import flash, session
+from flask import Blueprint, flash, session
 from flask_login import current_user
 from datetime import datetime
 import math
@@ -19,7 +20,7 @@ import logging
 
 
 
-@blueprint.route('/generate_report_document', methods=['GET', 'POST'])
+@Blueprint.route('/generate_report_document', methods=['GET', 'POST'])
 def generate_report_document():
     success_message = None
     error_message = None
