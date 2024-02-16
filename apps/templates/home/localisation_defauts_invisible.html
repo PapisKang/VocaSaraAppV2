@@ -1,38 +1,57 @@
-<!DOCTYPE html>
-<html lang="fr">
+{% extends 'layouts/base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Localisation des defauts</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
+{% block title %} Invoice {% endblock title %}
 
-        #map {
-            height: 100vh;
-        }
-    </style>
-</head>
-{% include 'home/index.html' %}
-<body>
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div id="map"></div>
-            </div>
-        </div>
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Localisation des defauts</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
+<style>
+    #map {
+        height: 90vh;
+        border: 2px solid rgb(228, 228, 240);
+       
+
+    }
+</style>
+
+ 
+  <div class="container-fluid my-3 py-3">
+    <div class="row">
+     
+       
+         
+                     
+              
+                <div class="container-fluid">
+                    
+                        <div class="col-md-12">
+                            <div id="map"></div>
+                        </div>
+                   
+                   
+               
+           
+          </div>
+        
+      </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    {% include "includes/footer.html" %}
+    
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <!-- Bootstrap JS and Popper.js -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -81,7 +100,8 @@
 
  
     </script>
+  
+{% endblock content %}
 
-</body>
-
-</html>
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

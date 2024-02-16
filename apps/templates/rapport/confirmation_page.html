@@ -1,213 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <title>Confirmation Page</title>
-  <!-- Link Bootstrap CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-<<<<<<< HEAD
-    body {
-      background: linear-gradient(45deg, #2193b0, #6dd5ed);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
-      margin: 0;
-      padding: 0;
-  }
+{% extends 'layouts/base.html' %}
 
-  @keyframes gradient {
-      0% {
-          background-position: 0% 50%;
-      }
-      50% {
-          background-position: 100% 50%;
-      }
-      100% {
-          background-position: 0% 50%;
-      }
-  }
+{% block title %} Invoice {% endblock title %}
 
-  .custom-container {
-      border: 2px solid white;
-      border-radius: 15px;
-      padding: 20px;
-      margin-top: 20px;
-      background-color: rgba(255, 255, 255, 0.8);
-  }
-  .container {
-    display:;
-    justify-content: space-between;
-    max-width: 900px;
-    margin: 50px auto;
-    flex: 1; /* Utiliser l'espace restant pour la flexbox */
-    }  
-    h2 {
-      color: #2dbdff;
-    }
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
 
-    p {
-      margin-bottom: 20px;
-    }
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
-    button {
-      background-color: #3bc8ff;
-      color: #000000;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-right: 10px;
-    }
+{% block content %} 
 
-=======
-    /* Custom CSS */
->>>>>>> Prince-Gildas
-    .image-container {
-      margin-top: 20px; /* Ajout d'une marge au-dessus de l'image */
-    }
 
-    
-    .image-container img {
-      max-width: 50%;
-      height: auto;
-      border-radius: 8px;
-      display: block; /* Pour éviter un léger espace en bas de l'image */
-      margin: 0 auto; /* Centrer l'image */
-    }
-<<<<<<< HEAD
+<style>
+ 
+ /* Custom CSS */
+ .image-container {
+  margin-top: 20px; /* Ajout d'une marge au-dessus de l'image */
+}
 
-    @media only screen and (max-width: 600px) {
-      /* Styles pour les petits écrans */
-      h2 {
-        font-size: 1.5em; /* Ajuster la taille du titre */
-      }
 
-      p {
-        font-size: 0.9em; /* Ajuster la taille du texte */
-      }
+.image-container img {
+  max-width: 30%;
+  height: auto;
+  border-radius: 8px;
+  display: block; /* Pour éviter un léger espace en bas de l'image */
+  margin: 0 auto; /* Centrer l'image */
+}
+</style>
 
-      .image-container img {
-        display: none; /* Cacher l'image sur les petits écrans */
-      }
-    }
-    h3{
-      color: #2dbdff;
-    }
-=======
->>>>>>> Prince-Gildas
-  </style>
-</head>
-{%include 'home/index.html'%}
-<body>
-
-<<<<<<< HEAD
-  <div class="container custom-container">
-    <h2>Important</h2>
-=======
-  <div class="container mt-5">
-    <h2 class="text-primary">Important</h2>
->>>>>>> Prince-Gildas
-    <p>L'explication fournie dans le texte vise à sensibiliser les utilisateurs sur les limites et les challenges associés à la classification d'images par les modèles d'intelligence artificielle.</p>
-
-    <h3>Quantité de données d'entraînement limitée :</h3>
-    <p>Les modèles d'intelligence artificielle, y compris ceux utilisés pour la classification d'images, dépendent fortement des données sur lesquelles ils sont entraînés. Si le modèle a été entraîné sur une quantité limitée de données, il peut ne pas être capable de généraliser efficacement à des situations nouvelles ou différentes. Un modèle qui a été entraîné sur une diversité insuffisante d'images peut avoir des difficultés à reconnaître des motifs inattendus ou des exemples atypiques.</p>
-
-    <h3>Classification non garantie à 100% :</h3>
-    <p>Même avec une quantité importante de données d'entraînement, la classification d'images par des modèles d'IA n'est généralement pas garantie à 100%. Cela est dû à la complexité de certaines tâches de classification et à la variabilité naturelle des données. Il est important de comprendre que les modèles d'IA ne sont pas infaillibles et peuvent parfois produire des prédictions incorrectes.</p>
-
-    <h3>Recommandation de tri des images :</h3>
-    <p>Étant donné la possibilité d'erreurs de classification, il est recommandé de trier les images avant de les charger dans le système. Cela signifie que les utilisateurs doivent examiner les résultats de la classification et s'assurer que les étiquettes attribuées par le modèle correspondent correctement au contenu réel des images. Ce processus de vérification manuelle peut aider à identifier et à corriger d'éventuelles erreurs, améliorant ainsi la qualité globale des données utilisées par le modèle.</p>
-
-    <p>En résumé, l'idée est de souligner que même les modèles d'IA avancés ne sont pas infaillibles, et qu'il est essentiel d'adopter une approche prudente lors de l'utilisation de ces modèles. La vérification manuelle des résultats de la classification et le tri préalable des données contribuent à garantir une utilisation plus fiable et précise des modèles d'IA, en particulier dans des domaines où la précision est cruciale.</p>
-    
-<<<<<<< HEAD
-    <h3>Options :</h3><br>
-    <button onclick="handleButtonClick('visible')"> <i class="fas fa-eye"></i> Rapport Visible</button>
-    <button onclick="handleButtonClick('invisible')"> <i class="fas fa-eye-slash"></i> Rapport Invisible</button>
-
-    
-=======
-    <h3>Options :</h3>
-    <div class="btn-group mb-3">
-      <button type="button" class="btn btn-primary" onclick="handleButtonClick('visible')">Rapport Visible</button>
-      <button type="button" class="btn btn-primary" onclick="handleButtonClick('invisible')">Rapport Invisible</button>
+ 
+  <div class="container-fluid my-3 py-3">
+    <div class="row">
+     
+       
+         
+            <div class="card-header text-center">          
+              
+           <!-- Ajout de l'image à droite -->
+    <div class="container image-container">
+      <img src="{{ config.ASSETS_ROOT }}/img/illustrations/IA.jpg" alt="Image explicative" loading="lazy">
+    </div>  
+              <div style="overflow-x: auto">
+                <div class="container mt-5">
+                  <h2 class="text-primary">Important</h2>
+                  <p>L'explication fournie dans le texte vise à sensibiliser les utilisateurs sur les limites et les challenges associés à la classification d'images par les modèles d'intelligence artificielle.</p>
+              
+                  <h3>Quantité de données d'entraînement limitée :</h3>
+                  <p>Les modèles d'intelligence artificielle, y compris ceux utilisés pour la classification d'images, dépendent fortement des données sur lesquelles ils sont entraînés. Si le modèle a été entraîné sur une quantité limitée de données, il peut ne pas être capable de généraliser efficacement à des situations nouvelles ou différentes. Un modèle qui a été entraîné sur une diversité insuffisante d'images peut avoir des difficultés à reconnaître des motifs inattendus ou des exemples atypiques.</p>
+              
+                  <h3>Classification non garantie à 100% :</h3>
+                  <p>Même avec une quantité importante de données d'entraînement, la classification d'images par des modèles d'IA n'est généralement pas garantie à 100%. Cela est dû à la complexité de certaines tâches de classification et à la variabilité naturelle des données. Il est important de comprendre que les modèles d'IA ne sont pas infaillibles et peuvent parfois produire des prédictions incorrectes.</p>
+              
+                  <h3>Recommandation de tri des images :</h3>
+                  <p>Étant donné la possibilité d'erreurs de classification, il est recommandé de trier les images avant de les charger dans le système. Cela signifie que les utilisateurs doivent examiner les résultats de la classification et s'assurer que les étiquettes attribuées par le modèle correspondent correctement au contenu réel des images. Ce processus de vérification manuelle peut aider à identifier et à corriger d'éventuelles erreurs, améliorant ainsi la qualité globale des données utilisées par le modèle.</p>
+              
+                  <p>En résumé, l'idée est de souligner que même les modèles d'IA avancés ne sont pas infaillibles, et qu'il est essentiel d'adopter une approche prudente lors de l'utilisation de ces modèles. La vérification manuelle des résultats de la classification et le tri préalable des données contribuent à garantir une utilisation plus fiable et précise des modèles d'IA, en particulier dans des domaines où la précision est cruciale.</p>
+                  
+                  <h3>Options :</h3>
+                  <div class="btn-group mb-3">
+                    <button type="button" class="btn btn-primary" onclick="handleButtonClick('visible')">Rapport Visible</button>
+                    <button type="button" class="btn btn-primary" onclick="handleButtonClick('invisible')">Rapport Invisible</button>
+                  </div>
+                </div>
+              </div>
+           
+          </div>
+        
+      </div>
     </div>
->>>>>>> Prince-Gildas
+
+    {% include "includes/footer.html" %}
+    
   </div>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+  
+   
+  
+    <!-- Link Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Fonction pour définir un cookie avec une durée d'expiration
+      function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+          var date = new Date();
+          date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+          expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
+      }
+    
+      // Fonction pour obtenir la valeur d'un cookie
+      function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+          var c = ca[i];
+          while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+          if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+      }
+    
+      // Stocke l'option sélectionnée dans une variable
+      var selectedOption = null;
+    
+      // Fonction pour rediriger l'utilisateur en fonction de l'option sélectionnée
+      function redirectToStoredOption() {
+        var storedOption = getCookie('selectedOption');
+        if (storedOption) {
+          selectedOption = storedOption;
+        }
+      }
+    
+      // Fonction pour gérer le clic sur les boutons
+      function handleButtonClick(option) {
+        // Stocke l'option sélectionnée dans le cookie
+        setCookie('selectedOption', option, 1);  // Stocke l'option sélectionnée dans le cookie pendant 1 jour
+        // Met à jour la variable avec l'option sélectionnée
+        selectedOption = option;
+        // Redirige l'utilisateur
+        redirectToStoredOption();
+        // Redirection manuelle
+        if (selectedOption === 'visible') {
+          window.location.href = '/upload_page';
+        } else if (selectedOption === 'invisible') {
+          window.location.href = '/upload_page_invisible';
+        }
+      }
+    
+      document.addEventListener('DOMContentLoaded', function() {
+        // Appel de la fonction pour rediriger l'utilisateur en fonction du cookie
+        redirectToStoredOption();
+      });
+    </script>
+ 
+{% endblock content %}
 
-  <!-- Ajout de l'image à droite -->
-<<<<<<< HEAD
- <!-- <div class="image-container">
-=======
-  <div class="container image-container">
->>>>>>> Prince-Gildas
-    <img src="{{ config.ASSETS_ROOT }}/img/illustrations/IA.jpg" alt="Image explicative" loading="lazy">
-  </div>  -->
-
-  <!-- Link Bootstrap JS -->
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Fonction pour définir un cookie avec une durée d'expiration
-    function setCookie(name, value, days) {
-      var expires = "";
-      if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-      }
-      document.cookie = name + "=" + value + expires + "; path=/";
-    }
-  
-    // Fonction pour obtenir la valeur d'un cookie
-    function getCookie(name) {
-      var nameEQ = name + "=";
-      var ca = document.cookie.split(';');
-      for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-      }
-      return null;
-    }
-  
-    // Stocke l'option sélectionnée dans une variable
-    var selectedOption = null;
-  
-    // Fonction pour rediriger l'utilisateur en fonction de l'option sélectionnée
-    function redirectToStoredOption() {
-      var storedOption = getCookie('selectedOption');
-      if (storedOption) {
-        selectedOption = storedOption;
-      }
-    }
-  
-    // Fonction pour gérer le clic sur les boutons
-    function handleButtonClick(option) {
-      // Stocke l'option sélectionnée dans le cookie
-      setCookie('selectedOption', option, 1);  // Stocke l'option sélectionnée dans le cookie pendant 1 jour
-      // Met à jour la variable avec l'option sélectionnée
-      selectedOption = option;
-      // Redirige l'utilisateur
-      redirectToStoredOption();
-      // Redirection manuelle
-      if (selectedOption === 'visible') {
-        window.location.href = '/upload_page';
-      } else if (selectedOption === 'invisible') {
-        window.location.href = '/upload_page_invisible';
-      }
-    }
-  
-    document.addEventListener('DOMContentLoaded', function() {
-      // Appel de la fonction pour rediriger l'utilisateur en fonction du cookie
-      redirectToStoredOption();
-    });
-  </script>
-  
-</body>
-</html>
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

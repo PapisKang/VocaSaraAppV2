@@ -4,10 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inspections Générées</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-    />
+    <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link rel="stylesheet" href="../../static/assets/css/soft-ui-dashboard.css" />
+    <link rel="stylesheet" href="../../static/assets/css/soft-ui-dashboard.min.css" />
     <style>
       body {
         font-family: "Arial", sans-serif;
@@ -106,7 +105,9 @@
     </style>
   </head>
   <body>
-    {%include 'home/index.html'%}
+    {% include 'layouts/base.html' %}
+<div>  
+    <div class="card" style="border: 2px solid rgb(239, 233, 233); margin-left:270px;">
     <h1>Créer un rapport</h1>
     <!-- Add this at the top of your HTML body -->
     {% if success_message %}
@@ -126,51 +127,53 @@
         placeholder="Rechercher..."
       />
     </div>
-    <!-- Bouton pour générer les rapports sélectionnés -->
-    <form id="generateReportForm" method="post" action="{{ url_for('home_blueprint.generate_report_document') }}">
-    <button id="generateReportBtn">Créer le rapport</button>
-    <div style="overflow-x: auto">
-      <table id="rapportTable">
-        <thead>
-          <tr>
-            <th>Nom Opérateur</th>
-            <th>Feeder</th>
-            <th>Tronçon</th>
-            <th>Date Début</th>
-            <th>Date Fin</th>
-            <th>Zone</th>
-            <th>Groupement Tronçon</th>
-            <th>Date Created</th>
-            <th>Date Modified</th>
-            <!-- Remplacez l'icône "Voir Images" par des cases à cocher -->
-            <th>Sélectionner</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for rapport in rapports %}
-          <tr>
-            <td>{{ rapport.nom_operateur }}</td>
-            <td>{{ rapport.feeder }}</td>
-            <td>{{ rapport.troncon }}</td>
-            <td>{{ rapport.date_debut }}</td>
-            <td>{{ rapport.date_fin }}</td>
-            <td>{{ rapport.zone }}</td>
-            <td>{{ rapport.groupement_troncon }}</td>
-            <td>{{ rapport.date_created }}</td>
-            <td>{{ rapport.date_modified }}</td>
-            <!-- Remplacez l'icône par une case à cocher -->
-            <td>
-              <input
-                type="checkbox"
-                class="custom-checkbox"
-                name="selectedReports"
-                value="{{ rapport.id }}"
-              />
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  
+        <!-- Bouton pour générer les rapports sélectionnés -->
+        <form id="generateReportForm" method="post" action="{{ url_for('home_blueprint.generate_report_document') }}">
+        <button id="generateReportBtn">Créer le rapport</button>
+        <div style="overflow-x: auto">
+          <table id="rapportTable">
+            <thead>
+              <tr>
+                <th>Nom Opérateur</th>
+                <th>Feeder</th>
+                <th>Tronçon</th>
+                <th>Date Début</th>
+                <th>Date Fin</th>
+                <th>Zone</th>
+                <th>Groupement Tronçon</th>
+                <th>Date Created</th>
+                <th>Date Modified</th>
+                <!-- Remplacez l'icône "Voir Images" par des cases à cocher -->
+                <th>Sélectionner</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rapport in rapports %}
+              <tr>
+                <td>{{ rapport.nom_operateur }}</td>
+                <td>{{ rapport.feeder }}</td>
+                <td>{{ rapport.troncon }}</td>
+                <td>{{ rapport.date_debut }}</td>
+                <td>{{ rapport.date_fin }}</td>
+                <td>{{ rapport.zone }}</td>
+                <td>{{ rapport.groupement_troncon }}</td>
+                <td>{{ rapport.date_created }}</td>
+                <td>{{ rapport.date_modified }}</td>
+                <!-- Remplacez l'icône par une case à cocher -->
+                <td>
+                  <input
+                    type="checkbox"
+                    class="custom-checkbox"
+                    name="selectedReports"
+                    value="{{ rapport.id }}"
+                  />
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>

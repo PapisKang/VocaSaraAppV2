@@ -1,20 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Leaflet Map</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+{% extends 'layouts/base.html' %}
 
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+{% block title %} Invoice {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+
+<title>Leaflet Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-  }
 
   #map {
-    height: 100vh;
+    height: 90vh;
+    border: 2px solid rgb(228, 228, 240);
+   
   }
 
   /* Styles for the dropdown */
@@ -53,39 +59,56 @@
   }
 </style>
 
-  </head>
-  {% include 'home/index.html' %}
-  <body>
-    <div>
-      <!-- Ajoutez ceci à l'endroit approprié dans votre HTML -->
-<div>
-  <label for="rapportsDropdown">Choisir le rapport généré :</label>
-  <select id="rapportsDropdown" onchange="updateMapByRapport()">
-    <!-- Les options seront ajoutées dynamiquement avec JavaScript -->
-  </select>
-</div>
-<!-- Add this inside your HTML, where you want the dropdown to appear -->
-<div>
-  <label for="defaultTypeDropdown">Choisir le type de défaut :</label>
-  <select id="defaultTypeDropdown" onchange="updateMapByDefaultType()">
-    <!-- Options will be added dynamically with JavaScript -->
-  </select>
-</div>
-
-
-      <label for="statusDropdown">Choisir le statut :</label>
-      <select id="statusDropdown" onchange="updateMap()">
-        <option value="en attente">En attente</option>
-        <option value="corriger">Corriger</option>
-        <option value="annuler">Annuler</option>
-      </select>
+ 
+  <div class="container-fluid my-3 py-3">
+    <div class="row">
+     
+       
+         
+                     
+              
+                <div class="container-fluid">
+                    
+                      
+                   
+              <div>
+                    <!-- Ajoutez ceci à l'endroit approprié dans votre HTML -->
+              <div style="text-align: center;">
+                <label for="rapportsDropdown">Choisir le rapport généré :</label>
+                <select id="rapportsDropdown" onchange="updateMapByRapport()">
+                  <!-- Les options seront ajoutées dynamiquement avec JavaScript -->
+                </select>
+              </div>
+              <!-- Add this inside your HTML, where you want the dropdown to appear -->
+              <div  style="text-align: center;">
+                <label for="defaultTypeDropdown">Choisir le type de défaut :</label>
+                <select id="defaultTypeDropdown" onchange="updateMapByDefaultType()">
+                  <!-- Options will be added dynamically with JavaScript -->
+                </select>
+              </div>
+              
+                  <div  style="text-align: center;">
+                    <label for="statusDropdown">Choisir le statut :</label>
+                    <select id="statusDropdown" onchange="updateMap()">
+                      <option value="en attente">En attente</option>
+                      <option value="corriger">Corriger</option>
+                      <option value="annuler">Annuler</option>
+                    </select>
+                  </div>
+                  <div id="map"></div>
+               
+           
+          </div>
+        
+      </div>
     </div>
-    <div id="map"></div>
 
+    {% include "includes/footer.html" %}
+    
+  </div>
 
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
@@ -413,5 +436,8 @@ function updateMapByDefaultType() {
 
 
     </script>
-  </body>
-</html>
+  
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

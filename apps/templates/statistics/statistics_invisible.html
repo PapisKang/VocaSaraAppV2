@@ -5,29 +5,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page en construction</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            padding: 50px;
-        }
-
-        h1 {
-            color: #333;
-        }
-
-        p {
-            color: #777;
-        }
-    </style>
+  
+    
 </head>
-{%include 'home/index.html'%}
-<body>
 
-    <h1>Page en construction</h1>
-    <p>Nous travaillons actuellement sur cette page. Merci de revenir ultérieurement.</p>
+    {% extends 'layouts/base.html' %}
 
-</body>
-
-</html>
+    {% block title %} New User {% endblock title %}
+    
+    <!-- Specific CSS goes HERE -->
+    {% block stylesheets %}{% endblock stylesheets %}
+    
+    {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+    
+    {% block content %}
+    
+      <div class="container-fluid py-4">
+    
+        <div class="row">
+          <div class="col-12">
+            <div class="multisteps-form mb-5">
+              <!--progress bar-->
+              <div class="row">
+                <div class="col-12 col-lg-8 mx-auto my-5">
+                  <div class="multisteps-form__progress">
+                    <button class="multisteps-form__progress-btn js-active" type="button" title="User Info">
+                      <span>User Info</span>
+                    </button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Address">Address</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Socials">Socials</button>
+                    <button class="multisteps-form__progress-btn" type="button" title="Profile">Profile</button>
+                  </div>
+                </div>
+              </div>
+              <!--form panels-->
+              <div class="row">
+                <div class="col-12 col-lg-8 m-auto">
+                  <form class="multisteps-form__form mb-8">
+                    <!--single form panel-->
+                    <div class="card multisteps-form__panel p-3 border-radius-xl bg-white js-active" data-animation="FadeIn">
+                      <h5 class="font-weight-bolder mb-0">About me</h5>
+                      <p class="mb-0 text-sm">Page en construction</p>
+                      <div class="multisteps-form__content">
+                        
+                        
+                        <div class="row mt-3">
+                          
+                          <p>Nous travaillons actuellement sur cette page. Merci de revenir ultérieurement.</p>
+                        </div>
+                        
+                      </div>
+                    </div>
+                    <!--single form panel-->
+                    
+                    <!--single form panel-->
+                    
+                        
+                    <!--single form panel-->
+                    
+                      
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        {% include "includes/footer.html" %}
+        
+      </div>
+    
+    {% endblock content %}
+    
+    <!-- Specific JS goes HERE --> 
+    {% block javascripts %} 
+    
+      <script src="{{ config.ASSETS_ROOT }}/js/plugins/multistep-form.js"></script>
+    
+    {% endblock javascripts %}
+    

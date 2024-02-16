@@ -1,214 +1,140 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GENERATION DE RAPPORT</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .container-main {
-      display: flex;
-<<<<<<< HEAD
-      justify-content: space-between;
-      max-width: 900px;
-      margin: 50px auto;
-      flex: 1; /* Utiliser l'espace restant pour la flexbox */
-=======
-      flex-direction: column;
-      align-items: center;
-      margin: 20px 10px; /* Réduction de la marge supérieure */
->>>>>>> Prince-Gildas
-    }
-    
-    .container-form {
-<<<<<<< HEAD
-      flex: 1;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 18px;
-=======
-      width: 100%;
-      max-width: 600px;
-      padding: 10px; /* Réduction de l'espacement intérieur */
-      background-color: #ffffff;
-      border-radius: 8px;
->>>>>>> Prince-Gildas
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    form {
-      display: grid;
-      gap: 15px; /* Réduction de l'espacement entre les éléments du formulaire */
-    }
-    
-    label {
-      color: #007bff;
-      font-weight: bold;
-    }
-    
-    input,
-    select {
-      width: 100%;
-      padding: 8px; /* Réduction de la taille du padding */
-      border: 1px solid #ced4da;
-      border-radius: 5px;
-      transition: border-color 0.3s ease;
-    }
-    
-    input:focus,
-    select:focus {
-      border-color: #007bff;
-    }
-    
-    button {
-<<<<<<< HEAD
-      background-color:cornflowerblue;
-=======
-      background-color: #28a745;
->>>>>>> Prince-Gildas
-      color: #fff;
-      padding: 10px; /* Réduction de la taille du padding */
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    
-    button:hover {
-      background-color: #218838;
-    }
-    
-    .error-message {
-      color: #ff0000;
-      display: none;
-    }
-    h2{
-      font-family: cursive;
-      color: cornflowerblue;
-      
-    }
-    /* Styles pour les petits écrans */
-  /* Masquer l'image sur les petits écrans */
-@media only screen and (max-width: 600px) {
-  #illustration {
-    display: none;
-  }
+{% extends 'layouts/base.html' %}
 
-  /* Ajuster la largeur du formulaire et le centrer */
+{% block title %} Invoice {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+
+<style>
   .container-form {
-    width: 80%;
-    margin-left: 70px;
-    margin-right: 20px;
-    
-<<<<<<< HEAD
+    flex: 1;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 18px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
-
-  /* Ajuster la taille des étiquettes sur les petits écrans */
+  
+  form {
+    display: grid;
+    gap: 15px; /* Réduction de l'espacement entre les éléments du formulaire */
+  }
+  
   label {
-    font-size: 14px;
+    color: #007bff;
+    font-weight: bold;
   }
-
-  /* Ajuster la largeur des champs de saisie et des listes déroulantes */
-  input[type="text"],
-  input[type="date"],
+  
+  input,
   select {
     width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
+    padding: 8px; /* Réduction de la taille du padding */
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
   }
-
-  /* Ajuster la largeur du bouton */
+  
+  input:focus,
+  select:focus {
+    border-color: #007bff;
+  }
+  
   button {
-    width: 100%;
+    background-color:cornflowerblue;
+    color: #fff;
+    padding: 10px; /* Réduction de la taille du padding */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
   }
-}
-
-=======
-    @media (max-width: 768px) {
-      .container-form {
-        width: 100%;
-        margin: 0;
-      }
-      input,
-      select {
-        width: 100%;
-      }
-    }
+  
+  button:hover {
+    background-color: #218838;
+  }
+  
+  .error-message {
+    color: #ff0000;
+    display: none;
+  }
+  h2{
+    font-family: cursive;
+    color: cornflowerblue;
     
-    
->>>>>>> Prince-Gildas
-  </style>
-</head>
-<body>
-{%include 'home/index.html'%}
+  }
 
-  <div id="sidebar-container"></div>
-  <div class="container-main">
-    <div class="container-form">
-      <h2>FORMULAIRE DE RAPPORT</h2>
-      <form id="rapportForm" action="{{ url_for('home_blueprint.generate_rapport') }}" method="POST">
-        <label for="feeder"><i class="fas fa-rss"></i> Feeder:</label>
-        <select id="feeder" name="feeder">
-          <option value="" disabled selected> Choisissez un feeder existant ou saisissez-en un nouveau</option>
-          {% for feeder in feeders_existants %}
-            <option value="{{ feeder.Nom }}">{{ feeder.Nom }}</option>
-          {% endfor %}
-        </select>
-        <input type="text" id="feederInput" name="feederInput" placeholder="Saisissez le feeder">
+</style>
+
+ 
+  <div class="container-fluid my-3 py-3">
+    <div class="row">
+     
+       
+         
+            <div class="card-header text-center">          
+              
+          
+              <div style="overflow-x: auto">
+                <div class="container-form">
+                  <h2>FORMULAIRE DE RAPPORT</h2>
+                  <form id="rapportForm" action="{{ url_for('home_blueprint.generate_rapport') }}" method="POST">
+                    <label for="feeder"><i class="fas fa-rss"></i> Feeder:</label>
+                    <select id="feeder" name="feeder">
+                      <option value="" disabled selected> Choisissez un feeder existant ou saisissez-en un nouveau</option>
+                      {% for feeder in feeders_existants %}
+                        <option value="{{ feeder.Nom }}">{{ feeder.Nom }}</option>
+                      {% endfor %}
+                    </select>
+                    <input type="text" id="feederInput" name="feederInput" placeholder="Saisissez le feeder">
+                    
+                    <label for="troncon"> <i class="fas fa-road"></i> Troncon:</label>
+                    <select id="troncon" name="troncon">
+                      <option value="" disabled selected>Choisissez un troncon existant ou saisissez-en un nouveau</option>
+                      {% for troncon in troncons_existants %}
+                        <option value="{{ troncon.Nom }}">{{ troncon.Nom }}</option>
+                      {% endfor %}
+                    </select>
+                    <input type="text" id="tronconInput" name="tronconInput" placeholder="Saisissez le tronçon">
+                    
+                    <label for="dateDebut"> <i class="fas fa-calendar"></i> Date de visite - Début:</label>
+                    <input type="date" id="dateDebut" name="dateDebut" required>
+            
+                    <label for="dateFin"> <i class="fas fa-calendar"></i> Date de visite - Fin:</label>
+                    <input type="date" id="dateFin" name="dateFin" required>
+            
+                    <label for="operateur"><i class="fas fa-user"></i> Nom de l'opérateur:</label>
+                    <input type="text" id="operateur" name="operateur" value="{{ current_user.username }}" readonly>
+            
+                    <label for="zone"> <i class="fas fa-map-marker-alt"></i>  Zone:</label>
+                    <select id="zone" name="zone" required>
+                      <option value="" disabled selected>Choisissez une zone</option>
+                      <option value="DRS">DRS</option>
+                      <option value="DRN">DRN</option>
+                      <option value="DNO">DNO</option>
+                      <option value="DRE">DRE</option>
+                    </select>
+                    
+                    <label for="groupementTroncon"> <i class="fas fa-object-group"></i> Groupement troncon:</label>
+                    <input type="text" id="groupementTroncon" name="groupementTroncon">
+            
+                    <button type="submit" onclick="saveFormData()"> <i class="fa-fw fas fa-check"></i> Confirmer</button>
+                  </form>
+            
+                  <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
+                </div>
+              </div>
+           
+          </div>
         
-        <label for="troncon"> <i class="fas fa-road"></i> Troncon:</label>
-        <select id="troncon" name="troncon">
-          <option value="" disabled selected>Choisissez un troncon existant ou saisissez-en un nouveau</option>
-          {% for troncon in troncons_existants %}
-            <option value="{{ troncon.Nom }}">{{ troncon.Nom }}</option>
-          {% endfor %}
-        </select>
-        <input type="text" id="tronconInput" name="tronconInput" placeholder="Saisissez le tronçon">
-        
-        <label for="dateDebut"> <i class="fas fa-calendar"></i> Date de visite - Début:</label>
-        <input type="date" id="dateDebut" name="dateDebut" required>
-
-        <label for="dateFin"> <i class="fas fa-calendar"></i> Date de visite - Fin:</label>
-        <input type="date" id="dateFin" name="dateFin" required>
-
-        <label for="operateur"><i class="fas fa-user"></i> Nom de l'opérateur:</label>
-        <input type="text" id="operateur" name="operateur" value="{{ current_user.username }}" readonly>
-
-        <label for="zone"> <i class="fas fa-map-marker-alt"></i>  Zone:</label>
-        <select id="zone" name="zone" required>
-          <option value="" disabled selected>Choisissez une zone</option>
-          <option value="DRS">DRS</option>
-          <option value="DRN">DRN</option>
-          <option value="DNO">DNO</option>
-          <option value="DRE">DRE</option>
-        </select>
-        
-        <label for="groupementTroncon"> <i class="fas fa-object-group"></i> Groupement troncon:</label>
-        <input type="text" id="groupementTroncon" name="groupementTroncon">
-
-<<<<<<< HEAD
-        <button type="submit" onclick="saveFormData()"> <i class="fa-fw fas fa-check"></i> Confirmer</button>
-=======
-        <button type="submit" onclick="saveFormData()">Confirmer</button>
-      
->>>>>>> Prince-Gildas
-      </form>
-
-      <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
+      </div>
     </div>
 
-  
-
+    {% include "includes/footer.html" %}
+    
+  </div>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.1/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
@@ -331,6 +257,7 @@
   }
 
   </script>
-  
-</body>
-</html>
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

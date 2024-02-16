@@ -186,14 +186,10 @@ def confirmation_page():
 def apropos():
     return render_template('home/apropos.html', segment='apropos')
 
-<<<<<<< HEAD
-=======
-
->>>>>>> Prince-Gildas
 @blueprint.route('/acceuil')
 @login_required
 def acceuil():
-    return render_template('home/acceuil.html')
+    return render_template('home/index.html')
 
 
 #./////////////////////// page de localisation de défuat§§§§§§§§§§

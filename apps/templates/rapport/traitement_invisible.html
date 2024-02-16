@@ -1,31 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'layouts/base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page en construction</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            padding: 50px;
-        }
+{% block title %} Invoice {% endblock title %}
 
-        h1 {
-            color: #333;
-        }
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
 
-        p {
-            color: #777;
-        }
-    </style>
-</head>
-{%include 'home/index.html'%}
-<body>
-    <h1>Page en construction</h1>
-    <p>Nous travaillons actuellement sur cette page. Merci de revenir ultérieurement.</p>
-</body>
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
-</html>
+{% block content %} 
+
+
+<style>
+ 
+    h1 {
+        color: #333;
+    }
+
+    p {
+        color: #777;
+    }
+</style>
+
+ 
+  <div class="container-fluid my-3 py-3">
+    <div class="row">
+     
+       
+         
+            <div class="card-header text-center">          
+                <h1>Page en construction</h1>
+                <p>Nous travaillons actuellement sur cette page. Merci de revenir ultérieurement.</p>
+   
+             
+          </div>
+        
+      </div>
+    </div>
+
+    {% include "includes/footer.html" %}
+    
+  </div>
+  
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}
