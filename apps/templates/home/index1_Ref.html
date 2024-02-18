@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/png" href="../../static/assets/img/vocasara/logoo.png" >
+	<!-- Boxicons -->
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<!-- Ajoutez cette balise dans la section HEAD de votre document pour inclure SweetAlert2 pour la boîte de dialogue -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<!-- Ajoutez cette balise dans la section HEAD de votre document pour inclure SweetAlert2 pour la boîte de dialogue -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+	<!-- My CSS -->
+	<link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/css/sidebar.css">
+	<title>Vocasara</title>
+</head>
+{%include 'Chatbot/chatbot.html'%}
+<body>
+
+
+ <!-- SIDEBAR -->
+ <section id="sidebar">
+	<a href="#" class="brand">
+		<img src="{{ config.ASSETS_ROOT }}/img/vocasara/logo.png" alt="Vocasara Logo" class="logo-img">
+		<span class="text">VOCASARA</span>
+ 
+	</a>
+
+	<ul class="side-menu top">
+		<li class="active">
+			<a href="/acceuil">
+				<i class='bx bxs-dashboard bx-sm bx-burst' ></i>
+
+				<span class="text">Acceuil</span>
+			</a>
+		</li>
+		<li>
+			<a href="/generation_rapport">
+				<i class='bx bxs-shopping-bag-alt bx-sm ' ></i>
+				<span class="text">Traitement</span>
+			</a>
+		</li>
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-chart'></i>
+				<span class="text">Localisation</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/localisation_defauts_invisible_page">
+						<i class='bx bx-hide'></i>
+						<span class="text">Invisible</span>
+					</a>
+				</li>
+				<li>
+					<a href="/localisation_page">
+						<i class='bx bx-show'></i>
+						<span class="text">Visible</span>
+					</a>
+				</li>
+				
+			</ul>
+		</li>
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-file'></i>
+				<span class="text">Statistiques</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/statistics_invisible">
+						<i class='bx bx-show'></i>
+						<span class="text">Invisible</span>
+					</a>
+				</li>
+				<li>
+					<a href="/statistiques">
+						<i class='bx bx-hide'></i>
+						<span class="text">Visible</span>
+					</a>
+				</li>
+			</ul>
+		</li>
+		
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-file'></i>
+				<span class="text">Inspections</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/rapport_id_page">
+						<i class='bx bx-list-ul'></i>
+						<span class="text">Inspections Générés</span>
+					</a>
+				</li>
+				<li>
+					<a href="/generate_report_document_page">
+						<i class='bx bx-file'></i>
+						<span class="text">Généré un Rapport</span>
+					</a>
+				</li>
+				
+				<!-- Ajoutez le nouveau bouton "Mes rapports" ici -->
+				<li>
+					<a href="/mes_rapports">
+						<i class='bx bx-file'></i>
+						<span class="text">Mes rapports</span>
+					</a>
+				</li>
+			</ul>
+		</li>
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-cog'></i>
+				<span class="text">Informations</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="/apropos">
+						<i class='bx bx-info-circle'></i>
+						<span class="text">A propos</span>
+					</a>
+				</li>
+				<li>
+					<a href="">
+						<i class='bx bx-code'></i>
+						<span class="text">Version</span>
+					</a>
+				</li>
+				<li>
+					<a href="/confidentialite">
+						<i class='bx bx-shield'></i>
+						<span class="text">Confidentialité</span>
+					</a>
+				</li>
+				<li>
+					<a href="/chatbot_info">
+						<i class='bx bx-chat'></i>
+						<span class="text">Chatbot</span>
+					</a>
+				</li>
+			</ul>
+		</li>
+		
+			
+		</li>
+		<li>
+			<a href="#" class="submenu-toggle">
+				<i class='bx bx-cog'></i>
+				<span class="text">Mon Profil</span>
+				<i class='bx bx-chevron-down'></i>
+			</a>
+			<ul class="submenu">
+				<li>
+					<a href="{{ url_for('authentication_blueprint.user_profile') }}">
+						<i class='bx bx-user'></i>
+						<span class="text">Informations</span>
+					</a>
+				</li>
+				<li>
+					<a href="photo_upload">
+						<i class='bx bx-camera'></i>
+						<span class="text">Photo</span>
+					</a>
+				</li>
+			</ul>
+			
+		</li>
+		
+
+		<li class="logout">
+			<a href="{{ url_for('authentication_blueprint.logout') }}">
+				<i class='bx bx-log-out-circle'></i>
+				<span class="text">Déconnexion</span>
+			</a>
+		</li>
+
+	  
+		
+		</ul>
+		
+</section>
+
+<!-- SIDEBAR -->
+
+<!-- CONTENT -->
+<section id="content">
+	<!-- NAVBAR -->
+	<nav>
+		<i class='bx bx-menu' ></i>
+		<form action="#">
+			<div class="form-input">
+				<input type="search" placeholder="Rechercher...">
+				<button type="submit" class="search-btn"><i class='bx bx-search' ></i></button>
+			</div>
+		</form>
+		<input type="checkbox" id="switch-mode" hidden>
+		<label for="switch-mode" class="switch-mode"></label>
+	</nav>
+	<!-- NAVBAR -->
+
+	</section>
+	<!-- CONTENT -->
+
+	<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
+		<div class="sidenav-header">
+			<li class="nav-item">
+				<a data-bs-toggle="collapse" href="#applicationsExamples" 
+				
+				   class="nav-link {% if 'applications-' in segment %} active {% endif %}" 
+				   aria-expanded="{% if 'applications-' in segment %} true {% else %} false {% endif %}"  
+	  
+				   aria-controls="applicationsExamples" role="button">
+				  <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center  me-2">
+					<svg width="12px" height="12px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+					  <title>settings</title>
+					  <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+						<g transform="translate(-2020.000000, -442.000000)" fill="#FFFFFF" fill-rule="nonzero">
+						  <g transform="translate(1716.000000, 291.000000)">
+							<g transform="translate(304.000000, 151.000000)">
+							  <polygon class="color-background" opacity="0.596981957" points="18.0883333 15.7316667 11.1783333 8.82166667 13.3333333 6.66666667 6.66666667 0 0 6.66666667 6.66666667 13.3333333 8.82166667 11.1783333 15.315 17.6716667"></polygon>
+							  <path class="color-background" d="M31.5666667,23.2333333 C31.0516667,23.2933333 30.53,23.3333333 30,23.3333333 C29.4916667,23.3333333 28.9866667,23.3033333 28.48,23.245 L22.4116667,30.7433333 L29.9416667,38.2733333 C32.2433333,40.575 35.9733333,40.575 38.275,38.2733333 L38.275,38.2733333 C40.5766667,35.9716667 40.5766667,32.2416667 38.275,29.94 L31.5666667,23.2333333 Z" opacity="0.596981957"></path>
+							  <path class="color-background" d="M33.785,11.285 L28.715,6.215 L34.0616667,0.868333333 C32.82,0.315 31.4483333,0 30,0 C24.4766667,0 20,4.47666667 20,10 C20,10.99 20.1483333,11.9433333 20.4166667,12.8466667 L2.435,27.3966667 C0.95,28.7083333 0.0633333333,30.595 0.00333333333,32.5733333 C-0.0583333333,34.5533333 0.71,36.4916667 2.11,37.89 C3.47,39.2516667 5.27833333,40 7.20166667,40 C9.26666667,40 11.2366667,39.1133333 12.6033333,37.565 L27.1533333,19.5833333 C28.0566667,19.8516667 29.01,20 30,20 C35.5233333,20 40,15.5233333 40,10 C40,8.55166667 39.685,7.18 39.1316667,5.93666667 L33.785,11.285 Z"></path>
+							</g>
+						  </g>
+						</g>
+					  </g>
+					</svg>
+				  </div>
+				  <span class="nav-link-text ms-1">Applications</span>
+				</a>
+				<div class="collapse {% if 'applications-' in segment %} show {% endif %}" id="applicationsExamples">
+				  <ul class="nav ms-4 ps-3">
+					<li class="nav-item ">
+					  <a class="nav-link {% if '-kanban.html' in segment %} active {% endif %}" href="/applications-kanban.html">
+						<span class="sidenav-mini-icon"> K </span>
+						<span class="sidenav-normal"> Kanban </span>
+					  </a>
+					</li>
+					<li class="nav-item {% if '-wizard.html' in segment %} active {% endif %}">
+					  <a class="nav-link " href="/applications-wizard.html">
+						<span class="sidenav-mini-icon"> W </span>
+						<span class="sidenav-normal"> Wizard </span>
+					  </a>
+					</li>
+					<li class="nav-item {% if '-datatables.html' in segment %} active {% endif %}">
+					  <a class="nav-link " href="/applications-datatables.html">
+						<span class="sidenav-mini-icon"> D </span>
+						<span class="sidenav-normal"> DataTables </span>
+					  </a>
+					</li>
+					<li class="nav-item {% if '-calendar.html' in segment %} active {% endif %}">
+					  <a class="nav-link " href="/applications-calendar.html">
+						<span class="sidenav-mini-icon"> C </span>
+						<span class="sidenav-normal"> Calendar </span>
+					  </a>
+					</li>
+					<li class="nav-item {% if '-analytics.html' in segment %} active {% endif %}">
+					  <a class="nav-link " href="/applications-analytics.html">
+						<span class="sidenav-mini-icon"> A </span>
+						<span class="sidenav-normal"> Analytics </span>
+					  </a>
+					</li>
+				  </ul>
+				</div>
+			  </li>
+
+		</div>
+	</aside>
+
+
+
+<!-- COOKIE CONSENT BANNER -->
+<div id="cookie-consent-banner">
+	<p>Nous utilisons des cookies pour améliorer votre expérience sur notre site. En continuant à naviguer, vous acceptez notre utilisation des cookies.</p>
+	<button id="accept-cookies-btn">Accepter les cookies</button>
+  </div>
+  <!-- COOKIE CONSENT BANNER -->
+  
+		
+
+	<script >
+		const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+allSideMenu.forEach(item=> {
+	const li = item.parentElement;
+
+	item.addEventListener('click', function () {
+		allSideMenu.forEach(i=> {
+			i.parentElement.classList.remove('active');
+		})
+		li.classList.add('active');
+	})
+});
+
+// TOGGLE SIDEBAR
+const menuBar = document.querySelector('#content nav .bx.bx-menu');
+const sidebar = document.getElementById('sidebar');
+menuBar.addEventListener('click', function () {
+	sidebar.classList.toggle('hide');
+})
+
+const searchButton = document.querySelector('#content nav form .form-input button');
+const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
+const searchForm = document.querySelector('#content nav form');
+
+searchButton.addEventListener('click', function (e) {
+	if(window.innerWidth < 576) {
+		e.preventDefault();
+		searchForm.classList.toggle('show');
+		if(searchForm.classList.contains('show')) {
+			searchButtonIcon.classList.replace('bx-search', 'bx-x');
+		} else {
+			searchButtonIcon.classList.replace('bx-x', 'bx-search');
+		}
+	}
+})
+
+if(window.innerWidth < 768) {
+	sidebar.classList.add('hide');
+} else if(window.innerWidth > 576) {
+	searchButtonIcon.classList.replace('bx-x', 'bx-search');
+	searchForm.classList.remove('show');
+}
+
+window.addEventListener('resize', function () {
+	if(this.innerWidth > 576) {
+		searchButtonIcon.classList.replace('bx-x', 'bx-search');
+		searchForm.classList.remove('show');
+	}
+})
+
+const switchMode = document.getElementById('switch-mode');
+switchMode.addEventListener('change', function () {
+	if(this.checked) {
+		document.body.classList.add('dark');
+	} else {
+		document.body.classList.remove('dark');
+	}
+})
+const submenuToggles = document.querySelectorAll('.submenu-toggle');
+
+submenuToggles.forEach(toggle => {
+	toggle.addEventListener('click', function (event) {
+		event.preventDefault();
+		const submenu = this.nextElementSibling;
+		submenu.classList.toggle('active');
+	});
+});
+document.addEventListener('DOMContentLoaded', function () {
+    const cookieBanner = document.getElementById('cookie-consent-banner');
+    const acceptCookiesBtn = document.getElementById('accept-cookies-btn');
+
+    // Vérifier si le consentement aux cookies a déjà été donné
+    if (!localStorage.getItem('cookieConsent')) {
+      cookieBanner.style.display = 'block';
+    }
+
+    acceptCookiesBtn.addEventListener('click', function () {
+      // Cacher le bandeau des cookies
+      cookieBanner.style.display = 'none';
+
+      // Enregistrer le consentement dans le stockage local
+      localStorage.setItem('cookieConsent', 'true');
+    });
+  });
+</script>
+	</script>
+</body>
+</html>

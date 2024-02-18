@@ -1,183 +1,187 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voir Images</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 20px;
-            background-color: #fff;
-            color: #333;
-            overflow-x: auto;
-        }
+{% extends 'layouts/base.html' %}
 
-        h1 {
-            text-align: center;
-            color: #333;
-            font-size: 1.5em;
-            margin: 10px 0;
-        }
+{% block title %} Voir Images {% endblock title %}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            overflow-x: auto;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
+{% block stylesheets %}
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 20px;
+      background-color: #fff;
+      color: #333;
+      overflow-x: auto;
+    }
 
-        th, td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 10px;
-            white-space: nowrap;
-        }
+    h1 {
+      text-align: center;
+      color: #333;
+      font-size: 1.5em;
+      margin: 10px 0;
+    }
 
-        th {
-            background-color: #f2f2f2;
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      overflow-x: auto;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
 
-        .image-preview {
-            max-width: 100px;
-            max-height: 100px;
-            cursor: pointer;
-        }
+    th,
+    td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 10px;
+      white-space: nowrap;
+    }
 
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-            display: flex;
-        }
+    th {
+      background-color: #f2f2f2;
+    }
 
-        #overlay img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-        }
+    .image-preview {
+      max-width: 100px;
+      max-height: 100px;
+      cursor: pointer;
+    }
 
-        #searchInputContainer {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      display: flex;
+    }
 
-        #searchInput {
-            padding: 10px;
-            width: 60%;
-        }
+    #overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
 
-        .table-container {
-            overflow-x: auto;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
+    #searchInputContainer {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-        @media screen and (max-width: 600px) {
-            table {
-                overflow-x: auto;
-            }
-        }
+    #searchInput {
+      padding: 10px;
+      width: 60%;
+    }
 
-        .grise {
-            background-color: #ddd;
-            color: #666;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
-{% include 'home/index.html' %}
-<body>
-    <h1>Voir Images - {{ rapport.nom_operateur }} - {{ rapport.feeder }}</h1>
-    <p>Nombre total d'images : {{ images_invisibles|length }}</p>
+    .table-container {
+      overflow-x: auto;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
 
-    <div id="searchInputContainer">
-        <input type="text" id="searchInput" placeholder="Rechercher...">
-        <i class="fas fa-search"></i>
-    </div>
+    @media screen and (max-width: 600px) {
+      table {
+        overflow-x: auto;
+      }
+    }
 
+    .grise {
+      background-color: #ddd;
+      color: #666;
+      cursor: not-allowed;
+    }
+  </style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+  <h1>Voir Images - {{ rapport.nom_operateur }} - {{ rapport.feeder }}</h1>
+  <p>Nombre total d'images : {{ images_invisibles|length }}</p>
+
+  <div id="searchInputContainer">
+    <input type="text" id="searchInput" placeholder="Rechercher...">
+    <i class="fas fa-search"></i>
     <div class="table-container">
-        <table id="imagesTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nom Opérateur</th>
-                    <th>Filename</th>
-                    <th>Upload Date</th>
-                    <th>Data</th>
-                    <th>Longitude</th>
-                    <th>Latitude</th>
-                    <th>Type Défaut</th>
-                    <th>Temperature</th>
-                    <th>Feeder</th>
-                    <th>Tronçon</th>
-                    <th>Zone</th>
-                    <th>Type Image</th>
-                    <th>Rapport Genere ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for image in images_invisibles %}
-                    <tr{% if image.display == 'no' %} class="grise" onclick="showMessage()" {% endif %}>
-                        <td>{{ image.id }}</td>
-                        <td>{{ rapport.nom_operateur }}</td>
-                        <td>{{ image.filename }}</td>
-                        <td>{{ image.upload_date }}</td>
-                        <td>
-                            {% if image.data %}
-                            <img src="data:image/png;base64,{{ image.data }}" alt="Image Preview" class="image-preview">
-                            {% endif %}
-                        </td>
-                        <td>{{ image.longitude }}</td>
-                        <td>{{ image.latitude }}</td>
-                        <td>{{ image.type_defaut }}</td>
-                        <td>{{ image.temperature }}</td>
-                        <td>{{ image.feeder }}</td>
-                        <td>{{ image.troncon }}</td>
-                        <td>{{ image.zone }}</td>
-                        <td>{{ image.type_image }}</td>
-                        <td>{{ image.rapport_genere_id }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+      <table id="imagesTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom Opérateur</th>
+            <th>Filename</th>
+            <th>Upload Date</th>
+            <th>Data</th>
+            <th>Longitude</th>
+            <th>Latitude</th>
+            <th>Type Défaut</th>
+            <th>Temperature</th>
+            <th>Feeder</th>
+            <th>Tronçon</th>
+            <th>Zone</th>
+            <th>Type Image</th>
+            <th>Rapport Genere ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for image in images_invisibles %}
+            <tr{% if image.display == 'no' %} class="grise" onclick="showMessage()" {% endif %}>
+              <td>{{ image.id }}</td>
+              <td>{{ rapport.nom_operateur }}</td>
+              <td>{{ image.filename }}</td>
+              <td>{{ image.upload_date }}</td>
+              <td>
+                {% if image.data %}
+                  <img src="data:image/png;base64,{{ image.data }}" alt="Image Preview" class="image-preview">
+                {% endif %}
+              </td>
+              <td>{{ image.longitude }}</td>
+              <td>{{ image.latitude }}</td>
+              <td>{{ image.type_defaut }}</td>
+              <td>{{ image.temperature }}</td>
+              <td>{{ image.feeder }}</td>
+              <td>{{ image.troncon }}</td>
+              <td>{{ image.zone }}</td>
+              <td>{{ image.type_image }}</td>
+              <td>{{ image.rapport_genere_id }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
     <div id="overlay">
-        <img id="overlayImage" src="" alt="Agrandir l'image">
+      <img id="overlayImage" src="" alt="Agrandir l'image">
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $("#searchInput").on("keyup", function () {
-                var value = $(this).val().toLowerCase();
-                $("#imagesTable tbody tr").filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-                });
-            });
-
-            $(".image-preview").on("click", function () {
-                var imageUrl = $(this).attr("src");
-                $("#overlayImage").attr("src", imageUrl);
-                $("#overlay").show();
-            });
-
-            $("#overlay").on("click", function () {
-                $(this).hide();
-            });
+      $(document).ready(function () {
+        $("#searchInput").on("keyup", function () {
+          var value = $(this).val().toLowerCase();
+          $("#imagesTable tbody tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+          });
         });
 
-        function showMessage() {
-            alert("Seul l'administrateur peut approuver.");
-        }
+        $(".image-preview").on("click", function () {
+          var imageUrl = $(this).attr("src");
+          $("#overlayImage").attr("src", imageUrl);
+          $("#overlay").show();
+        });
+
+        $("#overlay").on("click", function () {
+          $(this).hide();
+        });
+      });
+
+      function showMessage() {
+        alert("Seul l'administrateur peut approuver.");
+      }
     </script>
-</body>
-</html>
+  </div>
+{% endblock content %}
+
+{% block javascripts %}
+  <!-- Specific JS goes HERE -->
+{% endblock javascripts %}

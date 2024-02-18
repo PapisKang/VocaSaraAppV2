@@ -127,6 +127,20 @@
   
   
 {% endblock content %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      var showPasswordCheckbox = document.getElementById('showPassword');
+      var passwordField = document.getElementById('passwordField');
+
+      showPasswordCheckbox.addEventListener('change', function () {
+          if (showPasswordCheckbox.checked) {
+              passwordField.type = 'text';
+          } else {
+              passwordField.type = 'password';
+          }
+      });
+  });
+</script>
 
 <!-- Le JavaScript spécifique va ICI -->
 {% block javascripts %} {% endblock javascripts %}

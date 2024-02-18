@@ -1,12 +1,9 @@
 {% extends 'layouts/base-fullscreen.html' %}
-
-
-
 <!-- Les styles spécifiques vont ICI -->
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-
+<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
   <main class="main-content  mt-0">
     <section>
       <div class="page-header min-vh-100">
@@ -29,19 +26,19 @@
                   </div>
                   <form role="form" method="post" action="">
                     {{ form.hidden_tag() }}
-                    <label>Nom</label>
+                    <label><i class='bx bx-user-plus bx-tada' ></i> Nom</label>
                     <div class="mb-3">
                       {{ form.username(placeholder="Nom d'utilisateur", class="form-control") }}
                     </div>
-                    <label>Email</label>
+                    <label><i class='bx bx-envelope bx-tada' ></i> Email</label>
                     <div class="mb-3">
                       {{ form.email(placeholder="Email", class="input form-control", type="email") }}
                     </div>
-                    <label>Mot de passe</label>
+                    <label> <i class='bx bxs-user-detail bx-tada' ></i> Mot de passe</label>
                     <div class="mb-3">
                       {{ form.password(placeholder="Mot de passe", class="form-control", type="password") }}
                     </div>
-                    <label>Confirmer le mot de passe</label>
+                    <label><i class='bx bxs-user-check bx-tada' ></i> Confirmer le mot de passe</label>
                     <div class="mb-3">
                       {{ form.password_check(placeholder="Vérification du mot de passe", class="form-control", type="password") }}
                     </div>
