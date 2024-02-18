@@ -17,14 +17,14 @@ class Email_config(object):
 class Config(object):
     
 
-    USERS_ROLES  = { 'ADMIN'  :1 , 'USER'      : 2 , 'TECHNICIEN':3}
+    USERS_ROLES  = { 'ADMIN'  :1 , 'USER'      : 2 }
     USERS_STATUS = { 'ACTIVE' :1 , 'SUSPENDED' : 2 }
     
     # USERS_STATUS = { 'ACTIVE' :1 , 'SUSPENDED' : 2 }
     # check verified_email
     VERIFIED_EMAIL = { 'verified' :1 , 'not-verified' : 2 }
 
-    LOGIN_ATTEMPT_LIMIT = 3
+    LOGIN_ATTEMPT_LIMIT = 5
 
     DEFAULT_IMAGE_URL =  'static/assets/images/'
   
@@ -64,7 +64,7 @@ class Config(object):
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_NAME = os.getenv('DB_NAME', 'root')
 
-    USE_SQLITE = False
+    USE_SQLITE = False  
     # try to set up a Relational DBMS
     if  DB_NAME and DB_USERNAME:
 

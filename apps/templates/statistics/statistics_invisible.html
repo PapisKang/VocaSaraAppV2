@@ -1,109 +1,118 @@
-<!-- statistiques.html -->
-<!DOCTYPE html>
-<html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Statistiques des Types de Défauts Invisible</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      /* Ajoutez votre CSS ici */
-      body {
-        font-family: Arial, sans-serif;
-      }
+{% extends 'layouts/base.html' %}
 
-      .chart-container {
-        width: 100%;
-        max-width: 600px; /* Ajustez la largeur maximale selon vos besoins */
-        margin: auto;
-        padding: 20px;
-        margin-left: 250px;
-        margin-top: 50px;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
+{% block title %} Invoice {% endblock title %}
 
-      @media (min-width: 600px) {
-        .chart-container {
-          display: inline-block;
-          width: 48%; /* Ajustez la largeur selon vos besoins */
-          margin-right: 1%;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    {%include 'home/index.html'%}
-    <div class="chart-container">
-      <h2>Pie Chart - Répartition des Défauts</h2>
-      <canvas id="defautChart"></canvas>
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+<title>Statistiques des Types de Défauts</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+ 
+  .chart-container {
+    width: 100%;
+    max-width: 600px; /* Ajustez la largeur maximale selon vos besoins */
+    margin: auto;
+    padding: 20px;
+    margin-left: 250px;
+    margin-top: 50px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+ 
+  <div class="container-fluid my-3 py-3">
+    <div class="row">
+     
+       
+         
+            <div class="card-header text-center">          
+              <div id="container" style="display:inline-flex; flex-direction: row;">
+                <div class="chart-container" style="margin-right: 20px;">
+                  <h2>Pie Chart - Répartition des Défauts</h2>
+                  <canvas id="defautChart"></canvas>
+                </div>
+              
+                <div class="chart-container">
+                  <h2>Mixed Chart - Nombre de Défauts et Évolution</h2>
+                  <canvas id="mixedChart"></canvas>
+                </div>
+              </div>
+              
+           
+          </div>
+        
+      </div>
     </div>
 
-    <div class="chart-container">
-      <h2>Mixed Chart - Nombre de Défauts et Évolution</h2>
-      <canvas id="mixedChart"></canvas>
-    </div>
+    {% include "includes/footer.html" %}
+    
+  </div>
+  <script>
+    // Récupérer les données passées par Flask
+    var data = JSON.parse('{{ data | safe }}');
 
-    <script>
-      // Récupérer les données passées par Flask
-      var data = JSON.parse(`{{ data | safe }}`);
+    // Générer des couleurs aléatoires pour chaque segment de pie chart
+    var randomColors = Array.from(
+      { length: data.labels.length },
+      () => "#" + Math.floor(Math.random() * 16777215).toString(16)
+    );
 
-      // Générer des couleurs aléatoires pour chaque segment de pie chart
-      var randomColors = Array.from(
-        { length: data.labels.length },
-        () => "#" + Math.floor(Math.random() * 16777215).toString(16)
-      );
+    // Créer le graphique Pie
+    var defautCtx = document.getElementById("defautChart").getContext("2d");
+    var defautChart = new Chart(defautCtx, {
+      type: "pie",
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: "Nombre de Défauts",
+          data: data.values,
+          backgroundColor: randomColors,
+          borderColor: "rgba(255, 255, 255, 1)",
+          borderWidth: 1,
+        }],
+      },
+      options: {
+        // options spécifiques au graphique Pie
+      },
+    });
 
-      // Créer le graphique Pie
-      var defautCtx = document.getElementById("defautChart").getContext("2d");
-      var defautChart = new Chart(defautCtx, {
-        type: "pie",
-        data: {
-          labels: data.labels,
-          datasets: [
-            {
-              label: "Nombre de Défauts",
-              data: data.values,
-              backgroundColor: randomColors,
-              borderColor: "rgba(255, 255, 255, 1)",
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          // options spécifiques au graphique Pie
-        },
-      });
 
-      // Créer le graphique Mixed
-      var mixedCtx = document.getElementById("mixedChart").getContext("2d");
-      var mixedChart = new Chart(mixedCtx, {
-        type: "bar",
-        data: {
-          labels: data.labels,
-          datasets: [
-            {
-              label: "Nombre de Défauts",
-              data: data.values,
-              backgroundColor: randomColors,
-              borderColor: "rgba(255, 255, 255, 1)",
-              borderWidth: 1,
-            },
-            {
-              type: "line",
-              label: "Évolution des Défauts",
-              data: data.values,
-              borderColor: "blue",
-              borderWidth: 1,
-              fill: false,
-            },
-          ],
-        },
-        options: {
-          // options spécifiques au graphique Mixed
-        },
-      });
-    </script>
-  </body>
-</html>
+    // Créer le graphique Mixed
+    var mixedCtx = document.getElementById("mixedChart").getContext("2d");
+    var mixedChart = new Chart(mixedCtx, {
+      type: "bar",
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: "Nombre de Défauts",
+          data: data.values,
+          backgroundColor: randomColors,
+          borderColor: "rgba(255, 255, 255, 1)",
+          borderWidth: 1,
+        }, {
+          type: "line",
+          label: "Évolution des Défauts",
+          data: data.values,
+          borderColor: "blue",
+          borderWidth: 1,
+          fill: false,
+        }],
+      },
+      options: {
+        // options spécifiques au graphique Mixed
+      },
+    });
+  </script>
+ 
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

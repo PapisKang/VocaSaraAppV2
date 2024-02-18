@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -68,12 +69,14 @@
                     <h2 class="h4">Bienvenue chez VOCA SARA-SUARL</h2>
                     <p class="blinking-text">VOCA SARA-SUARL est une nouvelle PME créée par Monsieur Yiékiédion Raphael SARA en 2021 à Dakar, naissant d’une véritable passion des drones et de la robotique. En effet, l’entreprise VOCA SARA-SUARL agit dans la réalisation et la conception des inspections par drones, notamment dans le secteur de l’énergie avec les visites et inspections du réseau aérien HTA et BT de la SENELEC par drones, mais aussi dans le secteur agricole, industriel, pétrolier, multimédia, etc.</p>
                 </section>
+=======
+{% extends 'layouts/base.html' %}
+>>>>>>> Prince-Gildas
 
-                <section class="bg-light rounded shadow-sm mb-4 p-4">
-                    <h2 class="h4">Évolution de l'entreprise</h2>
-                    <p>Par ailleurs, elle a d’abord vu le jour sous le nom de Volantis en 2018 en statut de GIE, et au fil du temps, elle a signé en 2019 avec la SENELEC sur le projet portant inspections et visites par drones des lignes du réseau aérien HTA. Ensuite, en 2020, elle change de statut juridique pour devenir une SARL, avec pour ambition de bien pouvoir développer ses activités et d'être en adéquation avec ses différents métiers. En fin, Volantis SARL a décidé en 2021 de changer de dénomination sociale et de statut juridique pour devenir VOCA SARA-SUARL.</p>
-                </section>
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
 
+<<<<<<< HEAD
                 <section class="bg-light rounded shadow-sm mb-4 p-4">
                     <h2 class="h4">Nos Compétences</h2>
 >>>>>>> Prince-Gildas
@@ -109,13 +112,95 @@
             <h5 class="blinking-text text-center mb-4">Dakar (Sénégal), Hann Maristes I Villa numéro B 113.</h5>
             <div class="embed-responsive embed-responsive-16by9">
                 <iframe class="embed-responsive-item rounded" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d964.6424348265977!2d-17.425846330448714!3d14.736900999110382!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xec10d54666a52ff%3A0x494168c5dd93026e!2sVOCASARA!5e0!3m2!1sfr!2ssn!4v1696973615830!5m2!1sfr!2ssn" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+=======
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> 
+<style>
+    .iframe-container {
+        border: 3px dotted #c7d8ea; /* Couleur de la bordure, ajustez selon vos préférences */
+        margin: auto; /* Centre l'élément horizontalement */
+        width: 90%; /* Ajuste la largeur selon vos préférences */
+        max-width: 800px; /* Limite la largeur maximale */
+        padding: 20px; /* Ajoute un padding à l'intérieur de la bordure */
+        background-color: white; /* Fond blanc, ajustez selon vos préférences */
+    }
+
+</style>
+
+ 
+  <div class="container-fluid my-3 py-3">
+    <div class="row">
+     
+        <div class="container">
+            <div class="text-center mt-4 mb-5">
+                <img src="{{ config.ASSETS_ROOT }}/img/vocasara/logo.png" alt="Logo VOCA SARA-SUARL" class="img-fluid">
+                <h1 class="display-7 mt-7">À PROPOS DE VOCASARA-SUARL</h1>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <section class="bg-light rounded shadow-sm mb-4 p-4">
+                        <h2 class="h4">Bienvenue chez VOCA SARA-SUARL</h2>
+                        <p class="blinking-text">VOCA SARA-SUARL est une nouvelle PME créée par Monsieur Yiékiédion Raphael SARA en 2021 à Dakar, naissant d’une véritable passion des drones et de la robotique. En effet, l’entreprise VOCA SARA-SUARL agit dans la réalisation et la conception des inspections par drones, notamment dans le secteur de l’énergie avec les visites et inspections du réseau aérien HTA et BT de la SENELEC par drones, mais aussi dans le secteur agricole, industriel, pétrolier, multimédia, etc.</p>
+                    </section>
+    
+                    <section class="bg-light rounded shadow-sm mb-4 p-4">
+                        <h2 class="h4">Évolution de l'entreprise</h2>
+                        <p>Par ailleurs, elle a d’abord vu le jour sous le nom de Volantis en 2018 en statut de GIE, et au fil du temps, elle a signé en 2019 avec la SENELEC sur le projet portant inspections et visites par drones des lignes du réseau aérien HTA. Ensuite, en 2020, elle change de statut juridique pour devenir une SARL, avec pour ambition de bien pouvoir développer ses activités et d'être en adéquation avec ses différents métiers. En fin, Volantis SARL a décidé en 2021 de changer de dénomination sociale et de statut juridique pour devenir VOCA SARA-SUARL.</p>
+                    </section>
+    
+                    <section class="bg-light rounded shadow-sm mb-4 p-4">
+                        <h2 class="h4">Nos Compétences</h2>
+                        <p>Cependant, notre savoir-faire et nos compétences reposent sur l’ingéniosité en inspections par drones via notre Centre de Traitement and d’Analyse de Données (CTAD), nos compétences du terrain and d’un personnel expérimenté and motivé. En outre, quel que soit votre projet, l’entreprise VOCA SARA-SUARL vous accompagne, identifie l’ensemble de vos besoins and vous propose des solutions à votre attente afin de réaliser une maintenance préventive or curative.</p>
+                    </section>
+                </div>
+            </div>
+            <div class="text-center">
+                <h2 class="mb-4">Contactez-nous</h2>
+                <form method="POST" action="/envoyer_message" class="col-lg-6 offset-lg-3 border rounded p-4" style="background-color: white;">
+                    <div class="form-group">
+                        <label for="nom"><i class="fas fa-user"></i> Nom :</label>
+                        <input type="text" id="nom" name="nom" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email"> <i class="fas fa-envelope"></i> Email :</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message"> <i class="fas fa-comment"></i> Message :</label>
+                        <textarea id="message" name="message" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Envoyer</button>
+                </form>
+            </div>
+            
+    
+            <div class="text-center mt-5">
+                <h3 class="mb-3">DIAYANTE BA NAW</h3>
+            </div>
+    
+            <div class="iframe-container">
+                <h5 class="blinking-text text-center mb-4">Dakar (Sénégal), Hann Maristes I Villa numéro B 113.</h5>
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item rounded" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d964.6424348265977!2d-17.425846330448714!3d14.736900999110382!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xec10d54666a52ff%3A0x494168c5dd93026e!2sVOCASARA!5e0!3m2!1sfr!2ssn!4v1696973615830!5m2!1sfr!2ssn" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+>>>>>>> Prince-Gildas
             </div>
         </div>
+    
+         
+            
+        
+      </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+    {% include "includes/footer.html" %}
+    
+  </div>
+  
+{% endblock content %}
 
-</html>
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

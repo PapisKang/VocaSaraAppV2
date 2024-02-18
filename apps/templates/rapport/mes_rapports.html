@@ -1,173 +1,135 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mes Rapports</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- mes_rapports.html -->
+{% extends 'layouts/base.html' %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <!-- Ajoutez le lien CDN Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
+        /* Vos styles personnalisés ici */
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f8f9fa; /* Couleur de fond */
-            margin: 0;
+            background-color: #f4f4f4;
+            margin: 20px;
         }
-
         h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #007bff; /* Couleur du texte */
-            font-size: 1.5rem;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        li {
-            margin-bottom: 10px;
-            background-color: #fff; /* Couleur de fond des éléments de liste */
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre légère */
-        }
-
-        .rapport-link {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
             color: #333;
-            font-size: 1rem;
+            font-size: 15px;
         }
-
-        .rapport-link:hover {
-            color: #0056b3; /* Couleur du texte au survol */
-        }
-
-        .rapport-icon {
-            margin-right: 10px;
-            color: #007bff; /* Couleur de l'icône */
-        }
-
-        .message {
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        .success-message {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .search-container {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .search-container input[type="text"] {
+        table {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 1rem;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
-
-        .date-container {
+        th, td {
             border: 1px solid #ddd;
-            margin-bottom: 20px;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 8px;
+            text-align: left;
         }
-
-        @media only screen and (max-width: 600px) {
-            h1 {
-                font-size: 1.2rem;
-            }
-
-            .rapport-link {
-                flex-direction: column;
-                text-align: center;
-                font-size: 0.9rem;
-            }
-
-            .rapport-icon {
-                margin-bottom: 10px;
-            }
+        th {
+            background-color: #f2f2f2;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+        .download-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
         }
     </style>
-</head>
-<body>
-  {%include 'home/index.html'%}
-    <h1>Mes Rapports</h1>
-    <!-- Barre de recherche -->
-    <div class="search-container">
-        <input type="text" id="search-bar" placeholder="Rechercher par nom de rapport">
-    </div>
+{% endblock stylesheets %}
 
-    <!-- Conteneur pour les résultats -->
-    <div id="result-container">
-        {% if rapports %}
-        <ul>
-            {% for rapport in rapports %}
-            <li class="rapport-item" data-date="{{ rapport.date_de_creation }}">
-                <a href="{{ url_for('home_blueprint.telecharger_rapport', rapport_id=rapport.id) }}" class="rapport-link">
-                    {% if rapport.type_de_fichier == 'excel' %}
-                    <i class="fas fa-file-excel rapport-icon"></i>
-                    {% elif rapport.type_de_fichier == 'word' %}
-                    <i class="fas fa-file-word rapport-icon"></i>
-                    {% else %}
-                    <i class="fas fa-file rapport-icon"></i>
-                    {% endif %}
-                    <strong>{{ rapport.nom_du_rapport }}</strong> - {{ rapport.date_de_creation }}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p>Aucun rapport disponible.</p>
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>Mes Rapports Visibles</h1>
+
+        <div class="mb-3">
+            <label for="searchInput" class="form-label">Recherchez un rapport :</label>
+            <input type="text" class="form-control" id="searchInput" oninput="filterTable()" placeholder="Nom du rapport">
+        </div>
+
+        {% if error_message %}
+            <p class="error-message">{{ error_message }}</p>
         {% endif %}
+
+        <div class="table-responsive">
+            <table class="table" id="rapportTable">
+                <thead>
+                    <tr>
+                        <th>Nom du Rapport</th>
+                        <th>Type de Fichier</th>
+                        <th>Date de Création</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rapport in rapports %}
+                        <tr>
+                            <td>{{ rapport.nom_du_rapport }}</td>
+                            <td>{{ rapport.type_de_fichier }}</td>
+                            <td>{{ rapport.date_de_creation }}</td>
+                            <td>
+                                <a href="{{ url_for('home_blueprint.telecharger_rapport', rapport_id=rapport.id) }}" class="btn btn-success"
+                                    onclick="showSuccessAlert()">Télécharger</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    {% if 'download_message' in session %}
-    <div class="message success-message">
-        {{ session.pop('download_message') }}
-    </div>
-    {% endif %} {% if 'error_message' in session %}
-    <div class="message error-message">{{ session.pop('error_message') }}</div>
-    {% endif %}
+    {% include "includes/footer.html" %}
+{% endblock content %}
+
+{% block javascripts %}
+    {{ super() }}
+    <!-- Ajoutez le script Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        $(document).ready(function () {
-            // Barre de recherche dynamique
-            $("#search-bar").on("keyup", function () {
-                var searchTerm = $(this).val().toLowerCase();
-                $(".rapport-item").filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(searchTerm) > -1);
-                });
-            });
-            
-            // Regroupement par date (ex. : format 'DD/MM/YYYY')
-            var containers = {};
-            $(".rapport-item").each(function () {
-                var dateText = $(this).data("date").split(' ')[0]; // Extraction de la partie date uniquement
-                if (!containers[dateText]) {
-                    containers[dateText] = $("<div class='date-container'></div>").appendTo("#result-container");
+        function filterTable() {
+            // Récupère la valeur du champ de recherche
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("rapportTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Parcourt toutes les lignes du tableau et cache celles qui ne correspondent pas à la recherche
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0]; // Changez l'index en fonction de la colonne que vous voulez filtrer
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
                 }
-                $(this).appendTo(containers[dateText]);
+            }
+        }
+
+        // Fonction pour afficher une alerte SweetAlert
+        function showSuccessAlert() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Téléchargement réussi',
+                text: 'Le rapport a été téléchargé avec succès.',
+                timer: 3000, // Affiche l'alerte pendant 3 secondes
+                timerProgressBar: true,
             });
-        });
+        }
     </script>
-</body>
-</html>
+{% endblock javascripts %}

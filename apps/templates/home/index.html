@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -275,92 +276,236 @@
 	<button id="accept-cookies-btn">Accepter les cookies</button>
   </div>
   <!-- COOKIE CONSENT BANNER -->
+=======
+{% extends 'layouts/base.html' %}
+
+{% block title %} Dashboard {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+
+
+    <div class="container-fluid py-4">
+
+      <div class="row">
+        <div class="col-lg-7 position-relative z-index-2">
+          <div class="card card-plain mb-4">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="col-lg-6">
+>>>>>>> Prince-Gildas
   
-	<script >
-		const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
-allSideMenu.forEach(item=> {
-	const li = item.parentElement;
+        <div class="col-lg-5 mb-lg-0 mb-4">
+        
+                <div class="chart">
+                  <canvas id="chart-bars" class="chart-canvas" height="170"></canvas>
+                </div>
 
-	item.addEventListener('click', function () {
-		allSideMenu.forEach(i=> {
-			i.parentElement.classList.remove('active');
-		})
-		li.classList.add('active');
-	})
-});
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-// TOGGLE SIDEBAR
-const menuBar = document.querySelector('#content nav .bx.bx-menu');
-const sidebar = document.getElementById('sidebar');
-menuBar.addEventListener('click', function () {
-	sidebar.classList.toggle('hide');
-})
+              <p class="text-sm">
+              
+              </p>
+            </div>
+            <div class="card-body p-3">
+              <div class="chart">
+                <canvas id="chart-line" class="chart-canvas" height="600"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-const searchButton = document.querySelector('#content nav form .form-input button');
-const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
-const searchForm = document.querySelector('#content nav form');
+      
+      <div class="row">
+        <div class="col-12">
+            <div id="globe" class="position-absolute start-0 top-10 mt-sm-3 mt-7 ms-lg-7">
+                <div class="globe-text-container">
+                    <h2 class="globe-text-title">
+                        <span class="reveal-word"> VOCASARA </span>
+                    </h2>
+                    <p class="globe-text">
+                        Une entreprise pionnière spécialisée dans l'inspection de lignes électriques par drone. Chez VOCASARA, nous comprenons le rôle crucial que jouent les lignes électriques dans l'infrastructure moderne.
+                        Notre technologie de drone avancée nous permet de réaliser des inspections précises, garantissant la fiabilité et la sécurité des lignes électriques alimentant des communautés du monde entier.
+                    </p>
+                </div>
+                <canvas width="200" height="60" class="w-lg-90 h-lg-100 w-75 h-75 ms-lg-0 ms-n10 mt-lg-5"></canvas>
+            </div>
+        </div>
+    </div>
+      
+    </div>
 
-searchButton.addEventListener('click', function (e) {
-	if(window.innerWidth < 576) {
-		e.preventDefault();
-		searchForm.classList.toggle('show');
-		if(searchForm.classList.contains('show')) {
-			searchButtonIcon.classList.replace('bx-search', 'bx-x');
-		} else {
-			searchButtonIcon.classList.replace('bx-x', 'bx-search');
-		}
-	}
-})
+{% endblock content %}
 
-if(window.innerWidth < 768) {
-	sidebar.classList.add('hide');
-} else if(window.innerWidth > 576) {
-	searchButtonIcon.classList.replace('bx-x', 'bx-search');
-	searchForm.classList.remove('show');
-}
+<!-- Specific JS goes HERE --> 
+{% block javascripts %} 
 
-window.addEventListener('resize', function () {
-	if(this.innerWidth > 576) {
-		searchButtonIcon.classList.replace('bx-x', 'bx-search');
-		searchForm.classList.remove('show');
-	}
-})
 
-const switchMode = document.getElementById('switch-mode');
-switchMode.addEventListener('change', function () {
-	if(this.checked) {
-		document.body.classList.add('dark');
-	} else {
-		document.body.classList.remove('dark');
-	}
-})
-const submenuToggles = document.querySelectorAll('.submenu-toggle');
+  <script src="{{ config.ASSETS_ROOT }}/js/plugins/threejs.js"></script>
+  <script src="{{ config.ASSETS_ROOT }}/js/plugins/orbit-controls.js"></script>
+  <script>
+    var ctx = document.getElementById("chart-bars").getContext("2d");
 
-submenuToggles.forEach(toggle => {
-	toggle.addEventListener('click', function (event) {
-		event.preventDefault();
-		const submenu = this.nextElementSibling;
-		submenu.classList.toggle('active');
-	});
-});
-document.addEventListener('DOMContentLoaded', function () {
-    const cookieBanner = document.getElementById('cookie-consent-banner');
-    const acceptCookiesBtn = document.getElementById('accept-cookies-btn');
 
-    // Vérifier si le consentement aux cookies a déjà été donné
-    if (!localStorage.getItem('cookieConsent')) {
-      cookieBanner.style.display = 'block';
+
+    var ctx2 = document.getElementById("chart-line").getContext("2d");
+
+    var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
+    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+
+    var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
+    gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
+
+
+    (function() {
+      const container = document.getElementById("globe");
+      const canvas = container.getElementsByTagName("canvas")[0];
+
+      const globeRadius = 100;
+      const globeWidth = 4098 / 2;
+      const globeHeight = 1968 / 2;
+
+      function convertFlatCoordsToSphereCoords(x, y) {
+        let latitude = ((x - globeWidth) / globeWidth) * -180;
+        let longitude = ((y - globeHeight) / globeHeight) * -90;
+        latitude = (latitude * Math.PI) / 180;
+        longitude = (longitude * Math.PI) / 180;
+        const radius = Math.cos(longitude) * globeRadius;
+
+        return {
+          x: Math.cos(latitude) * radius,
+          y: Math.sin(longitude) * globeRadius,
+          z: Math.sin(latitude) * radius
+        };
+      }
+
+      function makeMagic(points) {
+        const {
+          width,
+          height
+        } = container.getBoundingClientRect();
+
+        // 1. Setup scene
+        const scene = new THREE.Scene();
+        // 2. Setup camera
+        const camera = new THREE.PerspectiveCamera(45, width / height);
+        // 3. Setup renderer
+        const renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: true
+        });
+        renderer.setSize(width, height);
+        // 4. Add points to canvas
+        // - Single geometry to contain all points.
+        const mergedGeometry = new THREE.Geometry();
+        // - Material that the dots will be made of.
+        const pointGeometry = new THREE.SphereGeometry(0.5, 1, 1);
+        const pointMaterial = new THREE.MeshBasicMaterial({
+          color: "#989db5",
+        });
+
+        for (let point of points) {
+          const {
+            x,
+            y,
+            z
+          } = convertFlatCoordsToSphereCoords(
+            point.x,
+            point.y,
+            width,
+            height
+          );
+
+          if (x && y && z) {
+            pointGeometry.translate(x, y, z);
+            mergedGeometry.merge(pointGeometry);
+            pointGeometry.translate(-x, -y, -z);
+          }
+        }
+
+        const globeShape = new THREE.Mesh(mergedGeometry, pointMaterial);
+        scene.add(globeShape);
+
+        container.classList.add("peekaboo");
+
+        // Setup orbital controls
+        camera.orbitControls = new THREE.OrbitControls(camera, canvas);
+        camera.orbitControls.enableKeys = false;
+        camera.orbitControls.enablePan = false;
+        camera.orbitControls.enableZoom = false;
+        camera.orbitControls.enableDamping = false;
+        camera.orbitControls.enableRotate = true;
+        camera.orbitControls.autoRotate = true;
+        camera.position.z = -265;
+
+        function animate() {
+          // orbitControls.autoRotate is enabled so orbitControls.update
+          // must be called inside animation loop.
+          camera.orbitControls.update();
+          requestAnimationFrame(animate);
+          renderer.render(scene, camera);
+        }
+        animate();
+      }
+
+      function hasWebGL() {
+        const gl =
+          canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        if (gl && gl instanceof WebGLRenderingContext) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      function init() {
+        if (hasWebGL()) {
+          window
+          window.fetch("https://raw.githubusercontent.com/creativetimofficial/public-assets/master/soft-ui-dashboard-pro/assets/js/points.json")
+            .then(response => response.json())
+            .then(data => {
+              makeMagic(data.points);
+            });
+        }
+      }
+      init();
+    })();
+    const revealWords = document.querySelectorAll('.reveal-word');
+
+    let delay = 100; // ajustez selon vos préférences
+
+    revealWords.forEach((word) => {
+        word.style.opacity = '0';
+        word.style.transition = `opacity 1s ease ${delay / 1000}s`;
+        delay += 100; // décalage entre les mots
+    });
+
+    function revealText() {
+        revealWords.forEach((word) => {
+            setTimeout(() => {
+                word.style.opacity = '1';
+            }, delay);
+            delay += 100;
+        });
     }
 
-    acceptCookiesBtn.addEventListener('click', function () {
-      // Cacher le bandeau des cookies
-      cookieBanner.style.display = 'none';
+    // Ajoutez cette fonction à un événement de déclenchement, par exemple lors du chargement de la page.
+    revealText();
+  </script>
 
-      // Enregistrer le consentement dans le stockage local
-      localStorage.setItem('cookieConsent', 'true');
-    });
-  });
-</script>
-	</script>
-</body>
-</html>
+{% endblock javascripts %}

@@ -4,10 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inspections Générées</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link rel="stylesheet" href="../../static/assets/css/soft-ui-dashboard.css" />
+    <link rel="stylesheet" href="../../static/assets/css/soft-ui-dashboard.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
       body {
         font-family: "Arial", sans-serif;
@@ -106,102 +108,110 @@
     </style>
   </head>
   <body>
-    {%include 'home/index.html'%}
-    <h1>Créer un rapport</h1>
-    <!-- Add this at the top of your HTML body -->
-    {% if success_message %}
-    <div style="color: green; text-align: center; font-weight: bold">
-      {{ success_message }}
-    </div>
-    {% endif %} {% if error_message %}
-    <div style="color: red; text-align: center; font-weight: bold">
-      {{ error_message }}
-    </div>
-    {% endif %}
-    <div class="search-container">
-      <input
-        type="text"
-        class="search-box"
-        id="searchInput"
-        placeholder="Rechercher..."
-      />
-    </div>
-    <!-- Bouton pour générer les rapports sélectionnés -->
-    <form id="generateReportForm" method="post" action="{{ url_for('home_blueprint.generate_report_document') }}">
-    <button id="generateReportBtn">Créer le rapport</button>
-    <div style="overflow-x: auto">
-      <table id="rapportTable">
-        <thead>
-          <tr>
-            <th>Nom Opérateur</th>
-            <th>Feeder</th>
-            <th>Tronçon</th>
-            <th>Date Début</th>
-            <th>Date Fin</th>
-            <th>Zone</th>
-            <th>Groupement Tronçon</th>
-            <th>Date Created</th>
-            <th>Date Modified</th>
-            <th>Type_defaut</th>
-            <!-- Remplacez l'icône "Voir Images" par des cases à cocher -->
-            <th>Sélectionner</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for rapport in rapports %}
-          <tr>
-            <td>{{ rapport.nom_operateur }}</td>
-            <td>{{ rapport.feeder }}</td>
-            <td>{{ rapport.troncon }}</td>
-            <td>{{ rapport.date_debut }}</td>
-            <td>{{ rapport.date_fin }}</td>
-            <td>{{ rapport.zone }}</td>
-            <td>{{ rapport.groupement_troncon }}</td>
-            <td>{{ rapport.date_created }}</td>
-            <td>{{ rapport.date_modified }}</td>
-            <td>{{ rapport.type_defaut }}</td>
-            <!-- Remplacez l'icône par une case à cocher -->
-            <td>
-              <input
-                type="checkbox"
-                class="custom-checkbox"
-                name="selectedReports"
-                value="{{ rapport.id }}"
-              />
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    {% include 'layouts/base.html' %}
+    <div>  
+        <div class="card" style="border: 2px solid rgb(239, 233, 233); margin-left:270px;">
+            <h1>Créer un rapport</h1>
+            <!-- Add this at the top of your HTML body -->
+            {% if success_message %}
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Succès',
+                    text: '{{ success_message }}',
+                });
+            </script>
+            {% endif %} {% if error_message %}
+            <div style="color: red; text-align: center; font-weight: bold">
+                {{ error_message }}
+            </div>
+            {% endif %}
+            <div class="search-container">
+            <input
+                type="text"
+                class="search-box"
+                id="searchInput"
+                placeholder="Rechercher..."
+            />
+            </div>
+        
+            <!-- Bouton pour générer les rapports sélectionnés -->
+            <form id="generateReportForm" method="post" action="{{ url_for('home_blueprint.generate_report_document') }}">
+            <button id="generateReportBtn">Créer le rapport</button>
+            <div style="overflow-x: auto">
+                <table id="rapportTable">
+                <thead>
+                    <tr>
+                        <th>Nom Opérateur</th>
+                        <th>Feeder</th>
+                        <th>Tronçon</th>
+                        <th>Date Début</th>
+                        <th>Date Fin</th>
+                        <th>Zone</th>
+                        <th>Groupement Tronçon</th>
+                        <th>Date Created</th>
+                        <th>Date Modified</th>
+                        <!-- Remplacez l'icône "Voir Images" par des cases à cocher -->
+                        <th>Sélectionner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rapport in rapports %}
+                    <tr>
+                        <td>{{ rapport.nom_operateur }}</td>
+                        <td>{{ rapport.feeder }}</td>
+                        <td>{{ rapport.troncon }}</td>
+                        <td>{{ rapport.date_debut }}</td>
+                        <td>{{ rapport.date_fin }}</td>
+                        <td>{{ rapport.zone }}</td>
+                        <td>{{ rapport.groupement_troncon }}</td>
+                        <td>{{ rapport.date_created }}</td>
+                        <td>{{ rapport.date_modified }}</td>
+                        <!-- Remplacez l'icône par une case à cocher -->
+                        <td>
+                        <input
+                            type="checkbox"
+                            class="custom-checkbox"
+                            name="selectedReports"
+                            value="{{ rapport.id }}"
+                        />
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+        </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script>
-      $(document).ready(function () {
-        $("#searchInput").on("keyup", function () {
-            var value = $(this).val().toLowerCase();
-            $("#rapportTable tbody tr").filter(function () {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        <script>
+            $(document).ready(function () {
+                $("#searchInput").on("keyup", function () {
+                    var value = $(this).val().toLowerCase();
+                    $("#rapportTable tbody tr").filter(function () {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                    });
+                });
+
+                // Gestion du bouton "Créer le rapport"
+                $("#generateReportBtn").click(function () {
+                    // Vérifiez si au moins une case à cocher est sélectionnée
+                    if ($("input[name='selectedReports']:checked").length > 0) {
+                        // Soumettre le formulaire
+                        $("#generateReportForm").submit();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: 'Veuillez sélectionner au moins un rapport.',
+                        });
+                    }
+                });
+
+                // Gestion du bouton de bascule en mode sombre
+                $("#darkModeToggle").click(function () {
+                    $("body").toggleClass("dark-mode");
+                });
             });
-        });
-    
-        // Gestion du bouton "Créer le rapport"
-        $("#generateReportBtn").click(function () {
-            // Vérifiez si au moins une case à cocher est sélectionnée
-            if ($("input[name='selectedReports']:checked").length > 0) {
-                // Soumettre le formulaire
-                $("#generateReportForm").submit();
-            } else {
-                alert("Veuillez sélectionner au moins un rapport.");
-            }
-        });
-    
-        // Gestion du bouton de bascule en mode sombre
-        $("#darkModeToggle").click(function () {
-            $("body").toggleClass("dark-mode");
-        });
-    });
-    
-    </script>
-  </body>
-</html>
+        </script>
+    </body>
+    </html>

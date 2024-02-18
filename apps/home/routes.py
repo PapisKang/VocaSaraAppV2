@@ -403,7 +403,7 @@ def get_map_data_invisible():
     else:
         image_points = ImageUploadInvisible.query
 
-    # Si l'utilisateur est un administrateur, récupérer toutes les données
+    
     image_points = image_points.filter(
         ImageUploadInvisible.type_defaut.isnot(None),
         ImageUploadInvisible.type_defaut != "",
@@ -535,8 +535,13 @@ def rapport_id_page_invisible():
 def mes_inspections(rapport_id):
     rapport = RapportGenere.query.get(rapport_id)
     if rapport:
-        images_visibles = ImageUploadVisible.query.filter_by(
-            rapport_genere_id=rapport_id).all()
+        images_visibles = ImageUploadVisible.query.filter(
+            ImageUploadVisible.rapport_genere_id == rapport_id,
+            ImageUploadVisible.longitude.isnot(None),
+            ImageUploadVisible.latitude.isnot(None),
+            ImageUploadVisible.type_defaut != 'non_defaut'
+        ).all()
+
         return render_template('rapport/mes_inspections.html', rapport=rapport, images_visibles=images_visibles)
     else:
         return redirect(url_for('authentication_blueprint.index'))
@@ -587,8 +592,13 @@ def generate_report_document():
         feeder = last_image_data.feeder
         zone = last_image_data.zone
         groupement = last_image_data.groupement_troncon
-        image_data = ImageUploadVisible.query.filter_by(
-            nom_operateur=nom_operateur).all()
+        image_data = ImageUploadVisible.query.filter(
+            ImageUploadVisible.nom_operateur == nom_operateur,
+            ImageUploadVisible.longitude.isnot(None),
+            ImageUploadVisible.latitude.isnot(None),
+            ImageUploadVisible.type_defaut != 'non_defaut'
+        ).all()
+
 
         # Charger les normes_conseils des défauts à partir du fichier JSON
         with open('./apps/phrase_normes_conseils/normes_conseils.json', encoding='utf-8') as f:
@@ -818,8 +828,13 @@ def generate_quantification_report():
         feeder = last_image_data.feeder
         date = datetime.now().strftime("%Y-%m-%d")
         nom_operateur = last_image_data.nom_operateur
-        image_data = ImageUploadVisible.query.filter_by(
-            nom_operateur=nom_operateur).all()
+        image_data = ImageUploadVisible.query.filter(
+            ImageUploadVisible.nom_operateur == nom_operateur,
+            ImageUploadVisible.longitude.isnot(None),
+            ImageUploadVisible.latitude.isnot(None),
+            ImageUploadVisible.type_defaut != 'non_defaut'
+        ).all()
+
 
         # Charger le modèle de feuille Quantification
         template_workbook = load_workbook("./apps/Exemple_rapport/Quantification_Statistique_exemple.xlsx")
@@ -918,9 +933,12 @@ def generate_resume_rapport():
         date = datetime.now().strftime("%Y-%m-%d")
         nom_operateur = last_image_data.nom_operateur
         zone = last_image_data.zone
-        image_data = ImageUploadVisible.query.filter_by(
-            nom_operateur=nom_operateur).all()
-
+        image_data = ImageUploadVisible.query.filter(
+            ImageUploadVisible.nom_operateur == nom_operateur,
+            ImageUploadVisible.longitude.isnot(None),
+            ImageUploadVisible.latitude.isnot(None),
+            ImageUploadVisible.type_defaut != 'non_defaut'
+        ).all()
         # Créer une copie du fichier
         wb_copy = load_workbook(
             './apps/Exemple_rapport/resume_rapport_visibles_exemple.xlsx')
@@ -1029,10 +1047,10 @@ def mes_rapports():
 def telecharger_rapport(rapport_id):
     try:
         rapport = DocumentRapportGenere.query.get_or_404(rapport_id)
-        
+
         if rapport.type_de_fichier == 'excel':
             # Si le type de fichier est 'excel', c'est un document Excel
-            return send_file(
+            response = send_file(
                 io.BytesIO(rapport.data),
                 as_attachment=True,
                 download_name=f"{rapport.nom_du_rapport}.xlsx",
@@ -1040,7 +1058,7 @@ def telecharger_rapport(rapport_id):
             )
         elif rapport.type_de_fichier == 'word':
             # Si le type de fichier est 'word', c'est un document Word
-            return send_file(
+            response = send_file(
                 io.BytesIO(rapport.data),
                 as_attachment=True,
                 download_name=f"{rapport.nom_du_rapport}.docx",
@@ -1048,7 +1066,13 @@ def telecharger_rapport(rapport_id):
             )
         else:
             # Gérer d'autres types de fichiers si nécessaire
-            error_message='Type de fichier non pris en charge'
+            error_message = 'Type de fichier non pris en charge'
+            return render_template('rapport/mes_rapports.html', error_message=error_message, rapports=rapports)
+
+        # Logger le téléchargement réussi
+        logging.info(f"Téléchargement réussi : Rapport ID {rapport.id} téléchargé par l'utilisateur {current_user.username}")
+
+        return response
 
     except Exception as e:
         error_message = f"Erreur lors du téléchargement du rapport : {str(e)}"

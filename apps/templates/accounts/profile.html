@@ -11,21 +11,70 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <style>
-        /* CSS pour adapter la taille de la photo de profil */
-        @media (max-width: 576px) {
-            /* Styles pour les écrans de petite taille (mobile) */
-            .rounded-profile-img {
-                max-width: 100%;
-                height: auto;
-            }
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
         }
 
-        @media (min-width: 577px) {
-            /* Styles pour les écrans de taille moyenne et plus grande */
-            .rounded-profile-img {
-                max-width: 50%; /* Ajustez la largeur selon vos besoins */
-                height: auto;
-            }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .lead {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #007bff;
+        }
+
+        form {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #ffffff;
+            border-radius: 1px;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #0056b3;
+        }
+
+        button.btn.btn-primary {
+            font-family: 'Cursive', cursive;
+            margin-top: 20px;
+        }
+
+        .rounded-profile-img {
+            width: 100%;
+            border-radius: 3%;
+            margin-top: 20px;
+        }
+
+        hr {
+            border-top: 1px solid #ddd;
+            margin-top: 30px;
+            margin-bottom: 30px;
         }
 
         form{
@@ -47,6 +96,7 @@ label {
 
     </style>
 </head>
+<<<<<<< HEAD
 {%include 'home/index.html'%}
 <body class="bg-light">
     <div class="container mt-5">
@@ -57,14 +107,29 @@ label {
             <div class="form-group">
                 <label for="image"><i class="fas fa-user-circle"></i>  Photo de Profil:</label>
                 <input type="file" class="form-control-file" name="image" accept="image/*">
+=======
+
+{% include 'layouts/base.html' %}
+<body>
+    <div class="container">
+        <p class="lead">Bienvenue, {{ current_user.username }}!</p>
+
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="image"><i class="fas fa-user-circle"></i> Photo de Profil:</label>
+                <label class="custom-file-upload">
+                    <input type="file" name="image" accept="image/*">
+                    Choisir un fichier
+                </label>
+>>>>>>> Prince-Gildas
             </div>
             <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Changer de Photo</button>
         </form>
 
-        <hr class="my-4">
+        <hr>
 
         {% if user_profile.image %}
-            <img src="data:image/jpeg;base64,{{ user_profile.image }}" alt="Profile Picture" class="img-fluid rounded rounded-profile-img">
+            <img src="data:image/jpeg;base64,{{ user_profile.image }}" alt="Profile Picture" class="rounded-profile-img">
         {% endif %}
     </div>
 
