@@ -2,8 +2,8 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from smtplib import SMTPConnectError
 from flask_mail import Mail, Message
-from flask import Flask, render_template, request, flash, redirect, session, url_for, send_from_directory, send_file,current_app
-from flask import jsonify,g
+from flask import Flask, render_template, request, flash, redirect, session, url_for, send_from_directory, send_file, current_app
+from flask import jsonify, g
 from flask_sqlalchemy import SQLAlchemy
 from wtforms.validators import DataRequired, EqualTo, Email  # Ajoutez Email ici
 from wtforms import StringField, PasswordField, SubmitField, FileField, SelectField, BooleanField
@@ -15,6 +15,7 @@ from flask_login import (
     login_user,
     logout_user
 )
+from flask_mail import Message
 
 from apps import db, login_manager
 from apps.authentication import blueprint
@@ -52,16 +53,25 @@ import uuid
 from werkzeug.utils import secure_filename
 from io import BytesIO
 import shutil
-
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 
-from keras.models import load_model
-import matplotlib.pyplot as plt
+
 from fractions import Fraction
 from flask import Markup
+import logging
+import pytesseract
+from urllib.parse import unquote
+import locale
+import math
+import traceback
+
+from apps.config import Email_config
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+from torchvision.models import mobilenet_v2  # Import de MobileNetV2
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # classification d'images chargement du model
 
@@ -91,6 +101,17 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(
     days=365)  # adjust as needed
 app.config['SESSION_PROTECTION'] = 'strong'
 
+# Configurations Flask-Mail
+app.config['MAIL_SERVER'] = Email_config.MAIL_SERVER
+app.config['MAIL_PORT'] = Email_config.MAIL_PORT
+app.config['MAIL_USE_TLS'] = Email_config.MAIL_USE_TLS
+app.config['MAIL_USE_SSL'] = Email_config.MAIL_USE_SSL
+app.config['MAIL_USERNAME'] = Email_config.MAIL_USERNAME
+app.config['MAIL_PASSWORD'] = Email_config.MAIL_PASSWORD
+app.config['MAIL_DEFAULT_SENDER'] = Email_config.MAIL_DEFAULT_SENDER
+
+
+mail = Mail(app)
 
 @blueprint.route('/')
 def route_default():
@@ -111,18 +132,18 @@ def login():
     """ 
         Login View 
     """
-    
+
     template_name = 'accounts/login.html'
     login_form = LoginForm(request.form)
 
     if 'login' in request.form:
 
         # Read form data
-        userID   = request.form['username'] # user || email
+        userID = request.form['username']  # user || email
         password = request.form['password']
-        
+
         valid_email = emailValidate(userID)
-                        
+
         if valid_email == True:
             user = Users.find_by_email(userID)
         else:
@@ -134,32 +155,32 @@ def login():
             return render_template(template_name,
                                    msg=message['wrong_user_or_password'],
                                    form=login_form)
-        
+
         # Check user is suspended
         if STATUS_SUSPENDED == user.status:
             return render_template(template_name,
-                               msg=message['suspended_account_please_contact_support'],
-                               form=login_form)            
+                                   msg=message['suspended_account_please_contact_support'],
+                                   form=login_form)
 
         if user.failed_logins >= login_limit:
             user.status = STATUS_SUSPENDED
             db.session.commit()
             return render_template(template_name,
-                               msg=message['suspended_account_maximum_nb_of_tries_exceeded'],
-                               form=login_form)
-        
+                                   msg=message['suspended_account_maximum_nb_of_tries_exceeded'],
+                                   form=login_form)
+
         # Check the password
         if user and not verify_pass(password, user.password):
             user.failed_logins += 1
             db.session.commit()
 
             return render_template(template_name,
-                               msg=message['incorrect_password'],
-                               form=login_form)
+                                   msg=message['incorrect_password'],
+                                   form=login_form)
         login_user(user)
         user.failed_logins = 0
         db.session.commit()
-        
+
         return redirect(url_for('home_blueprint.acceuil'))
 
     if not current_user.is_authenticated:
@@ -173,7 +194,7 @@ def login():
         return render_template(template_name,
                                form=login_form,
                                msg=msg)
-    
+
     return redirect(url_for('home_blueprint.acceuil'))
 
 
@@ -185,7 +206,7 @@ def register():
     # already logged in
     if current_user.is_authenticated:
         return redirect('/')
-    
+
     template_name = 'accounts/register.html'
     create_account_form = CreateAccountForm(request.form)
 
@@ -194,13 +215,13 @@ def register():
         email = request.form['email']
         password = request.form['password']
         password2 = request.form['password_check']
-        
+
         if password != password2:
             return render_template(template_name,
                                    msg=message['pwd_not_match'],
                                    success=False,
                                    form=create_account_form)
-        
+
         # Check usename exists
         user = Users.find_by_username(username)
         if user:
@@ -216,33 +237,33 @@ def register():
                                    msg=message['email_already_registered'],
                                    success=False,
                                    form=create_account_form)
-            
+
         valid_pwd = password_validate(password)
         if valid_pwd != True:
             return render_template(template_name,
-                                   msg = valid_pwd,
-                                   success = False,
-                                   form = create_account_form)
-        
+                                   msg=valid_pwd,
+                                   success=False,
+                                   form=create_account_form)
+
         user = Users(**request.form)
         user.api_token = createAccessToken()
         user.api_token_ts = get_ts()
-        
+
         user.save()
 
         # Force logout
         logout_user()
 
         # send signal for create profile
-        user_saved_signals.send({"user_id":user.id, "email": user.email})
+        user_saved_signals.send({"user_id": user.id, "email": user.email})
 
         return render_template(template_name,
-                               msg = message['account_created_successfully'],
-                               success = True,
-                               form = create_account_form)
+                               msg=message['account_created_successfully'],
+                               success=True,
+                               form=create_account_form)
 
     else:
-        return render_template(template_name, form=create_account_form) 
+        return render_template(template_name, form=create_account_form)
 
 
 @blueprint.route('/profile', methods=['GET', 'PUT'])
@@ -252,25 +273,25 @@ def user_profile():
     Get user profile view
     """
     if request.method == 'GET':
-       
+
         template = 'accounts/account-settings.html'
-        
+
         user = Users.find_by_id(current_user.id)
-        user_profile = UserProfile.find_by_user_id(user.id) 
-        
+        user_profile = UserProfile.find_by_user_id(user.id)
+
         context = {
-            'id': user.id, 
+            'id': user.id,
             'profile_name': user_profile.full_name,
-            'profile_bio': user_profile.bio, 
-            'profile_address': user_profile.address, 
-            'profile_zipcode': user_profile.zipcode, 
+            'profile_bio': user_profile.bio,
+            'profile_address': user_profile.address,
+            'profile_zipcode': user_profile.zipcode,
             'profile_phone': user_profile.phone,
-            'email': user_profile.email, 
-            'profile_service': user_profile.service, 
+            'email': user_profile.email,
+            'profile_service': user_profile.service,
             'user_profile_id': user_profile.id
-            
+
         }
-        
+
         return render_template(template, context=context)
 
     return redirect(url_for('authentication_blueprint.index'))
@@ -281,7 +302,7 @@ def load_user(user_id):
     return Users.query.get(int(user_id))
 
 
-#///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
+# ///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
 @blueprint.route('/photo_upload', methods=['GET', 'POST'])
 @login_required
 def photo_upload():
@@ -290,7 +311,8 @@ def photo_upload():
             image = request.files['image']
             if image.filename != '':
                 image_binary = base64.b64encode(image.read())
-                user_profile = UserProfile.query.filter_by(user=current_user.id).first()
+                user_profile = UserProfile.query.filter_by(
+                    user=current_user.id).first()
                 user_profile.image = image_binary
                 db.session.commit()
 
@@ -302,8 +324,13 @@ def photo_upload():
     return render_template('home/index.html', user_profile=user_profile)
 =======
     return render_template('accounts/profile.html', user_profile=user_profile)
+<<<<<<< HEAD
 >>>>>>> Prince-Gildas
 #///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
+=======
+# ///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
+
+>>>>>>> Prince-Gildas
 
 @blueprint.route('/user_list', methods=['GET'])
 def user_list():
@@ -422,6 +449,26 @@ def edit_user():
     else:
         return jsonify({'error': message['record_not_found']}), 404
 
+@blueprint.route('/update_role', methods=['PUT'])
+def update_role():
+    if request.method == 'PUT':
+        user = Users.find_by_id(request.form.get('user_id'))
+
+        # Check if the user exists
+        if user:
+            # Update the user role (you may want to add more validation logic)
+            if user.role == ROLE_ADMIN:
+                user.role = ROLE_USER
+            else:
+                user.role = ROLE_ADMIN
+
+            # Save the updated user role
+            user.save()
+
+            context = {'new_role': user.role}
+            return jsonify(context), 200
+        else:
+            return jsonify({'error': message['record_not_found']}), 404
 
 @blueprint.route('/update_status', methods=['PUT'])
 def update_status():
@@ -724,6 +771,7 @@ def get_decimal_from_dms(dms, ref):
         decimal = -decimal
     return decimal
 
+
 def extract_gps_info(img_path):
     try:
         img = Image.open(img_path)
@@ -769,14 +817,15 @@ def extract_gps_info(img_path):
             if tag_name == 'GPSInfo':
                 for t, v in value.items():
                     sub_tag_name = GPSTAGS.get(t, t)
-                    value[t] = v[0] / v[1]  # Convertir les coordonnées GPS en décimales
+                    # Convertir les coordonnées GPS en décimales
+                    value[t] = v[0] / v[1]
                     if sub_tag_name == 'GPSLongitudeRef' and v == 'W':
-                        value[t] = -value[t]  # Inverser la longitude si elle est à l'ouest
+                        # Inverser la longitude si elle est à l'ouest
+                        value[t] = -value[t]
 
                 return {'latitude': value.get(2), 'longitude': value.get(4)}
 
     return None
-
 
 
 @login_required
@@ -784,17 +833,48 @@ def extract_gps_info(img_path):
 def upload_page():
     return render_template('rapport/traitement_visible.html')
 
-def prepare_image_from_path(file_path):
-    img = image.load_img(file_path, target_size=(224, 224))
-    img_array = image.img_to_array(img)
-    img_array = preprocess_input(img_array)
-    img_array = np.expand_dims(img_array, axis=0)
-    return img_array
+# Chargement du modèle pré-entraîné
+
+
+def load_model_visible(num_classes):
+    model = mobilenet_v2(pretrained=True)  # Utiliser MobileNetV2
+    num_features = model.classifier[1].in_features
+    model.classifier[1] = nn.Linear(num_features, num_classes)
+    model.features[0][0] = nn.Conv2d(3, 32, kernel_size=(3, 3), stride=(
+        1, 1), padding=(1, 1), bias=False)  # Adapter l'entrée à 3 canaux
+    model._dropout = nn.Dropout(0.5)  # Choisir la valeur de dropout souhaitée
+
+    # Chargement des poids du modèle
+    # Assurez-vous d'avoir le bon nom de fichier
+    model.load_state_dict(torch.load(
+        './apps/IA/model/model_mobilenetv2_normal.pt'))
+    return model.to(device)
+
+
+# Transformation des images pour la classification
+def prepare_image_from_path_visible(file_path):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.RandomRotation(30),
+        transforms.ColorJitter(
+            brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+        transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[
+                             0.229, 0.224, 0.225])
+    ])
+    image = Image.open(file_path).convert('RGB')
+    img_tensor = transform(image).unsqueeze(0).to(device)
+    return img_tensor
+
 
 @blueprint.route('/results_page/<rapport_genere_id>', methods=['GET'])
 def results_page(rapport_genere_id):
     # Récupérer les images associées au rapport généré
-    images = ImageUploadVisible.query.filter_by(rapport_genere_id=rapport_genere_id).all()
+    images = ImageUploadVisible.query.filter_by(
+        rapport_genere_id=rapport_genere_id).all()
     return render_template('rapport/traitement_visible.html', images=images)
 
 
@@ -802,91 +882,155 @@ def results_page(rapport_genere_id):
 @login_required
 @blueprint.route('/upload_and_traitement_visible', methods=['POST'])
 def upload_and_traitement_visible():
-    
-    # Assurez-vous de récupérer le champ "file" comme une liste
-    files = request.files.getlist('file')
+    try:
+        # Assurez-vous de récupérer le champ "file" comme une liste
+        files = request.files.getlist('file')
 
-    # Créer un identifiant unique pour le sous-répertoire
-    user_subdirectory = str(uuid.uuid4())
+        # Créer un identifiant unique pour le sous-répertoire
+        user_subdirectory = str(uuid.uuid4())
 
-    # Chemin du sous-répertoire dans le répertoire UPLOAD_FOLDER
-    user_upload_path = os.path.join(app.config['UPLOAD_FOLDER'], user_subdirectory)
+        # Chemin du sous-répertoire dans le répertoire UPLOAD_FOLDER
+        user_upload_path = os.path.join(
+            app.config['UPLOAD_FOLDER'], user_subdirectory)
 
-    # Créer le sous-répertoire
-    os.makedirs(user_upload_path)
+        # Créer le sous-répertoire
+        os.makedirs(user_upload_path)
 
-    # Charger le modèle d'apprentissage automatique et les étiquettes de classe
-    model_path = 'apps/IA/model/trained_tensorflow_model_MobileNetV2_normalV2.h5'
-    model = load_model(model_path)
-    class_labels_path = 'apps/IA/label/class_labels_normalv2.txt'
-    with open(class_labels_path, 'r') as f:
-        class_labels = f.read().splitlines()
+        class_labels_path = './apps/IA/label/class_labels_normalv2.txt'
+        with open(class_labels_path, 'r') as f:
+            class_labels = f.read().splitlines()
+        num_classes = len(class_labels)
 
-    # Ajout de la déclaration pour threshold
-    threshold = 0.5  # Vous pouvez ajuster cette valeur en fonction de vos besoins
+        # Maintenant que num_classes est défini, vous pouvez appeler load_model
+        model = load_model_visible(num_classes)
 
-    rapport_genere_id = None  # Déclarer rapport_genere_id à l'extérieur de la boucle
+        # Ajout de la déclaration pour threshold
+        threshold = 0.3  # Vous pouvez ajuster cette valeur en fonction de vos besoins
 
-    for file in files:
-        try:
-            # Le traitement pour chaque fichier est similaire à votre code existant
-            filename = secure_filename(file.filename)
+        rapport_genere_id = None  # Déclarer rapport_genere_id à l'extérieur de la boucle
+        
+        for file in files:
+            try:
+                # Le traitement pour chaque fichier est similaire à votre code existant
+                filename = secure_filename(file.filename)
 
-            # Sauvegarder le fichier dans le sous-répertoire
-            file_path = os.path.join(user_upload_path, filename)
-            file.save(file_path)
+                # Sauvegarder le fichier dans le sous-répertoire
+                file_path = os.path.join(user_upload_path, filename)
+                file.save(file_path)
 
-            # Préparer l'image pour la classification
-            img_array = prepare_image_from_path(file_path)
-            predictions = model.predict(img_array)
-            predicted_class_indices = np.where(predictions > threshold)[1]
+                img_tensor = prepare_image_from_path_visible(file_path)
+                model.eval()
+                with torch.no_grad():
+                    predictions = model(img_tensor)
+                    probabilities = torch.softmax(predictions, dim=1)[0]
+                    max_prob, predicted_class = torch.max(probabilities, dim=0)
+                    detected_defect = class_labels[predicted_class.item()]
+                    defect_prob = max_prob.item() * 100
 
-            # Extraire les coordonnées GPS si disponibles
-            gps_info = extract_gps_info(file_path)
-            
+                    # Extraire les coordonnées GPS si disponibles
+                    gps_info = extract_gps_info(file_path)
 
-            # Compresser l'image
-            compressed_data = compress_image(file_path)
+                    # Compresser l'image
+                    compressed_data = compress_image(file_path)
 
-            # Obtenir la taille de l'image originale
-            original_size = os.path.getsize(file_path)
+                    # Obtenir la taille de l'image originale
+                    original_size = os.path.getsize(file_path)
 
-            # Créer une nouvelle instance de ImageUploadVisible avec les résultats
-            new_image = ImageUploadVisible(
-                filename=filename,
-                data=compressed_data,  # Stocker les données compressées
-                original_size=convert_size(original_size),  # Stocker la taille originale
-                compressed_size=convert_size(len(compressed_data)),  # Stocker la taille compressée
-                nom_operateur=current_user.email,
-                feeder=request.cookies.get('feeder'),
-                troncon=request.cookies.get('troncon'),
-                zone=request.cookies.get('zone'),
-                type_image=request.cookies.get('selectedOption'),
-                latitude=gps_info['latitude'] if gps_info else None,
-                longitude=gps_info['longitude'] if gps_info else None,
-                type_defaut=class_labels[predicted_class_indices[0]] if predicted_class_indices.size > 0 else None
-            )
+                    # Créer une nouvelle instance de ImageUploadVisible avec les résultats
+                    new_image = ImageUploadVisible(
+                        filename=filename,
+                        data=compressed_data,  # Stocker les données compressées
+                        # Stocker la taille originale
+                        original_size=convert_size(original_size),
+                        # Stocker la taille compressée
+                        compressed_size=convert_size(len(compressed_data)),
+                        nom_operateur=current_user.email,
+                        feeder=request.cookies.get('feeder'),
+                        troncon=request.cookies.get('troncon'),
+                        zone=request.cookies.get('zone'),
+                        groupement_troncon=request.cookies.get(
+                            'groupementTroncon'),
+                        type_image=request.cookies.get('selectedOption'),
+                        latitude=gps_info['latitude'] if gps_info else None,
+                        longitude=gps_info['longitude'] if gps_info else None,
+                        type_defaut=detected_defect if defect_prob > threshold else None
+                    )
 
-            # Associer l'image au rapport généré
-            if rapport_genere_id is None:
-                rapport_genere_id = request.cookies.get('rapportGenereId')
-            new_image.rapport_genere_id = rapport_genere_id
+                    # Associer l'image au rapport généré
+                    if rapport_genere_id is None:
+                        rapport_genere_id = request.cookies.get(
+                            'rapportGenereId')
+                    new_image.rapport_genere_id = rapport_genere_id
 
-            # Ajouter à la base de données (pas besoin de commit ici)
-            db.session.add(new_image)
+                    # Ajouter à la base de données (pas besoin de commit ici)
+                    db.session.add(new_image)
+                    
+                    
 
-        except Exception as e:
-            print(f"Error processing image: {e}")
+            except Exception as e:
+                logging.error(f"Error processing image {filename}: {e}")
 
-    # Ajouter le commit ici, après avoir traité tous les fichiers
-    db.session.commit()
+        # Ajouter le commit ici, après avoir traité tous les fichiers
+        db.session.commit()
 
-    # Supprimer le sous-répertoire après le traitement des images
-    shutil.rmtree(user_upload_path)
+        # Supprimer le sous-répertoire après le traitement des images
+        shutil.rmtree(user_upload_path)
 
-    # Rendre le template avec le message de succès et les résultats
-    rapport_genere_id = request.cookies.get('rapportGenereId')
-    return redirect(url_for('authentication_blueprint.results_page', rapport_genere_id=rapport_genere_id))
+        # Rendre le template avec le message de succès et les résultats
+        rapport_genere_id = request.cookies.get('rapportGenereId')
+              # Envoyer un e-mail à l'utilisateur
+        user_email = current_user.email
+        subject_user = "Traitement d'images en cours"
+        message_user = "Le message: les images normales chargées sont soumises à une vérification préalable. Néanmoins, vous pouvez déjà consulter les statistiques ou générer des rapports. Pour un résultat optimal, il est préférable d'attendre un délai de 30 minutes à 1 heure pour de meilleurs résultats.Nous vous recontacterons dans les plus brefs délais"
+
+        send_email(user_email, subject_user, message_user)
+
+        # Envoyer un e-mail à tous les admins (rôle == 1)
+        if current_user.role == 1:
+            send_email_to_admins()
+        return redirect(url_for('authentication_blueprint.results_page', rapport_genere_id=rapport_genere_id))
+
+
+    except Exception as main_exception:
+        error_message = f"Error in upload_and_traitement_visible route: {main_exception}"
+        logging.error(error_message)
+        traceback.print_exc()  # Imprime la trace complète de l'exception
+
+        # Incluez des informations supplémentaires dans le message d'erreur
+        # Pour identifier plus facilement la source de l'erreur
+        error_message += f"\nAdditional Info: {str(main_exception)}"
+
+        # Relevez à nouveau l'exception pour la propager correctement
+        raise RuntimeError(error_message)
+
+#envoyer un email au admin #
+
+# Fonction pour envoyer un e-mail
+# Fonction pour envoyer un e-mail
+def send_email(to, subject, message, html=None):
+    msg = Message(subject, recipients=[to])
+    msg.body = message
+    if html:
+        msg.html = html
+    msg.sender = app.config['MAIL_DEFAULT_SENDER']  # Ajout de l'expéditeur
+    mail.send(msg)
+
+
+# Fonction pour envoyer un e-mail à tous les admins
+def send_email_to_admins():
+    admins = Users.query.filter_by(role=1).all()
+    for admin in admins:
+        admin_email = admin.email
+        subject_admin = f"Rapport généré par {current_user.username}"
+        message_admin = f"L'utilisateur {current_user.username} vient de générer un rapport. Merci de vérifier cela et de le corriger, puis informer le client."
+        html_admin = render_template('rapport/email_template.html', username=current_user.username, rapport_genere_id=request.cookies.get('rapportGenereId'), troncon=request.cookies.get('troncon'), feeder=request.cookies.get('feeder'), type_image=request.cookies.get('selectedOption'))
+
+        send_email(admin_email, subject_admin, message_admin, html_admin)
+
+
+
+#envoyer un email au admin #
+
 
 def convert_size(size_bytes):
     if size_bytes == 0:
@@ -897,10 +1041,9 @@ def convert_size(size_bytes):
     s = round(size_bytes / p, 2)
     return "%s %s" % (s, size_name[i])
 
-
-import traceback
-
 # Mettez à jour la fonction compress_image pour retourner les données compressées sans sauvegarder sur le disque
+
+
 def compress_image(file_path, quality=60):
     try:
         # Ouvrir l'image avec Pillow à partir du chemin du fichier
@@ -929,8 +1072,219 @@ def compress_image(file_path, quality=60):
         print(f"Error compressing image: {e}")
         print(traceback.format_exc())  # Imprime la trace complète de l'erreur
         return None
-    
+
+
+# ................IMAAGE//////VISIBLE//////////
+
+
+# §§§§§§§§§§§§§§§§§§IMAGE INVISIBLE§§§§§§§§§§§§§§§§§
+
+
+try:
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+except Exception as e:
+    print("Error can't find tesseract:", e)
+
+
 @login_required
 @blueprint.route("/upload_page_invisible")
 def upload_page_invisible():
     return render_template('rapport/traitement_invisible.html')
+
+
+@blueprint.route('/results_page_invisible/<rapport_genere_id>', methods=['GET'])
+def results_page_invisible(rapport_genere_id):
+    # Récupérer les images associées au rapport généré
+    images = ImageUploadInvisible.query.filter_by(
+        rapport_genere_id=rapport_genere_id).all()
+    return render_template('rapport/traitement_invisible.html', images=images)
+
+# Chargement du modèle pré-entraîné
+
+
+def load_model(num_classes):
+    model = mobilenet_v2(pretrained=True)  # Utiliser MobileNetV2
+    num_features = model.classifier[1].in_features
+    model.classifier[1] = nn.Linear(num_features, num_classes)
+    model.features[0][0] = nn.Conv2d(3, 32, kernel_size=(3, 3), stride=(
+        1, 1), padding=(1, 1), bias=False)  # Adapter l'entrée à 3 canaux
+    model._dropout = nn.Dropout(0.5)  # Choisir la valeur de dropout souhaitée
+
+    # Chargement des poids du modèle
+    # Assurez-vous d'avoir le bon nom de fichier
+    model.load_state_dict(torch.load(
+        './apps/IA/model/model_mobilenetv2_thermo.pt'))
+    return model.to(device)
+
+
+# Transformation des images pour la classification
+def prepare_image_from_path(file_path):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.RandomRotation(30),
+        transforms.ColorJitter(
+            brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+        transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[
+                             0.229, 0.224, 0.225])
+    ])
+    image = Image.open(file_path).convert('RGB')
+    img_tensor = transform(image).unsqueeze(0).to(device)
+    return img_tensor
+
+
+@blueprint.route('/upload_and_traitement_invisible', methods=['POST'])
+@login_required
+def upload_and_traitement_invisible():
+    try:
+        files = request.files.getlist('file')
+        user_subdirectory = str(uuid.uuid4())
+        user_upload_path = os.path.join(
+            app.config['UPLOAD_FOLDER'], user_subdirectory)
+        os.makedirs(user_upload_path)
+
+        class_labels_path = './apps/IA/label/class_label_mobilenetv2_thermo.txt'
+        with open(class_labels_path, 'r') as f:
+            class_labels = f.read().splitlines()
+        num_classes = len(class_labels)
+
+        # Maintenant que num_classes est défini, vous pouvez appeler load_model
+        model = load_model(num_classes)
+
+        threshold = 0.4
+
+        rapport_genere_id = None
+
+        for file in files:
+            try:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(user_upload_path, filename)
+                file.save(file_path)
+
+                img_tensor = prepare_image_from_path(file_path)
+                model.eval()
+                with torch.no_grad():
+                    predictions = model(img_tensor)
+                    probabilities = torch.softmax(predictions, dim=1)[0]
+                    max_prob, predicted_class = torch.max(probabilities, dim=0)
+                    detected_defect = class_labels[predicted_class.item()]
+                    defect_prob = max_prob.item() * 100
+
+                    # Extract OCR data
+                    nom_image, coordonnee, temperature, latitude, longitude = extract_data_for_image(
+                        file_path)
+
+                    # Compress the image
+                    compressed_data = compress_image(file_path)
+
+                    # Get the size of the original image
+                    original_size = os.path.getsize(file_path)
+
+                    # Create a new instance of ImageUploadInvisible with the results
+                    new_image = ImageUploadInvisible(
+                        filename=filename,
+                        data=compressed_data,
+                        original_size=convert_size(original_size),
+                        compressed_size=convert_size(len(compressed_data)),
+                        nom_operateur=current_user.email,
+                        feeder=request.cookies.get('feeder'),
+                        troncon=request.cookies.get('troncon'),
+                        zone=request.cookies.get('zone'),
+                        groupement_troncon=request.cookies.get(
+                            'groupementTroncon'),
+                        type_image=request.cookies.get('selectedOption'),
+                        latitude=latitude,
+                        longitude=longitude,
+                        type_defaut=detected_defect if defect_prob > threshold else None,
+                        temperature=temperature,
+
+                    )
+
+                    if rapport_genere_id is None:
+                        rapport_genere_id = request.cookies.get(
+                            'rapportGenereId')
+                    new_image.rapport_genere_id = rapport_genere_id
+
+                    db.session.add(new_image)
+
+            except Exception as e:
+                logging.error(f"Error processing image {filename}: {e}")
+
+        db.session.commit()
+        shutil.rmtree(user_upload_path)
+
+        rapport_genere_id = request.cookies.get('rapportGenereId')
+                # Rendre le template avec le message de succès et les résultats
+        rapport_genere_id = request.cookies.get('rapportGenereId')
+              # Envoyer un e-mail à l'utilisateur
+        user_email = current_user.email
+        subject_user = "Traitement d'images en cours"
+        message_user = " Les images Thermiques chargées sont soumises à une vérification Plus poussée, car certains détails sur l'images ne peuvent etre traités automatiquement.Seuls les images autorisées seront visible sur la page statistique,mocamisation,et Inspections Invisibles Néanmoins. Pour un résultat optimal, il est préférable d'attendre un délai de 30 minutes à 2 heure pour de meilleurs résultats.Nous vous recontacterons dans les plus brefs délais"
+
+        send_email(user_email, subject_user, message_user)
+
+        # Envoyer un e-mail à tous les admins (rôle == 1)
+        if current_user.role == 1:
+            send_email_to_admins()
+        return redirect(url_for('authentication_blueprint.results_page_invisible', rapport_genere_id=rapport_genere_id))
+
+    except Exception as main_exception:
+        error_message = f"Error in upload_and_traitement_visible route: {main_exception}"
+        logging.error(error_message)
+        traceback.print_exc()
+        error_message += f"\nAdditional Info: {str(main_exception)}"
+        raise RuntimeError(error_message)
+
+
+def apply_threshold(image, threshold_value):
+    _, thresholded = cv2.threshold(
+        image, threshold_value, 255, cv2.THRESH_BINARY)
+    return thresholded
+
+
+def remove_lines(image):
+    horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (24, 1))
+    vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 24))
+    horizontal_lines = cv2.morphologyEx(
+        image, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
+    vertical_lines = cv2.morphologyEx(
+        image, cv2.MORPH_OPEN, vertical_kernel, iterations=2)
+    lines = cv2.addWeighted(horizontal_lines, 1, vertical_lines, 1, 0)
+    return cv2.addWeighted(image, 1, lines, -1, 0)
+
+
+def extract_data_for_image(file_path):
+    try:
+        image = cv2.imread(file_path)
+        if image.shape[0] > 750 or image.shape[1] > 1624:
+            scale_factor = min(750 / image.shape[0], 1624 / image.shape[1])
+            image = cv2.resize(image, (0, 0), fx=scale_factor, fy=scale_factor)
+        # Coordinates extraction
+        x, y, w, h = 440, 690, 305, 38
+        crop_img = image[y:y + h, x:x + w]
+        gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
+        coordonnée = pytesseract.image_to_string(gray)  # coordonnée
+        pattern = r"[-]?\d+[.]\d+,\s*[-]?\d+[.]\d+"
+        matches = re.findall(pattern, coordonnée)
+        coordinates = matches[0].split(',') if len(matches) > 0 else ['', '']
+        # Temperature extraction
+        roi = (660, 550, 460, 37)
+        x, y, w, h = roi
+        if x + w > image.shape[1]:
+            w = image.shape[1] - x
+        if y + h > image.shape[0]:
+            h = image.shape[0] - y
+        roi_img = image[y:y + h, x:x + w]
+        gray = cv2.cvtColor(roi_img, cv2.COLOR_BGR2GRAY)
+        température = pytesseract.image_to_string(gray)  # température
+        nom_image = os.path.basename(file_path).split('.')[0]
+        return (nom_image, coordonnée, température, coordinates[1], coordinates[0])
+    except Exception as e:
+        logging.error(
+            'Erreur lors du traitement de l\'image {}: {}'.format(file_path, str(e)))
+        return ('', '', '', '', '')
+
+# §§§§§§§§§§§§§§§§§§IMAGE INVISIBLE§§§§§§§§§§§§§§§§§

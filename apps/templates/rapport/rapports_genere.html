@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapports Générés</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            margin: 20px;
+            background-color: #fff;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 10px;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    {%include 'home/index.html'%}
+    <h1>Rapports Générés</h1>
+
+    {% if success_message %}
+        <div style="color: green; text-align: center; font-weight: bold">
+            {{ success_message }}
+        </div>
+    {% endif %}
+
+    {% if error_message %}
+        <div style="color: red; text-align: center; font-weight: bold">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    <div style="overflow-x: auto">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom Opérateur</th>
+                    <th>Nom du Rapport</th>
+                    <th>Date de Création</th>
+                    <!-- Ajoutez d'autres colonnes au besoin -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for rapport in rapports %}
+                    <tr>
+                        <td>{{ rapport.nom_operateur }}</td>
+                        <td>{{ rapport.nom_du_rapport }}</td>
+                        <td>{{ rapport.date_created }}</td>
+                        <!-- Ajoutez d'autres colonnes au besoin -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -12,6 +12,13 @@ class Email_config(object):
     MAIL_USERNAME = 'vocasaracontactapp@gmail.com'
     MAIL_PASSWORD = 'oviq vypu oozz cjou'
     MAIL_DEFAULT_SENDER = 'vocasaracontactapp@gmail.com'
+    # Configurations Flask-Mail
+    MAIL_SERVER = 'smtp.gmail.com'  # Serveur SMTP (dans cet exemple, Gmail)
+    MAIL_PORT = 587  # Port du serveur SMTP (587 pour TLS)
+    MAIL_USE_TLS = True  # Utiliser TLS pour le chiffrement
+    MAIL_USE_SSL = False  # Ne pas utiliser SSL (car on utilise TLS)
+    MAIL_DEFAULT_SENDER = 'vocasaracontactapp@gmail.com'  # Adresse e-mail par défaut
+
     
     
 class Config(object):
@@ -24,7 +31,7 @@ class Config(object):
     # check verified_email
     VERIFIED_EMAIL = { 'verified' :1 , 'not-verified' : 2 }
 
-    LOGIN_ATTEMPT_LIMIT = 3
+    LOGIN_ATTEMPT_LIMIT = 5
 
     DEFAULT_IMAGE_URL =  'static/assets/images/'
   
@@ -64,7 +71,7 @@ class Config(object):
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_NAME = os.getenv('DB_NAME', 'root')
 
-    USE_SQLITE = False
+    USE_SQLITE = False  
     # try to set up a Relational DBMS
     if  DB_NAME and DB_USERNAME:
 

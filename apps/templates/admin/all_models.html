@@ -1,0 +1,64 @@
+{% extends 'layouts/base.html' %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+<head>
+    <title>Tous les Modèles</title>
+    <style>
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+    
+
+        a {
+            text-decoration: none;
+            color: #007bff;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+
+        /* Style pour les icônes */
+        .icon {
+            margin-right: 10px;
+        }
+
+        /* Media queries pour le responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Tous les Modèles</h1>
+    <ul>
+        {% for model_name, models_data in all_models_data.items() %}
+            <li><i class="icon fas fa-folder"></i><a href="{{ url_for('home_blueprint.show_model', model_name=model_name) }}">{{ model_name | title }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+{% include "includes/footer.html" %}
+    
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ username }} - Rapport généré</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+        main {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Rapport généré par {{ username }}</h1>
+    </header>
+    <main>
+        <p>L'utilisateur {{ username }} vient de générer un rapport.</p>
+        <p>Informations sur le rapport :</p>
+        <ul>
+            <li>Rapport ID : {{ rapport_genere_id }}</li>
+            <li>Tronçon : {{ troncon }}</li>
+            <li>Feeder : {{ feeder }}</li>
+            <li>Type d'image : {{ type_image }}</li>
+        </ul>
+        <p>Merci de vérifier cela et de le corriger, puis informer le client.</p>
+    </main>
+    <footer>
+        &copy; Vocasara 2024
+    </footer>
+</body>
+</html>

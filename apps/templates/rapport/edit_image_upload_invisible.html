@@ -1,0 +1,145 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Edit Image {% endblock title %}
+
+{% block stylesheets %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    form {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+
+    input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 16px;
+        box-sizing: border-box;
+    }
+
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    @media only screen and (max-width: 600px) {
+        form {
+            width: 90%;
+        }
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Edit Image - {{ rapport.nom_operateur }} - {{ rapport.feeder }}</h1>
+    <form id="editForm" method="POST" action="{{ url_for('home_blueprint.edit_image_upload_invisible', rapport_id=rapport.id, image_id=image.id) }}">
+
+        <label for="filename">Filename:</label>
+        <input type="text" id="filename" name="filename" value="{{ image.filename }}">
+        
+        <label for="longitude">Longitude:</label>
+        <input type="text" id="longitude" name="longitude" value="{{ image.longitude }}">
+
+        <label for="latitude">Latitude:</label>
+        <input type="text" id="latitude" name="latitude" value="{{ image.latitude }}">
+
+        <label for="type_defaut">Type Défaut:</label>
+        <input type="text" id="type_defaut" name="type_defaut" value="{{ image.type_defaut }}">
+
+        <label for="temperature">Temperature:</label>
+        <input type="text" id="temperature" name="temperature" value="{{ image.temperature }}">
+
+        <label for="feeder">Feeder:</label>
+        <input type="text" id="feeder" name="feeder" value="{{ image.feeder }}">
+
+        <label for="troncon">Tronçon:</label>
+        <input type="text" id="troncon" name="troncon" value="{{ image.troncon }}">
+
+        <label for="zone">Zone:</label>
+        <input type="text" id="zone" name="zone" value="{{ image.zone }}">
+        
+        <!-- Add more fields for other columns -->
+        <button type="submit">Save Changes</button>
+    </form>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            $("#editForm").submit(function (e) {
+                e.preventDefault();
+                var form = $(this);
+                $.ajax({
+                    type: form.attr('method'),
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function (data) {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success saving',
+                                text: data.message,
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '{{ url_for("home_blueprint.mes_inspections_invisible", rapport_id=rapport.id) }}';
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving',
+                                text: data.message,
+                            });
+                        }
+                    },
+                    error: function (data) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'big Error',
+                            text: 'An unexpected error occurred.',
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock content %}
+
+{% block javascripts %}
+    <!-- Add any additional scripts if needed -->
+{% endblock javascripts %}

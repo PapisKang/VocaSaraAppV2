@@ -1,141 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GENERATION DE RAPPORT</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .container-main {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 20px 10px; /* Réduction de la marge supérieure */
-    }
-    
-    .container-form {
-      width: 100%;
-      max-width: 600px;
-      padding: 10px; /* Réduction de l'espacement intérieur */
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    form {
-      display: grid;
-      gap: 15px; /* Réduction de l'espacement entre les éléments du formulaire */
-    }
-    
-    label {
-      color: #007bff;
-      font-weight: bold;
-    }
-    
-    input,
-    select {
-      width: 100%;
-      padding: 8px; /* Réduction de la taille du padding */
-      border: 1px solid #ced4da;
-      border-radius: 5px;
-      transition: border-color 0.3s ease;
-    }
-    
-    input:focus,
-    select:focus {
-      border-color: #007bff;
-    }
-    
-    button {
-      background-color: #28a745;
-      color: #fff;
-      padding: 10px; /* Réduction de la taille du padding */
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    
-    button:hover {
-      background-color: #218838;
-    }
-    
-    .error-message {
-      color: #ff0000;
-      display: none;
-    }
-    
-    @media (max-width: 768px) {
-      .container-form {
-        width: 100%;
-        margin: 0;
-      }
-      input,
-      select {
-        width: 100%;
-      }
-    }
-    
-    
-  </style>
-</head>
-{%include 'home/index.html'%}
-<body>
+{% extends 'layouts/base.html' %}
 
-  <div id="sidebar-container"></div>
-  <div class="container-main">
-    <div class="container-form">
-      <h2>FORMULAIRE DE RAPPORT</h2>
-      <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
-      <form id="rapportForm" action="{{ url_for('home_blueprint.generate_rapport') }}" method="POST">
-        <label for="feeder">Feeder:</label>
-        <select id="feeder" name="feeder">
-          <option value="" disabled selected>Choisissez un feeder existant ou saisissez-en un nouveau</option>
-          {% for feeder in feeders_existants %}
-            <option value="{{ feeder.Nom }}">{{ feeder.Nom }}</option>
-          {% endfor %}
-        </select>
-        <input type="text" id="feederInput" name="feederInput" placeholder="Saisissez le feeder">
-        
-        <label for="troncon">Troncon:</label>
-        <select id="troncon" name="troncon">
-          <option value="" disabled selected>Choisissez un troncon existant ou saisissez-en un nouveau</option>
-          {% for troncon in troncons_existants %}
-            <option value="{{ troncon.Nom }}">{{ troncon.Nom }}</option>
-          {% endfor %}
-        </select>
-        <input type="text" id="tronconInput" name="tronconInput" placeholder="Saisissez le tronçon">
-        
-        <label for="dateDebut">Date de visite - Début:</label>
-        <input type="date" id="dateDebut" name="dateDebut" required>
+{% block title %} Invoice {% endblock title %}
 
-        <label for="dateFin">Date de visite - Fin:</label>
-        <input type="date" id="dateFin" name="dateFin" required>
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
 
-        <label for="operateur">Nom de l'opérateur:</label>
-        <input type="text" id="operateur" name="operateur" value="{{ current_user.username }}" readonly required>
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
-        <label for="zone">Zone:</label>
-        <select id="zone" name="zone" required>
-          <option value="" disabled selected>Choisissez une zone</option>
-          <option value="DRS">DRS</option>
-          <option value="DRN">DRN</option>
-          <option value="DNO">DNO</option>
-          <option value="DRE">DRE</option>
-        </select>
-        
-        <label for="groupementTroncon">Groupement troncon:</label>
-        <input type="text" id="groupementTroncon" name="groupementTroncon">
+{% block content %} 
 
+<<<<<<< HEAD
         <button type="submit" onclick="saveFormData()">Confirmer</button>
       
       </form>
@@ -196,9 +70,18 @@
     if (!feederValue || !tronconValue || !dateDebut || !dateFin || !groupementTroncon || !zone) {
       document.getElementById("errorMessage").style.display = "block";  // Afficher le message d'erreur
       return;  // Arrêter le traitement si des champs obligatoires sont vides
+=======
+<style>
+  .container-form {
+    flex: 1;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 18px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+>>>>>>> Prince-Gildas
   }
-  document.getElementById("rapportForm").submit();
   
+<<<<<<< HEAD
 >>>>>>> Prince-Gildas
     }
 
@@ -257,28 +140,258 @@
     function acceptCookies() {
       // Vous pouvez ajouter ici du code supplémentaire pour définir des cookies ou effectuer d'autres actions liées à l'acceptation des cookies.
       document.getElementById('cookie-consent-message').style.display = 'none';
+=======
+  form {
+    display: grid;
+    gap: 15px; /* Réduction de l'espacement entre les éléments du formulaire */
+>>>>>>> Prince-Gildas
   }
-
-  function checkCookieConsent() {
-      const consentMessage = document.getElementById('cookie-consent-message');
-      if (!getCookie('cookieConsent')) {
-          // Afficher le message de consentement uniquement si le cookie n'a pas été accepté
-          consentMessage.style.display = 'block';
-      }
-  }
-
-  function getCookie(name) {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.startsWith(name + '=')) {
-              return cookie.substring(name.length + 1);
-          }
-      }
-      return null;
-  }
-
-  </script>
   
-</body>
-</html>
+  label {
+    color: #007bff;
+    font-weight: bold;
+  }
+  
+  input,
+  select {
+    width: 100%;
+    padding: 8px; /* Réduction de la taille du padding */
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+  }
+  
+  input:focus,
+  select:focus {
+    border-color: #007bff;
+  }
+  
+  button {
+    background-color:cornflowerblue;
+    color: #fff;
+    padding: 10px; /* Réduction de la taille du padding */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #218838;
+  }
+  
+  .error-message {
+    color: #ff0000;
+    display: none;
+  }
+  h2{
+    font-family: cursive;
+    color: cornflowerblue;
+    
+  }
+
+</style>
+
+ 
+  <div class="container-fluid my-3 py-3">
+    <div class="row">
+     
+       
+         
+            <div class="card-header text-center">          
+              
+          
+              <div style="overflow-x: auto">
+                <div class="container-form">
+                  <h2>FORMULAIRE DE RAPPORT</h2>
+                  <p id="errorMessage" class="error-message">Veuillez remplir tous les champs obligatoires.</p>
+                  <form id="rapportForm" action="{{ url_for('home_blueprint.generate_rapport') }}" method="POST">
+                    <label for="feeder">Feeder:</label>
+                    <select id="feeder" name="feeder">
+                      <option value="" disabled selected>Choisissez un feeder existant ou saisissez-en un nouveau</option>
+                      {% for feeder in feeders_existants %}
+                        <option value="{{ feeder.Nom }}">{{ feeder.Nom }}</option>
+                      {% endfor %}
+                    </select>
+                    <input type="text" id="feederInput" name="feederInput" placeholder="Saisissez le feeder">
+                    
+                    <label for="troncon">Troncon:</label>
+                    <select id="troncon" name="troncon">
+                      <option value="" disabled selected>Choisissez un troncon existant ou saisissez-en un nouveau</option>
+                      {% for troncon in troncons_existants %}
+                        <option value="{{ troncon.Nom }}">{{ troncon.Nom }}</option>
+                      {% endfor %}
+                    </select>
+                    <input type="text" id="tronconInput" name="tronconInput" placeholder="Saisissez le tronçon">
+                    
+                    <label for="dateDebut">Date de visite - Début:</label>
+                    <input type="date" id="dateDebut" name="dateDebut" required>
+            
+                    <label for="dateFin">Date de visite - Fin:</label>
+                    <input type="date" id="dateFin" name="dateFin" required>
+            
+                    <label for="operateur">Nom de l'opérateur:</label>
+                    <input type="text" id="operateur" name="operateur" value="{{ current_user.username }}" readonly required>
+            
+                    <label for="zone">Zone:</label>
+                    <select id="zone" name="zone" required>
+                      <option value="" disabled selected>Choisissez une zone</option>
+                      <option value="DRS">DRS</option>
+                      <option value="DRN">DRN</option>
+                      <option value="DNO">DNO</option>
+                      <option value="DRE">DRE</option>
+                    </select>
+                    <label for="type">Type:</label>
+                    <select id="type" name="type" required>
+                      <option value="" disabled selected>Choisissez le type</option>
+                      <option value="Visible">Normal</option>
+                      <option value="Invisible">Thermique</option>
+                    </select>
+                    
+                    <label for="groupementTroncon">Groupement troncon:</label>
+                    <input type="text" id="groupementTroncon" name="groupementTroncon">
+            
+                    <button type="submit" onclick="saveFormData()">Confirmer</button>
+                  
+                  </form>
+            
+                </div>
+                {% include "includes/footer.html" %}
+              <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+              <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.1/dist/umd/popper.min.js"></script>
+              <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+            
+              <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                  loadFormData();
+                });
+            
+                function saveFormData() {
+                  const feederSelect = document.getElementById("feeder");
+                  const feederInput = document.getElementById("feederInput");
+                  const feederValue = feederInput.value ? feederInput.value : feederSelect.value;
+                
+                  const tronconSelect = document.getElementById("troncon");
+                  const tronconInput = document.getElementById("tronconInput");
+                  const tronconValue = tronconInput.value ? tronconInput.value : tronconSelect.value;
+                  const dateDebut = encodeURIComponent(document.getElementById("dateDebut").value);
+                  const dateFin = encodeURIComponent(document.getElementById("dateFin").value);
+                  const operateur = encodeURIComponent(document.getElementById("operateur").value);
+                  const zone = encodeURIComponent(document.getElementById("zone").value);
+                  const type = encodeURIComponent(document.getElementById("type").value);
+                  const groupementTroncon = encodeURIComponent(document.getElementById("groupementTroncon").value);
+            
+              // Encode les valeurs pour les cookies
+              const feeder = encodeURIComponent(feederValue);
+              const troncon = encodeURIComponent(tronconValue);
+              // ... (le reste des valeurs)
+            
+              // Définir une date d'expiration pour les cookies
+              const expiration = new Date();
+              expiration.setFullYear(expiration.getFullYear() + 1); // Expiration dans 1 an
+              const expires = `;expires=${expiration.toUTCString()}`;
+            
+              // Sauvegarder les données dans les cookies avec une date d'expiration
+              document.cookie = `feeder=${feeder}${expires}; path=/`;
+              document.cookie = `troncon=${troncon}${expires}; path=/`;
+                  document.cookie = `dateDebut=${dateDebut}; path=/`;
+                  document.cookie = `dateFin=${dateFin}; path=/`;
+                  document.cookie = `operateur=${operateur}; path=/`;
+                  document.cookie = `zone=${zone}; path=/`;
+                  document.cookie = `type=${type}; path=/`;
+                  document.cookie = `groupementTroncon=${groupementTroncon}; path=/`;
+                    // Soumettre le formulaire
+                        // Vérifier si les champs obligatoires sont vides
+                if (!feederValue || !tronconValue || !dateDebut || !dateFin || !groupementTroncon || !zone || !type) {
+                  document.getElementById("errorMessage").style.display = "block";  // Afficher le message d'erreur
+                  return;  // Arrêter le traitement si des champs obligatoires sont vides
+              }
+              document.getElementById("rapportForm").submit();
+              
+                }
+            
+                function loadFormData() {
+                  const cookies = document.cookie.split(';');
+                  const formData = {};
+                
+                  cookies.forEach(cookie => {
+                    const parts = cookie.trim().split('=');
+                    const key = decodeURIComponent(parts[0]);
+                    const value = decodeURIComponent(parts[1]);
+                    formData[key] = value;
+                  });
+                
+                  // Charger les données dans les éléments <select> ou <input> selon la valeur
+                  const feederSelect = document.getElementById("feeder");
+                  const feederInput = document.getElementById("feederInput");
+                  if (formData.feeder) {
+                    if (feederSelect.querySelector(`option[value="${formData.feeder}"]`)) {
+                      feederSelect.value = formData.feeder;
+                    } else {
+                      feederInput.value = formData.feeder;
+                    }
+                  }
+                
+                  const tronconSelect = document.getElementById("troncon");
+                  const tronconInput = document.getElementById("tronconInput");
+                  if (formData.troncon) {
+                    if (tronconSelect.querySelector(`option[value="${formData.troncon}"]`)) {
+                      tronconSelect.value = formData.troncon;
+                    } else {
+                      tronconInput.value = formData.troncon;
+                    }
+                  }
+                
+                  if (formData.dateDebut) {
+                    document.getElementById("dateDebut").value = formData.dateDebut;
+                  }
+                  if (formData.dateFin) {
+                    document.getElementById("dateFin").value = formData.dateFin;
+                  }
+                  if (formData.operateur) {
+                    document.getElementById("operateur").value = formData.operateur;
+                  }
+                  if (formData.zone) {
+                    document.getElementById("zone").value = formData.zone;
+                  }
+                  if (formData.type) {
+                    document.getElementById("type").value = formData.type;
+                  }
+                  if (formData.groupementTroncon) {
+                    document.getElementById("groupementTroncon").value = formData.groupementTroncon;
+                  }
+                }
+                function toggleMenu() {
+                  const nav = document.querySelector('nav');
+                  nav.classList.toggle('active');
+                }
+                function acceptCookies() {
+                  // Vous pouvez ajouter ici du code supplémentaire pour définir des cookies ou effectuer d'autres actions liées à l'acceptation des cookies.
+                  document.getElementById('cookie-consent-message').style.display = 'none';
+              }
+            
+              function checkCookieConsent() {
+                  const consentMessage = document.getElementById('cookie-consent-message');
+                  if (!getCookie('cookieConsent')) {
+                      // Afficher le message de consentement uniquement si le cookie n'a pas été accepté
+                      consentMessage.style.display = 'block';
+                  }
+              }
+            
+              function getCookie(name) {
+                  const cookies = document.cookie.split(';');
+                  for (let i = 0; i < cookies.length; i++) {
+                      const cookie = cookies[i].trim();
+                      if (cookie.startsWith(name + '=')) {
+                          return cookie.substring(name.length + 1);
+                      }
+                  }
+                  return null;
+              }
+            
+              </script>
+              
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

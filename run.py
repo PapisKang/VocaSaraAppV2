@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 
+from multiprocessing import managers
 import os
 from flask_script import Manager
 from flask_migrate import Migrate
@@ -49,4 +50,4 @@ if DEBUG:
 
 if __name__ == "__main__":
     with app.app_context():
-        manager.run()
+        managers.run()

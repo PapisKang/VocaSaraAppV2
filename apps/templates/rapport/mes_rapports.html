@@ -1,105 +1,135 @@
-<!-- Mes Rapports HTML (mes_rapports.html) -->
+<!-- mes_rapports.html -->
+{% extends 'layouts/base.html' %}
 
-<!DOCTYPE html>
-<html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mes Rapports</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-    />
+{% block stylesheets %}
+    {{ super() }}
+    <!-- Ajoutez le lien CDN Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-      }
-      h1 {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      ul {
-        list-style-type: none;
-        padding: 0;
-      }
-      li {
-        margin-bottom: 10px;
-      }
-      .rapport-link {
-        display: flex;
-        align-items: center;
-        text-decoration: none;
-        color: #333;
-      }
-      .rapport-link:hover {
-        color: #0069d9;
-      }
-      .rapport-icon {
-        margin-right: 10px;
-      }
-      .message {
-        padding: 10px;
-        margin-bottom: 15px;
-        border-radius: 5px;
-        text-align: center;
-      }
-
-      .success-message {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-      }
-
-      .error-message {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-      }
-      @media only screen and (max-width: 600px) {
+        /* Vos styles personnalisés ici */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
         h1 {
-          font-size: 24px;
+            color: #333;
+            font-size: 15px;
         }
-        .rapport-link {
-          flex-direction: column;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
-        .rapport-icon {
-          margin-bottom: 10px;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
-      }
+        th {
+            background-color: #f2f2f2;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+        .download-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
     </style>
-  </head>
-  {%include 'home/index.html'%}
-  <body>
-    <h1>Mes Rapports</h1>
+{% endblock stylesheets %}
 
-    {% if rapports %}
-    <ul>
-      {% for rapport in rapports %}
-      <li>
-        <a
-          href="{{ url_for('home_blueprint.telecharger_rapport', rapport_id=rapport.id) }}"
-          class="rapport-link"
-        >
-          <i class="fas fa-file-excel rapport-icon"></i>
-          <strong>{{ rapport.nom_du_rapport }}</strong> - {{
-          rapport.date_de_creation }}
-        </a>
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>Aucun rapport disponible.</p>
-    {% endif %}
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
-    <!-- ... Le reste du HTML ... -->
+{% block content %}
+    <div class="container mt-4">
+        <h1>Mes Rapports Visibles</h1>
 
-    {% if 'download_message' in session %}
-    <div class="message success-message">
-      {{ session.pop('download_message') }}
+        <div class="mb-3">
+            <label for="searchInput" class="form-label">Recherchez un rapport :</label>
+            <input type="text" class="form-control" id="searchInput" oninput="filterTable()" placeholder="Nom du rapport">
+        </div>
+
+        {% if error_message %}
+            <p class="error-message">{{ error_message }}</p>
+        {% endif %}
+
+        <div class="table-responsive">
+            <table class="table" id="rapportTable">
+                <thead>
+                    <tr>
+                        <th>Nom du Rapport</th>
+                        <th>Type de Fichier</th>
+                        <th>Date de Création</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rapport in rapports %}
+                        <tr>
+                            <td>{{ rapport.nom_du_rapport }}</td>
+                            <td>{{ rapport.type_de_fichier }}</td>
+                            <td>{{ rapport.date_de_creation }}</td>
+                            <td>
+                                <a href="{{ url_for('home_blueprint.telecharger_rapport', rapport_id=rapport.id) }}" class="btn btn-success"
+                                    onclick="showSuccessAlert()">Télécharger</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    {% endif %} {% if 'error_message' in session %}
-    <div class="message error-message">{{ session.pop('error_message') }}</div>
-    {% endif %}
-  </body>
-</html>
+
+    {% include "includes/footer.html" %}
+{% endblock content %}
+
+{% block javascripts %}
+    {{ super() }}
+    <!-- Ajoutez le script Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function filterTable() {
+            // Récupère la valeur du champ de recherche
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("rapportTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Parcourt toutes les lignes du tableau et cache celles qui ne correspondent pas à la recherche
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0]; // Changez l'index en fonction de la colonne que vous voulez filtrer
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // Fonction pour afficher une alerte SweetAlert
+        function showSuccessAlert() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Téléchargement réussi',
+                text: 'Le rapport a été téléchargé avec succès.',
+                timer: 3000, // Affiche l'alerte pendant 3 secondes
+                timerProgressBar: true,
+            });
+        }
+    </script>
+{% endblock javascripts %}
