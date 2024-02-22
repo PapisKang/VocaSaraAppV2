@@ -112,9 +112,7 @@
                       <!-- Ajoutez cette colonne pour l'icône "Voir Images" -->
                       <td>
                         <i
-                          class="fas fa-eye btn-voir-images"
-                          onclick="window.location.href='{{ url_for('home_blueprint.mes_inspections_invisible', rapport_id=rapport.id) }}'"
-                        ></i>
+                         class="fas fa-eye btn-voir-images" onclick="window.location.href='{{ url_for('home_blueprint.mes_inspections_invisible', rapport_id=rapport.id) }}'"                        ></i>
                       </td>
                     </tr>
                     {% endfor %}
@@ -130,6 +128,7 @@
     {% include "includes/footer.html" %}
     
   </div>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script>
     
     $(document).ready(function () {

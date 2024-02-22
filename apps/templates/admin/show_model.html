@@ -1,0 +1,150 @@
+{% extends 'layouts/base.html' %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .scrollable-table {
+      overflow-x: auto;
+    }
+
+    .action-icons {
+      width: 60px;
+      text-align: center;
+    }
+
+    .add-link {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    .add-link:hover {
+      background-color: #0056b3;
+    }
+
+    @media (max-width: 768px) {
+      .add-link {
+        display: block;
+        margin-bottom: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      th, td {
+        padding: 8px;
+      }
+
+      .action-icons {
+        width: 40px;
+      }
+
+      .add-link {
+        text-align: left;
+      }
+    }
+  </style>
+<head>
+  <title>{{ model_name | title }}</title>
+</head>
+<body>
+  <h1>{{ model_name | title }}</h1>
+  <a href="{{ url_for('home_blueprint.add_model_data', model_name=model_name) }}" class="add-link">Ajout {{ model_name | title }}</a>
+  <div class="scrollable-table">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          {% for column in table.field_names %}
+            <th>{{ column }}</th>
+          {% endfor %}
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in table._rows %}
+          <tr>
+            {% for value in row %}
+              <td>{{ value }}</td>
+            {% endfor %}
+            <td class="action-icons">
+              <a href="{{ url_for('home_blueprint.edit_model', model_name=model_name, model_id=row[0]) }}">
+                <i class="fas fa-edit"></i>
+              </a>
+              <a href="#" onclick="return confirmDelete('{{ model_name }}', {{ row[0] }});">
+                <i class="fas fa-trash-alt"></i>
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+  function confirmDelete(model_name, model_id) {
+    Swal.fire({
+      title: 'Es-tu sur de cela?',
+      text: 'You won\'t be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Redirigez vers l'URL de suppression avec l'ID du modèle
+        window.location.href = `/models/${model_name}/${model_id}/delete`;
+      }
+    });
+    return false; // Empêche le lien de se comporter comme un lien normal
+  }
+</script>
+
+{% include "includes/footer.html" %}
+    
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

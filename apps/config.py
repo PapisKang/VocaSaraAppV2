@@ -12,6 +12,13 @@ class Email_config(object):
     MAIL_USERNAME = 'vocasaracontactapp@gmail.com'
     MAIL_PASSWORD = 'oviq vypu oozz cjou'
     MAIL_DEFAULT_SENDER = 'vocasaracontactapp@gmail.com'
+    # Configurations Flask-Mail
+    MAIL_SERVER = 'smtp.gmail.com'  # Serveur SMTP (dans cet exemple, Gmail)
+    MAIL_PORT = 587  # Port du serveur SMTP (587 pour TLS)
+    MAIL_USE_TLS = True  # Utiliser TLS pour le chiffrement
+    MAIL_USE_SSL = False  # Ne pas utiliser SSL (car on utilise TLS)
+    MAIL_DEFAULT_SENDER = 'vocasaracontactapp@gmail.com'  # Adresse e-mail par défaut
+
     
     
 class Config(object):

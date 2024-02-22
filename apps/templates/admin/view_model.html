@@ -1,0 +1,31 @@
+{% extends 'layouts/base.html' %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+<head>
+    <title>{{ model_name | title }} - View</title>
+</head>
+<body>
+    <h1>{{ model_name | title }} - View</h1>
+    {% if model %}
+        <ul>
+            {% for column in model.__table__.columns %}
+                <li>{{ column.name }}: {{ getattr(model, column.name) }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Model not found</p>
+    {% endif %}
+</body>
+{% include "includes/footer.html" %}
+    
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

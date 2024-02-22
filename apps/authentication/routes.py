@@ -15,6 +15,7 @@ from flask_login import (
     login_user,
     logout_user
 )
+from flask_mail import Message
 
 from apps import db, login_manager
 from apps.authentication import blueprint
@@ -64,7 +65,7 @@ import locale
 import math
 import traceback
 
-
+from apps.config import Email_config
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
@@ -100,6 +101,17 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(
     days=365)  # adjust as needed
 app.config['SESSION_PROTECTION'] = 'strong'
 
+# Configurations Flask-Mail
+app.config['MAIL_SERVER'] = Email_config.MAIL_SERVER
+app.config['MAIL_PORT'] = Email_config.MAIL_PORT
+app.config['MAIL_USE_TLS'] = Email_config.MAIL_USE_TLS
+app.config['MAIL_USE_SSL'] = Email_config.MAIL_USE_SSL
+app.config['MAIL_USERNAME'] = Email_config.MAIL_USERNAME
+app.config['MAIL_PASSWORD'] = Email_config.MAIL_PASSWORD
+app.config['MAIL_DEFAULT_SENDER'] = Email_config.MAIL_DEFAULT_SENDER
+
+
+mail = Mail(app)
 
 @blueprint.route('/')
 def route_default():
@@ -944,6 +956,8 @@ def upload_and_traitement_visible():
 
                     # Ajouter à la base de données (pas besoin de commit ici)
                     db.session.add(new_image)
+                    
+                    
 
             except Exception as e:
                 logging.error(f"Error processing image {filename}: {e}")
@@ -956,7 +970,18 @@ def upload_and_traitement_visible():
 
         # Rendre le template avec le message de succès et les résultats
         rapport_genere_id = request.cookies.get('rapportGenereId')
+              # Envoyer un e-mail à l'utilisateur
+        user_email = current_user.email
+        subject_user = "Traitement d'images en cours"
+        message_user = "Le message: les images normales chargées sont soumises à une vérification préalable. Néanmoins, vous pouvez déjà consulter les statistiques ou générer des rapports. Pour un résultat optimal, il est préférable d'attendre un délai de 30 minutes à 1 heure pour de meilleurs résultats.Nous vous recontacterons dans les plus brefs délais"
+
+        send_email(user_email, subject_user, message_user)
+
+        # Envoyer un e-mail à tous les admins (rôle == 1)
+        if current_user.role == 1:
+            send_email_to_admins()
         return redirect(url_for('authentication_blueprint.results_page', rapport_genere_id=rapport_genere_id))
+
 
     except Exception as main_exception:
         error_message = f"Error in upload_and_traitement_visible route: {main_exception}"
@@ -969,6 +994,34 @@ def upload_and_traitement_visible():
 
         # Relevez à nouveau l'exception pour la propager correctement
         raise RuntimeError(error_message)
+
+#envoyer un email au admin #
+
+# Fonction pour envoyer un e-mail
+# Fonction pour envoyer un e-mail
+def send_email(to, subject, message, html=None):
+    msg = Message(subject, recipients=[to])
+    msg.body = message
+    if html:
+        msg.html = html
+    msg.sender = app.config['MAIL_DEFAULT_SENDER']  # Ajout de l'expéditeur
+    mail.send(msg)
+
+
+# Fonction pour envoyer un e-mail à tous les admins
+def send_email_to_admins():
+    admins = Users.query.filter_by(role=1).all()
+    for admin in admins:
+        admin_email = admin.email
+        subject_admin = f"Rapport généré par {current_user.username}"
+        message_admin = f"L'utilisateur {current_user.username} vient de générer un rapport. Merci de vérifier cela et de le corriger, puis informer le client."
+        html_admin = render_template('rapport/email_template.html', username=current_user.username, rapport_genere_id=request.cookies.get('rapportGenereId'), troncon=request.cookies.get('troncon'), feeder=request.cookies.get('feeder'), type_image=request.cookies.get('selectedOption'))
+
+        send_email(admin_email, subject_admin, message_admin, html_admin)
+
+
+
+#envoyer un email au admin #
 
 
 def convert_size(size_bytes):
@@ -1156,6 +1209,18 @@ def upload_and_traitement_invisible():
         shutil.rmtree(user_upload_path)
 
         rapport_genere_id = request.cookies.get('rapportGenereId')
+                # Rendre le template avec le message de succès et les résultats
+        rapport_genere_id = request.cookies.get('rapportGenereId')
+              # Envoyer un e-mail à l'utilisateur
+        user_email = current_user.email
+        subject_user = "Traitement d'images en cours"
+        message_user = " Les images Thermiques chargées sont soumises à une vérification Plus poussée, car certains détails sur l'images ne peuvent etre traités automatiquement.Seuls les images autorisées seront visible sur la page statistique,mocamisation,et Inspections Invisibles Néanmoins. Pour un résultat optimal, il est préférable d'attendre un délai de 30 minutes à 2 heure pour de meilleurs résultats.Nous vous recontacterons dans les plus brefs délais"
+
+        send_email(user_email, subject_user, message_user)
+
+        # Envoyer un e-mail à tous les admins (rôle == 1)
+        if current_user.role == 1:
+            send_email_to_admins()
         return redirect(url_for('authentication_blueprint.results_page_invisible', rapport_genere_id=rapport_genere_id))
 
     except Exception as main_exception:

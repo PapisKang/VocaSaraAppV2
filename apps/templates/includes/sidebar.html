@@ -44,7 +44,34 @@
           </a>
         </li>
         {% endif %}
-        <!-- end users -->
+        <!-- end admin -->
+        {% if current_user.role == 1 %}
+        <li data-username="message" class="nav-item">
+          <a href="#" class="nav-link" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="pcoded-micon">
+              <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer me-2"></i>
+            </span>
+            <span class="pcoded-mtext">Administrateur</span>
+          </a>
+          <ul class="dropdown-menu">
+            <li data-username="sub-option-1" class="nav-item">
+              <a href="{{ url_for('home_blueprint.list_all_models') }} "class="nav-link">
+                <span class="pcoded-mtext">Gestion/Données</span>
+              </a>
+            <li data-username="sub-option-3" class="nav-item">
+              <a href="#" class="nav-link">
+                <span class="pcoded-mtext">Defaut</span>
+              </a>
+            </li>
+  
+            <!-- Add more sub-options as needed -->
+          </ul>
+        </li>
+      {% endif %}
+      
+      
+      
+      
         <li class="nav-item">
           <a data-bs-toggle="collapse" href="#dashboardsExamples" 
 
@@ -254,7 +281,7 @@
           <a data-bs-toggle="collapse" href="#authExamples" class="nav-link " aria-controls="authExamples" role="button" aria-expanded="false">
             <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center d-flex align-items-center justify-content-center  me-2">
               <svg width="12px" height="12px" viewBox="0 0 40 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>document</title>
+                <title></title>
                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g transform="translate(-1870.000000, -591.000000)" fill="#FFFFFF" fill-rule="nonzero">
                     <g transform="translate(1716.000000, 291.000000)">
@@ -304,18 +331,8 @@
                     </li>
                   </ul>
                 </div>
-
             </ul>
-          </div>
-        </li>
-
-                  </ul>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </li>
-      </ul>
+   
     </div>
     <div class="sidenav-footer mx-3 mt-3 pt-3">
       <div class="card card-background shadow-none card-background-mask-secondary" id="sidenavCard">
