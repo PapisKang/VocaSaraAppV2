@@ -76,38 +76,8 @@
             margin-top: 30px;
             margin-bottom: 30px;
         }
-
-        form{
-            display:;
-    justify-content: space-between;
-    max-width: 900px;
-    margin: 50px auto;
-    flex: 1; /* Utiliser l'espace restant pour la flexbox */
-        }
-p.lead{
-    text-align:end;
-}
-button.btn.btn-primary {
-    font-family: cursive;
-}
-label {
-    font-family: cursive;
-}
-
     </style>
 </head>
-<<<<<<< HEAD
-{%include 'home/index.html'%}
-<body class="bg-light">
-    <div class="container mt-5">
-        
-        <p class="lead" style"text-align:center;">Bienvenue, {{ current_user.username }}!</p>
-
-        <form method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="image"><i class="fas fa-user-circle"></i>  Photo de Profil:</label>
-                <input type="file" class="form-control-file" name="image" accept="image/*">
-=======
 
 {% include 'layouts/base.html' %}
 <body>
@@ -121,7 +91,6 @@ label {
                     <input type="file" name="image" accept="image/*">
                     Choisir un fichier
                 </label>
->>>>>>> Prince-Gildas
             </div>
             <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Changer de Photo</button>
         </form>

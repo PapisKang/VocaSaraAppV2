@@ -1,0 +1,93 @@
+{% extends 'layouts/base.html' %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+<head>
+    <title>Ajout {{ model_name | title }}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #28a745;
+            color: #ffffff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ajout {{ model_name | title }}</h1>
+    <form method="post" action="" id="addForm">
+        {% for column in model.__table__.columns %}
+            <div class="form-group">
+                <label for="{{ column.name }}">{{ column.name }}</label>
+                <input type="text" class="form-control" name="{{ column.key }}" id="{{ column.key }}">
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-success">Save {{ model_name | title }}</button>
+    </form>
+
+    <script>
+        document.getElementById('addForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Assuming you have a variable 'Swal' for SweetAlert
+            Swal.fire({
+                title: 'Data Added!',
+                text: 'Les données ont été ajouter avec succes.',
+                icon: 'success',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            }).then(() => {
+                // Submit the form after showing the success message
+                document.getElementById('addForm').submit();
+            });
+        });
+    </script>
+</body>
+{% include "includes/footer.html" %}
+    
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

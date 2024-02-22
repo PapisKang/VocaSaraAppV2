@@ -1,161 +1,15 @@
-<<<<<<< HEAD
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <title>Confirmation Page</title>
-  <!-- Link Bootstrap CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-<<<<<<< HEAD
-    body {
-      background: linear-gradient(45deg, #2193b0, #6dd5ed);
-      background-size: 400% 400%;
-      animation: gradient 15s ease infinite;
-      margin: 0;
-      padding: 0;
-  }
-
-  @keyframes gradient {
-      0% {
-          background-position: 0% 50%;
-      }
-      50% {
-          background-position: 100% 50%;
-      }
-      100% {
-          background-position: 0% 50%;
-      }
-  }
-
-  .custom-container {
-      border: 2px solid white;
-      border-radius: 15px;
-      padding: 20px;
-      margin-top: 20px;
-      background-color: rgba(255, 255, 255, 0.8);
-  }
-  .container {
-    display:;
-    justify-content: space-between;
-    max-width: 900px;
-    margin: 50px auto;
-    flex: 1; /* Utiliser l'espace restant pour la flexbox */
-    }  
-    h2 {
-      color: #2dbdff;
-    }
-
-    p {
-      margin-bottom: 20px;
-    }
-
-    button {
-      background-color: #3bc8ff;
-      color: #000000;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-
-=======
-    /* Custom CSS */
->>>>>>> Prince-Gildas
-    .image-container {
-      margin-top: 20px; /* Ajout d'une marge au-dessus de l'image */
-    }
-
-    
-    .image-container img {
-      max-width: 50%;
-      height: auto;
-      border-radius: 8px;
-      display: block; /* Pour éviter un léger espace en bas de l'image */
-      margin: 0 auto; /* Centrer l'image */
-    }
-<<<<<<< HEAD
-
-    @media only screen and (max-width: 600px) {
-      /* Styles pour les petits écrans */
-      h2 {
-        font-size: 1.5em; /* Ajuster la taille du titre */
-      }
-
-      p {
-        font-size: 0.9em; /* Ajuster la taille du texte */
-      }
-
-      .image-container img {
-        display: none; /* Cacher l'image sur les petits écrans */
-      }
-    }
-    h3{
-      color: #2dbdff;
-    }
-=======
->>>>>>> Prince-Gildas
-  </style>
-</head>
-{%include 'home/index.html'%}
-<body>
-
-<<<<<<< HEAD
-  <div class="container custom-container">
-    <h2>Important</h2>
-=======
-  <div class="container mt-5">
-    <h2 class="text-primary">Important</h2>
->>>>>>> Prince-Gildas
-    <p>L'explication fournie dans le texte vise à sensibiliser les utilisateurs sur les limites et les challenges associés à la classification d'images par les modèles d'intelligence artificielle.</p>
-=======
 {% extends 'layouts/base.html' %}
 
 {% block title %} Invoice {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
->>>>>>> Prince-Gildas
 
 {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
 {% block content %} 
 
 
-<<<<<<< HEAD
-    <p>En résumé, l'idée est de souligner que même les modèles d'IA avancés ne sont pas infaillibles, et qu'il est essentiel d'adopter une approche prudente lors de l'utilisation de ces modèles. La vérification manuelle des résultats de la classification et le tri préalable des données contribuent à garantir une utilisation plus fiable et précise des modèles d'IA, en particulier dans des domaines où la précision est cruciale.</p>
-    
-<<<<<<< HEAD
-    <h3>Options :</h3><br>
-    <button onclick="handleButtonClick('visible')"> <i class="fas fa-eye"></i> Rapport Visible</button>
-    <button onclick="handleButtonClick('invisible')"> <i class="fas fa-eye-slash"></i> Rapport Invisible</button>
-
-    
-=======
-    <h3>Options :</h3>
-    <div class="btn-group mb-3">
-      <button type="button" class="btn btn-primary" onclick="handleButtonClick('visible')">Rapport Visible</button>
-      <button type="button" class="btn btn-primary" onclick="handleButtonClick('invisible')">Rapport Invisible</button>
-    </div>
->>>>>>> Prince-Gildas
-  </div>
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
-
-  <!-- Ajout de l'image à droite -->
-<<<<<<< HEAD
- <!-- <div class="image-container">
-=======
-  <div class="container image-container">
->>>>>>> Prince-Gildas
-    <img src="{{ config.ASSETS_ROOT }}/img/illustrations/IA.jpg" alt="Image explicative" loading="lazy">
-  </div>  -->
-=======
 <style>
  
  /* Custom CSS */
@@ -213,7 +67,6 @@
         
       </div>
     </div>
->>>>>>> Prince-Gildas
 
     {% include "includes/footer.html" %}
     

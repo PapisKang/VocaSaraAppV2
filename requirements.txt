@@ -74,3 +74,4 @@ transformers
 langid
 Flask-Cors
 python-docx
+Flask-Mail

@@ -1,0 +1,135 @@
+{% extends 'layouts/base.html' %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %} 
+<head>
+    <title>{{ model_name | title }} - {{ 'Edit' if model.id else 'Add New' }}</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-link {
+            color: #dc3545;
+            margin-top: 10px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .delete-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <!-- Ajoutez le lien vers SweetAlert CDN ici -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+</head>
+<body>
+    <h1>{{ model_name | title }} - {{ 'Edit' if model.id else 'Add New' }}</h1>
+    {% if model %}
+        <form method="post" action="">
+            {% for column in model.__table__.columns %}
+                <label for="{{ column.name }}">{{ column.name }}</label>
+                {% if column.name in binary_columns %}
+                    <input type="text" name="{{ column.key }}" id="{{ column.key }}" value="Binary Data" disabled>
+                {% else %}
+                    <input type="text" name="{{ column.key }}" id="{{ column.key }}" value="{{ model[column.key]|default('') }}">
+                {% endif %}
+            {% endfor %}
+            <button type="submit">Save Changes</button>
+        </form>
+
+        {% if model.id %}
+            <a href="#" onclick="event.preventDefault(); showDeleteConfirmation();" class="delete-link">
+                <i class="fas fa-trash-alt"></i> Delete {{ model_name | title }}
+            </a>
+            <form id="delete-form" method="post" action="{{ url_for('home_blueprint.delete_model', model_name=model_name, model_id=model.id) }}" style="display: none;">
+                <input type="hidden" name="_method" value="DELETE">
+            </form>
+        {% endif %}
+
+    {% else %}
+        <p>Model not found</p>
+    {% endif %}
+
+    <script>
+        function showDeleteConfirmation() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form').submit();
+                    Swal.fire(
+                        'Deleted!',
+                        'Your {{ model_name }} has been deleted.',
+                        'success'
+                    );
+                }
+            });
+        }
+    </script>
+</body>
+
+{% include "includes/footer.html" %}
+    
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}
