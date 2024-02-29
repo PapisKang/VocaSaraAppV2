@@ -1,0 +1,310 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Voir Images {% endblock title %}
+
+{% block stylesheets %}
+
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 20px;
+      background-color: #fff;
+      color: #333;
+      overflow-x: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      font-size: 1.5em;
+      margin: 10px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      overflow-x: auto;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 10px;
+      white-space: nowrap;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .image-preview {
+      max-width: 100px;
+      max-height: 100px;
+      cursor: pointer;
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      display: flex;
+    }
+
+    #overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+    .btn-toggle {
+      background-color: #4CAF50; /* Green */
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 13px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 5px;
+  }
+
+  .btn-toggle:hover {
+      background-color: #45a049; /* Darker Green */
+  }
+
+  .btn-edit {
+    background-color: #65ddf0; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.btn-edit:hover {
+    background-color: #45a049; /* Darker Green */
+}
+
+.btn-delete {
+  background-color: #cf4848; /* Green */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 13px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.btn-delete:hover {
+  background-color: #45a049; /* Darker Green */
+}
+    #searchInputContainer {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #searchInput {
+      padding: 10px;
+      width: 60%;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    @media screen and (max-width: 600px) {
+      table {
+        overflow-x: auto;
+      }
+    }
+
+    .grise {
+      background-color: #ddd;
+      color: #666;
+      cursor: not-allowed;
+    }
+  </style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+  <h1>Voir Images - {{ rapport.nom_operateur }} - {{ rapport.feeder }}</h1>
+  <p>Nombre total d'images : {{ images_invisibles|length }}</p>
+
+  <div id="searchInputContainer">
+    <input type="text" id="searchInput" placeholder="Rechercher...">
+    <i class="fas fa-search"></i>
+    <div class="table-container">
+      <table id="imagesTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom Opérateur</th>
+            <th>Filename</th>
+            <th>Upload Date</th>
+            <th>Data</th>
+            <th>Longitude</th>
+            <th>Latitude</th>
+            <th>Type Défaut</th>
+            <th>Temperature</th>
+            <th>Feeder</th>
+            <th>Tronçon</th>
+            <th>Zone</th>
+            <th>Type Image</th>
+            <th>Rapport Genere ID</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for image in images_invisibles %}
+              <tr{% if image.display == 'no' %} class="grise" onclick="showMessage()" {% endif %}>
+                <td>{{ image.id }}</td>
+                <td>{{ rapport.nom_operateur }}</td>
+                <td>{{ image.filename }}</td>
+                <td>{{ image.upload_date }}</td>
+                <td>
+                  {% if image.data %}
+                    <img src="data:image/png;base64,{{ image.data }}" alt="Image Preview" class="image-preview">
+                  {% endif %}
+                </td>
+                <td>{{ image.longitude }}</td>
+                <td>{{ image.latitude }}</td>
+                <td>{{ image.type_defaut }}</td>
+                <td>{{ image.temperature }}</td>
+                <td>{{ image.feeder }}</td>
+                <td>{{ image.troncon }}</td>
+                <td>{{ image.zone }}</td>
+                <td>{{ image.type_image }}</td>
+                <td>{{ image.rapport_genere_id }}</td>
+                <td>
+                  {% if current_user.role == 1 %}
+                    <button class="btn-toggle" data-rapport="{{ rapport.id }}" data-image="{{ image.id }}">
+                      Change Status
+                    </button>
+                    <button class="btn-edit"  data-rapport="{{ rapport.id }}" data-image="{{ image.id }}">
+                      Edit
+                    </button>
+                    <button class="btn-delete" data-rapport="{{ rapport.id }}" data-image="{{ image.id }}">
+                      Delete
+                    </button>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          
+      </table>
+    </div>
+
+    <div id="overlay">
+      <img id="overlayImage" src="" alt="Agrandir l'image">
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+
+    <script>
+      $(document).ready(function () {
+        $("#searchInput").on("keyup", function () {
+          var value = $(this).val().toLowerCase();
+          $("#imagesTable tbody tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+          });
+        });
+
+        $(".image-preview").on("click", function () {
+          var imageUrl = $(this).attr("src");
+          $("#overlayImage").attr("src", imageUrl);
+          $("#overlay").show();
+        });
+
+        $("#overlay").on("click", function () {
+          $(this).hide();
+        });
+    
+
+      function showMessage() {
+        alert("Seul l'administrateur peut approuver.");
+      }
+      $(".btn-toggle").on("click", function () {
+        var rapportId = $(this).data("rapport");
+        var imageId = $(this).data("image");
+    
+        $.get(`/changer_statut/${rapportId}/${imageId}`, function (data) {
+          if (data.success) {
+              Swal.fire({
+                  icon: 'success',
+                  title: 'Succès',
+                  text: data.message,
+              }).then((result) => {
+                  // You can perform additional actions after the user clicks OK
+                  if (result.isConfirmed) {
+                      // Refresh the page or update the relevant row without reloading the page
+                      location.reload(); // Example: Reload the page
+                  }
+              });
+          } else {
+              swal("Erreur", data.message, "error");
+          }
+      });
+    });
+  });
+  $(".btn-delete").on("click", function () {
+    var rapportId = $(this).data("rapport"); 
+    var imageId = $(this).data("image");
+
+    $.get(`/supprimer_image/${rapportId}/${imageId}`, function (data) {
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Succès',
+          text: data.message,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            location.reload();
+          }
+        });
+      } else {
+        Swal.fire("Erreur", data.message, "error");
+      }
+    });
+  });
+  $(document).ready(function () {
+    $(".btn-edit").on("click", function () {
+        var rapportId = $(this).data("rapport");
+        var imageId = $(this).data("image");
+
+        // Redirect to the edit page with the rapport_id and image_id
+        window.location.href = `/edit_image/${rapportId}/${imageId}`;
+    });
+});
+
+  
+    </script>
+  </div>
+{% endblock content %}
+
+{% block javascripts %}
+  <!-- Specific JS goes HERE -->
+{% endblock javascripts %}
