@@ -75,3 +75,12 @@ langid
 Flask-Cors
 python-docx
 Flask-Mail
+
+pytesseract
+torch
+torchvision
+prettytable
+scikit-learn
+xlsxwriter
+openpyxl
+python-Levenshtein
