@@ -23,12 +23,20 @@ import zlib
 import logging
 import os
 import base64
+<<<<<<< HEAD
+<<<<<<< HEAD
+from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible
+from flask import render_template, jsonify, send_file
+=======
+from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible, RapportGenere, DocumentRapportGenere
+=======
 from apps.authentication.models import (UserProfile, Users, ImageUploadVisible,
                                         ImageUploadInvisible, RapportGenere, DocumentRapportGenere,
                                         Troncon, Feeder)
 
 from apps.authentication import models
 
+>>>>>>> Prince-Gildas
 from flask import render_template, jsonify, send_file
 import json
 from sqlalchemy import func
@@ -43,6 +51,9 @@ from openpyxl.styles import Font, Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
 
 import io
+<<<<<<< HEAD
+>>>>>>> Prince-Gildas
+=======
 import logging
 from apps.config import Config
 from sqlalchemy.orm import Mapper
@@ -52,6 +63,7 @@ from docx import Document
 from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from PIL import Image as PILIMAGE
+>>>>>>> Prince-Gildas
 
 # Ajouter un log lorsqu'un utilisateur se connecte
 
@@ -206,12 +218,31 @@ def apropos():
     return render_template('home/apropos.html', segment='apropos')
 
 
+<<<<<<< HEAD
+
+
+@blueprint.route('/acceuil')
+=======
 @blueprint.route('/acceuil')
 @login_required
+>>>>>>> Prince-Gildas
 def acceuil():
     return render_template('home/acceuil.html')
 
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+@blueprint.route('/get_map_data')
+def get_map_data():
+    # Récupérer les données nécessaires de la base de données
+    image_points = ImageUploadVisible.query.all()
+
+    # Préparer les données pour la carte
+    map_data = []
+    for point in image_points:
+=======
+=======
 # ./////////////////////// page de localisation de défuat§§§§§§§§§§
 @blueprint.route('/update_status/<int:image_id>', methods=['POST'])
 @login_required
@@ -262,6 +293,7 @@ def get_default_types():
     return jsonify(default_types)
 
 
+>>>>>>> Prince-Gildas
 @blueprint.route('/get_map_data')
 def get_map_data():
     page = request.args.get('page', default=1, type=int)
@@ -301,6 +333,26 @@ def get_map_data():
 
     map_data = []
     for point in image_points.items:
+<<<<<<< HEAD
+>>>>>>> Prince-Gildas
+        data = {
+            'latitude': point.latitude,
+            'longitude': point.longitude,
+            'type_defaut': point.type_defaut,
+            'feeder': point.feeder,
+            'troncon': point.troncon,
+            'zone': point.zone,
+            'filename': point.filename,
+            'nom_operateur': point.nom_operateur,
+            'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'image_binary': point.data
+<<<<<<< HEAD
+
+=======
+>>>>>>> Prince-Gildas
+        }
+        map_data.append(data)
+=======
         # Filtrer les points en fonction du statut sélectionné
         if point.status == selected_status:
             data = {
@@ -318,10 +370,18 @@ def get_map_data():
                 'status': point.status
             }
             map_data.append(data)
+>>>>>>> Prince-Gildas
 
     return jsonify(map_data)
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+
+>>>>>>> Prince-Gildas
+=======
+>>>>>>> Prince-Gildas
 @blueprint.route('/localisation_page')
 @login_required
 def localisation_page():
