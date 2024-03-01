@@ -547,13 +547,6 @@ def rapport_id_page():
     return render_template('rapport/rapport_id_page.html', rapports=rapports)
 
 
-@blueprint.route('/rapport_id_page_invisible')
-def rapport_id_page_invisible():
-    type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
-    rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
-    return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
-
-
 @login_required
 @blueprint.route('/mes_inspections/<int:rapport_id>', methods=['GET'])
 def mes_inspections(rapport_id):
@@ -571,7 +564,80 @@ def mes_inspections(rapport_id):
         return redirect(url_for('authentication_blueprint.index'))
 
 
+@login_required
+@blueprint.route('/edit_image_visible/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
+def edit_image_visible(rapport_id, image_id):
+    # Fetch the image you want to edit
+    image = ImageUploadVisible.query.get(image_id)
 
+    # Add role verification here if necessary
+
+    if image:
+        # Fetch the corresponding rapport
+        rapport = RapportGenere.query.get(rapport_id)
+
+        if rapport:
+            if request.method == 'POST':
+                try:
+                    # Update image details based on the form submission
+                    image.filename = request.form.get('filename')
+                    image.longitude = request.form.get('longitude')
+                    image.latitude = request.form.get('latitude')
+                    image.type_defaut = request.form.get('type_defaut')
+                    image.feeder = request.form.get('feeder')
+                    image.troncon = request.form.get('troncon')
+                    image.zone = request.form.get('zone')
+
+                    # Save changes to the database
+                    db.session.commit()
+
+                    # Return a JSON response indicating success
+                    return jsonify(success=True, message="Image updated successfully.")
+                except Exception as e:
+                    # Log the exception for debugging purposes
+                    print(e)
+
+                    # Return a JSON response indicating failure
+                    return jsonify(success=False, message="Failed to update image."), 500
+
+            # Render the edit template if it's a GET request
+            return render_template('rapport/edit_image_upload_visible.html', image=image, rapport=rapport, rapport_id=rapport_id)
+        else:
+            # Handle the case where the rapport is not found
+            return jsonify(success=False, message="Rapport not found."), 404
+    else:
+        # Handle the case where the image is not found
+        return jsonify(success=False, message="Image not found."), 404
+
+@login_required
+@blueprint.route('/supprimer_image_visible/<int:rapport_id>/<int:image_id>', methods=['GET'])
+def supprimer_image_visible(rapport_id, image_id):
+    rapport = RapportGenere.query.get(rapport_id)
+    image = ImageUploadVisible.query.get(image_id)
+
+    if rapport and image:
+        # Supprimez toute la ligne (colonne) associée à l'image
+        db.session.delete(image)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Image et toutes ses données associées ont été supprimées avec succès',
+            'rapport_id': rapport_id,
+            'image_id': image_id
+        })
+
+    else:
+        return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
+
+#Invisible ::::::::::::::::::::::::::::::::::::::::::::::
+
+
+@blueprint.route('/rapport_id_page_invisible')
+def rapport_id_page_invisible():
+    type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
+    rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
+    return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
 
 
 @login_required
@@ -656,6 +722,8 @@ def supprimer_image_invisible(rapport_id, image_id):
 
     else:
         return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
+    
+    
 @login_required
 @blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
 def mes_inspections_invisible(rapport_id):

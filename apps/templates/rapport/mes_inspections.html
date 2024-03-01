@@ -9,14 +9,14 @@
       margin: 20px;
       background-color: #fff;
       color: #333;
-      overflow-x: auto; /* Ajout de la propriété pour le défilement horizontal */
+      overflow-x: auto;
     }
 
     h1 {
       text-align: center;
       color: #333;
-      font-size: 1em; /* Ajustez la taille de la police selon vos préférences */
-      margin: 10px 0; /* Ajoutez une marge pour un espacement agréable */
+      font-size: 1.5em;
+      margin: 10px 0;
     }
 
     table {
@@ -40,9 +40,9 @@
     }
 
     .image-preview {
-      max-width: 100px; /* Ajustez la taille de prévisualisation selon vos besoins */
-      max-height: 100px; /* Ajustez la taille de prévisualisation selon vos besoins */
-      cursor: pointer; /* Ajout pour le curseur pointer lors du survol de l'image */
+      max-width: 100px;
+      max-height: 100px;
+      cursor: pointer;
     }
 
     #overlay {
@@ -55,21 +55,67 @@
       background-color: rgba(0, 0, 0, 0.7);
       justify-content: center;
       align-items: center;
-      display: flex; /* Ajout pour utiliser flexbox */
+      display: flex;
     }
 
     #overlay img {
       max-width: 90%;
       max-height: 90%;
-      object-fit: contain; /* Ajout pour ajuster la taille de l'image tout en préservant son ratio */
+      object-fit: contain;
     }
-
-    #searchContainer {
+    .btn-toggle {
+      background-color: #4CAF50; /* Green */
+      border: none;
+      color: white;
+      padding: 10px 20px;
       text-align: center;
-      margin-bottom: 20px;
-    }
+      text-decoration: none;
+      display: inline-block;
+      font-size: 13px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 5px;
+  }
 
-    /* Style pour centrer la barre de recherche */
+  .btn-toggle:hover {
+      background-color: #45a049; /* Darker Green */
+  }
+
+  .btn-edit {
+    background-color: #65ddf0; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.btn-edit:hover {
+    background-color: #45a049; /* Darker Green */
+}
+
+.btn-delete {
+  background-color: #cf4848; /* Green */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 13px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.btn-delete:hover {
+  background-color: #45a049; /* Darker Green */
+}
     #searchInputContainer {
       text-align: center;
       margin-bottom: 20px;
@@ -81,12 +127,11 @@
     }
 
     .table-container {
-      overflow-x: auto; /* Ajout de la propriété pour le défilement horizontal */
+      overflow-x: auto;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       margin-top: 20px;
     }
 
-    /* Ajoutez cette règle pour permettre le défilement horizontal sur les écrans étroits */
     @media screen and (max-width: 600px) {
       table {
         overflow-x: auto;
@@ -150,10 +195,21 @@
                 <td>{{ image.type_image }}</td>
                 <td>{{ image.rapport_genere_id }}</td>
                 <!-- Ajoutez d'autres colonnes nécessaires -->
+                <td>
+                  {% if current_user.role == 1 %}
+                    <button class="btn-edit"  data-rapport="{{ rapport.id }}" data-image="{{ image.id }}">
+                      Edit
+                    </button>
+                    <button class="btn-delete" data-rapport="{{ rapport.id }}" data-image="{{ image.id }}">
+                      Delete
+                    </button>
+                  {% endif %}
+                </td>
               </tr>
-            {% endif %}
-          {% endfor %}
-        </tbody>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+          
       </table>
     </div>
     <!-- Overlay pour agrandir l'image -->
@@ -184,6 +240,39 @@
           $(this).hide();
         });
       });
+      function showMessage() {
+        alert("Seul l'administrateur peut approuver.");
+      }
+  
+  $(".btn-delete").on("click", function () {
+    var rapportId = $(this).data("rapport"); 
+    var imageId = $(this).data("image");
+
+    $.get(`/supprimer_image_visible/${rapportId}/${imageId}`, function (data) {
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Succès',
+          text: data.message,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            location.reload();
+          }
+        });
+      } else {
+        Swal.fire("Erreur", data.message, "error");
+      }
+    });
+  });
+  $(document).ready(function () {
+    $(".btn-edit").on("click", function () {
+        var rapportId = $(this).data("rapport");
+        var imageId = $(this).data("image");
+
+        // Redirect to the edit page with the rapport_id and image_id
+        window.location.href = `/edit_image_visible/${rapportId}/${imageId}`;
+    });
+});
     </script>
   </div>
 {% endblock content %}

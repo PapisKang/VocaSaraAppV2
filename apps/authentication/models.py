@@ -183,32 +183,6 @@ def request_loader(request):
     return user if user else None
 
 
-class InspectionOperateur(db.Model):
-    __tablename__ = 'InspectionOperateur'
-    id = Column(Integer, primary_key=True)
-    Inspection = Column(Integer, ForeignKey('RapportGenere.id'))
-    Users = Column(Integer, ForeignKey('users.id'))
-    EstResponsable = Column(Boolean)
-
-
-
-class Defaut(db.Model):
-    __tablename__ = 'Defaut'
-    id = Column(Integer, primary_key=True)
-    Nom = Column(String(255))
-    TypeDefaut = Column(Integer, ForeignKey('TypeDefaut.id'))
-
-class TypeDefaut(db.Model):
-    __tablename__ = 'TypeDefaut'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
-
-
-class StatutInspection(db.Model):
-    __tablename__ = 'StatutInspection'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
-
 class Feeder(db.Model):
     __tablename__ = 'Feeder'
     id = db.Column(db.Integer, primary_key=True)
