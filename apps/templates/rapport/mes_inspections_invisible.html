@@ -3,6 +3,7 @@
 {% block title %} Voir Images {% endblock title %}
 
 {% block stylesheets %}
+
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -137,6 +138,12 @@
         overflow-x: auto;
       }
     }
+
+    .grise {
+      background-color: #ddd;
+      color: #666;
+      cursor: not-allowed;
+    }
   </style>
 {% endblock stylesheets %}
 
@@ -144,10 +151,8 @@
 
 {% block content %}
   <h1>Voir Images - {{ rapport.nom_operateur }} - {{ rapport.feeder }}</h1>
-  <p>Nombre total d'images : {{ images_visibles|length }}</p>
+  <p>Nombre total d'images : {{ images_invisibles|length }}</p>
 
-  <!-- Barre de recherche en temps réel -->
-  <!-- Barre de recherche en temps réel avec icône Font Awesome -->
   <div id="searchInputContainer">
     <input type="text" id="searchInput" placeholder="Rechercher...">
     <i class="fas fa-search"></i>
@@ -163,40 +168,40 @@
             <th>Longitude</th>
             <th>Latitude</th>
             <th>Type Défaut</th>
+            <th>Temperature</th>
             <th>Feeder</th>
             <th>Tronçon</th>
             <th>Zone</th>
             <th>Type Image</th>
             <th>Rapport Genere ID</th>
-            <!-- Ajoutez d'autres colonnes nécessaires -->
           </tr>
         </thead>
         <tbody>
-          {% for image in images_visibles %}
-            {% if image.longitude is not none and image.latitude is not none and image.type_defaut != 'non_defaut' %}
-              <tr>
+            {% for image in images_invisibles %}
+              <tr{% if image.display == 'no' %} class="grise" onclick="showMessage()" {% endif %}>
                 <td>{{ image.id }}</td>
                 <td>{{ rapport.nom_operateur }}</td>
                 <td>{{ image.filename }}</td>
                 <td>{{ image.upload_date }}</td>
                 <td>
-                  <!-- Afficher l'image à partir des données binaires encodées en base64 -->
                   {% if image.data %}
                     <img src="data:image/png;base64,{{ image.data }}" alt="Image Preview" class="image-preview">
                   {% endif %}
                 </td>
-
                 <td>{{ image.longitude }}</td>
                 <td>{{ image.latitude }}</td>
                 <td>{{ image.type_defaut }}</td>
+                <td>{{ image.temperature }}</td>
                 <td>{{ image.feeder }}</td>
                 <td>{{ image.troncon }}</td>
                 <td>{{ image.zone }}</td>
                 <td>{{ image.type_image }}</td>
                 <td>{{ image.rapport_genere_id }}</td>
-                <!-- Ajoutez d'autres colonnes nécessaires -->
                 <td>
                   {% if current_user.role == 1 %}
+                    <button class="btn-toggle" data-rapport="{{ rapport.id }}" data-image="{{ image.id }}">
+                      Change Status
+                    </button>
                     <button class="btn-edit"  data-rapport="{{ rapport.id }}" data-image="{{ image.id }}">
                       Edit
                     </button>
@@ -206,20 +211,20 @@
                   {% endif %}
                 </td>
               </tr>
-              {% endif %}
             {% endfor %}
           </tbody>
           
       </table>
     </div>
-    <!-- Overlay pour agrandir l'image -->
+
     <div id="overlay">
       <img id="overlayImage" src="" alt="Agrandir l'image">
     </div>
-
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+
     <script>
-      // Fonction pour gérer la recherche en temps réel
       $(document).ready(function () {
         $("#searchInput").on("keyup", function () {
           var value = $(this).val().toLowerCase();
@@ -228,27 +233,48 @@
           });
         });
 
-        // Fonction pour agrandir l'image au clic
         $(".image-preview").on("click", function () {
           var imageUrl = $(this).attr("src");
           $("#overlayImage").attr("src", imageUrl);
           $("#overlay").show();
         });
 
-        // Cacher l'overlay au clic en dehors de l'image
         $("#overlay").on("click", function () {
           $(this).hide();
         });
-      });
+    
+
       function showMessage() {
         alert("Seul l'administrateur peut approuver.");
       }
-  
+      $(".btn-toggle").on("click", function () {
+        var rapportId = $(this).data("rapport");
+        var imageId = $(this).data("image");
+    
+        $.get(`/changer_statut/${rapportId}/${imageId}`, function (data) {
+          if (data.success) {
+              Swal.fire({
+                  icon: 'success',
+                  title: 'Succès',
+                  text: data.message,
+              }).then((result) => {
+                  // You can perform additional actions after the user clicks OK
+                  if (result.isConfirmed) {
+                      // Refresh the page or update the relevant row without reloading the page
+                      location.reload(); // Example: Reload the page
+                  }
+              });
+          } else {
+              swal("Erreur", data.message, "error");
+          }
+      });
+    });
+  });
   $(".btn-delete").on("click", function () {
     var rapportId = $(this).data("rapport"); 
     var imageId = $(this).data("image");
 
-    $.get(`/supprimer_image_visible/${rapportId}/${imageId}`, function (data) {
+    $.get(`/supprimer_image/${rapportId}/${imageId}`, function (data) {
       if (data.success) {
         Swal.fire({
           icon: 'success',
@@ -270,9 +296,11 @@
         var imageId = $(this).data("image");
 
         // Redirect to the edit page with the rapport_id and image_id
-        window.location.href = `/edit_image_visible/${rapportId}/${imageId}`;
+        window.location.href = `/edit_image/${rapportId}/${imageId}`;
     });
 });
+
+  
     </script>
   </div>
 {% endblock content %}

@@ -9,16 +9,6 @@
 
 {% block content %} 
 
-<<<<<<< HEAD
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<<<<<<< HEAD
-    <script>
-        var map;
-        var tileLayers = {};
-        var currentMapType;
-
-=======
-=======
 <title>Leaflet Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
@@ -119,7 +109,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
->>>>>>> Prince-Gildas
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
     <script>
@@ -127,20 +116,11 @@
       var tileLayers = {};
       var currentMapType;
 
-<<<<<<< HEAD
->>>>>>> Prince-Gildas
-        // Fonction pour créer et afficher la carte par défaut
-        function createDefaultMap() {
-            map = L.map('map', {
-                attributionControl: false
-            }).setView([14.6928, -17.4467], 6); // Centré sur Dakar avec un zoom par défaut
-=======
       // Fonction pour créer et afficher la carte par défaut
       function createDefaultMap() {
         map = L.map("map", {
           attributionControl: false,
         }).setView([14.6928, -17.4467], 6); // Centré sur Dakar avec un zoom par défaut
->>>>>>> Prince-Gildas
 
         var streetLayer = L.tileLayer(
           "https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}",
@@ -172,80 +152,9 @@
 
         streetLayer.addTo(map);
 
-<<<<<<< HEAD
-            // Ajouter un gestionnaire d'événements pour gérer le changement de type de carte
-            map.on('baselayerchange', function (eventLayer) {
-                currentMapType = eventLayer.name; // Mettre à jour le type de carte actuel
-            });
-
-            // Ajouter le contrôle de changement de couche
-            L.control.layers(tileLayers).addTo(map);
-        }
-
-        // Appeler la fonction pour créer la carte par défaut
-        createDefaultMap();
-
-        // Ajouter une couche de marqueurs pour afficher les points sur la carte
-        var markersLayer = new L.LayerGroup();
-        markersLayer.addTo(map);
-<<<<<<< HEAD
-
-=======
-        // Utiliser le cluster de marqueurs
-        var markers = L.markerClusterGroup();
-        markers.addLayer(markersLayer);
-        map.addLayer(markers);
->>>>>>> Prince-Gildas
-       // ...
-
-// Appeler la route Flask pour récupérer les données de la carte
-fetch('/get_map_data')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP! Statut: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Données reçues :", data);  // Vérifier les données dans la console
-
-        if (data.length === 0) {
-            console.log("Aucune donnée à afficher sur la carte.");
-            return;
-        }
-
-        // Créer un tableau de coordonnées des marqueurs
-        var markerCoordinates = data.map(point => [point.latitude, point.longitude]);
-
-        // Créer un marqueur pour chaque point
-        data.forEach(point => {
-            var marker = L.marker([point.latitude, point.longitude]).addTo(markersLayer);
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> Prince-Gildas
-            marker.bindPopup(
-                `<strong>${point.type_defaut}</strong><br>
-                Feeder: ${point.feeder}<br>
-                Tronçon: ${point.troncon}<br>
-                Zone: ${point.zone}<br>
-                Filename: ${point.filename}<br>
-                Opérateur: ${point.nom_operateur}<br>
-                Date: ${point.upload_date}<br>
-                latitude: ${point.latitude}<br>
-                longitude: ${point.longitude}<br>
-<<<<<<< HEAD
-                <img src="data:image/png;base64,${point.image_binary}" alt="Uploaded Image" style="max-width:200px; max-height:200px;">`
-=======
-                <img src="data:image/png;base64,${point.image_binary}" alt="Uploaded Image" style="max-width:200px; max-height:200px;" loading="lazy">`
->>>>>>> Prince-Gildas
-            );
-=======
         // Ajouter un gestionnaire d'événements pour gérer le changement de type de carte
         map.on("baselayerchange", function (eventLayer) {
           currentMapType = eventLayer.name; // Mettre à jour le type de carte actuel
->>>>>>> Prince-Gildas
         });
 
         // Ajouter le contrôle de changement de couche

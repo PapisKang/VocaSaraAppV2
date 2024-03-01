@@ -13,7 +13,8 @@ from flask_login import (
     current_user,
     login_required,
     login_user,
-    logout_user
+    logout_user,
+    user_logged_in
 )
 from flask_mail import Message
 
@@ -320,17 +321,9 @@ def photo_upload():
                 image_url = user_profile.image
 
     user_profile = UserProfile.query.filter_by(user=current_user.id).first()
-<<<<<<< HEAD
-    return render_template('home/index.html', user_profile=user_profile)
-=======
     return render_template('accounts/profile.html', user_profile=user_profile)
-<<<<<<< HEAD
->>>>>>> Prince-Gildas
-#///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
-=======
 # ///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
 
->>>>>>> Prince-Gildas
 
 @blueprint.route('/user_list', methods=['GET'])
 def user_list():
@@ -357,6 +350,10 @@ def user_list():
 
     return redirect(url_for('authentication_blueprint.index'))
 
+@user_logged_in.connect
+def track_login(sender, user, **extra):
+    user.last_login_at = datetime.utcnow()
+    db.session.commit()
 
 @blueprint.route('/edit_user', methods=['PUT'])
 def edit_user():
@@ -846,8 +843,12 @@ def load_model_visible(num_classes):
 
     # Chargement des poids du modèle
     # Assurez-vous d'avoir le bon nom de fichier
-    model.load_state_dict(torch.load(
-        './apps/IA/model/model_mobilenetv2_normal.pt'))
+    if torch.cuda.is_available():
+        model.load_state_dict(torch.load(
+            './apps/IA/model/model_mobilenetv2_normal.pt'))
+    else:
+        model.load_state_dict(torch.load(
+            './apps/IA/model/model_mobilenetv2_normal.pt', map_location=torch.device('cpu')))
     return model.to(device)
 
 
@@ -1112,8 +1113,12 @@ def load_model(num_classes):
 
     # Chargement des poids du modèle
     # Assurez-vous d'avoir le bon nom de fichier
-    model.load_state_dict(torch.load(
-        './apps/IA/model/model_mobilenetv2_thermo.pt'))
+    if torch.cuda.is_available():
+        model.load_state_dict(torch.load(
+            './apps/IA/model/model_mobilenetv2_thermo.pt'))
+    else:
+        model.load_state_dict(torch.load(
+            './apps/IA/model/model_mobilenetv2_thermo.pt', map_location=torch.device('cpu')))
     return model.to(device)
 
 

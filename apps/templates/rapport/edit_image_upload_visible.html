@@ -64,7 +64,7 @@
 {% block content %}
 <div class="container">
     <h1>Edit Image - {{ rapport.nom_operateur }} - {{ rapport.feeder }}</h1>
-    <form id="editForm" method="POST" action="{{ url_for('home_blueprint.edit_image_upload_invisible', rapport_id=rapport.id, image_id=image.id) }}">
+    <form id="editForm" method="POST" action="{{ url_for('home_blueprint.edit_image_visible', rapport_id=rapport.id, image_id=image.id) }}">
 
         <label for="filename">Filename:</label>
         <input type="text" id="filename" name="filename" value="{{ image.filename }}">
@@ -77,15 +77,11 @@
 
         <label for="type_defaut">Type Défaut:</label>
         <select id="type_defaut" name="type_defaut" class="form-control">
-            {% for defaut in defauts_invisibles %}
+            {% for defaut in defauts_visibles %}
             <option value="{{ defaut.Nom }}" {% if defaut.Nom == image.type_defaut %} selected {% endif %}>{{ defaut.Nom }}</option>
             {% endfor %}
         </select>
         
-        
-        <label for="temperature">Temperature:</label>
-        <input type="text" id="temperature" name="temperature" value="{{ image.temperature }}">
-
         <label for="feeder">Feeder:</label>
         <input type="text" id="feeder" name="feeder" value="{{ image.feeder }}">
 
@@ -121,7 +117,7 @@
                                 text: data.message,
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    window.location.href = '{{ url_for("home_blueprint.mes_inspections_invisible", rapport_id=rapport.id) }}';
+                                    window.location.href = '{{ url_for("home_blueprint.mes_inspections", rapport_id=rapport.id) }}';
                                 }
                             });
                         } else {

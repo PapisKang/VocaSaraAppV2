@@ -16,8 +16,8 @@
 /* CHATBOX */
 .chatbox {
     position: fixed; /* Utiliser une position fixe pour que l'icône reste en bas à droite même en faisant défiler la page */
-    bottom: 30px;
-    right: 30px;
+    bottom: 100px;
+    right: 40px;
     width: 40px; /* Réduire la largeur de l'icône */
     height: 40px; /* Réduire la hauteur de l'icône */
     border-radius: 10%; /* Utiliser une forme de cercle pour l'icône */

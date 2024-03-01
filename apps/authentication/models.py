@@ -43,7 +43,7 @@ class Users(db.Model, UserMixin):
     
     verified_email  = db.Column(db.Integer(),   default=VERIFIED_EMAIL['not-verified'], nullable=False)
     
-    
+    last_login_at = db.Column(db.DateTime, default=datetime.utcnow)
     date_created    = db.Column(db.DateTime, default=dt.datetime.utcnow())
     date_modified   = db.Column(db.DateTime, default=db.func.current_timestamp(),
                                                onupdate=db.func.current_timestamp())
@@ -135,6 +135,7 @@ class UserProfile(db.Model):
     image          = db.Column(LONGTEXT, nullable=True)
     user          = db.Column(db.Integer, db.ForeignKey("users.id",ondelete="cascade"), nullable=False)
     user_id       = relationship(Users, uselist=False, backref="profile")
+    last_login_at = db.Column(db.DateTime, default=datetime.utcnow)
     date_created  = db.Column(db.DateTime, default=dt.datetime.utcnow())
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
                                                onupdate=db.func.current_timestamp())
@@ -182,32 +183,18 @@ def request_loader(request):
     user = Users.query.filter_by(username=username).first()
     return user if user else None
 
+class Defaut_visible(db.Model):
+    __tablename__ = 'Defaut_visible'
+    id = db.Column(db.Integer, primary_key=True)
+    Nom = db.Column(db.String(255), nullable=False)
+    Description = db.Column(db.Text)  # Add a new column for description
 
-class InspectionOperateur(db.Model):
-    __tablename__ = 'InspectionOperateur'
-    id = Column(Integer, primary_key=True)
-    Inspection = Column(Integer, ForeignKey('RapportGenere.id'))
-    Users = Column(Integer, ForeignKey('users.id'))
-    EstResponsable = Column(Boolean)
+class Defaut_invisible(db.Model):
+    __tablename__ = 'Defaut_invisible'
+    id = db.Column(db.Integer, primary_key=True)
+    Nom = db.Column(db.String(255), nullable=False)
+    Description = db.Column(db.Text)  # Add a new column for description
 
-
-
-class Defaut(db.Model):
-    __tablename__ = 'Defaut'
-    id = Column(Integer, primary_key=True)
-    Nom = Column(String(255))
-    TypeDefaut = Column(Integer, ForeignKey('TypeDefaut.id'))
-
-class TypeDefaut(db.Model):
-    __tablename__ = 'TypeDefaut'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
-
-
-class StatutInspection(db.Model):
-    __tablename__ = 'StatutInspection'
-    id = Column(Integer, primary_key=True)
-    Libelle = Column(String(255))
 
 class Feeder(db.Model):
     __tablename__ = 'Feeder'
