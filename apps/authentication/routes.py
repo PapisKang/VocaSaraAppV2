@@ -13,7 +13,8 @@ from flask_login import (
     current_user,
     login_required,
     login_user,
-    logout_user
+    logout_user,
+    user_logged_in
 )
 from flask_mail import Message
 
@@ -349,6 +350,10 @@ def user_list():
 
     return redirect(url_for('authentication_blueprint.index'))
 
+@user_logged_in.connect
+def track_login(sender, user, **extra):
+    user.last_login_at = datetime.utcnow()
+    db.session.commit()
 
 @blueprint.route('/edit_user', methods=['PUT'])
 def edit_user():

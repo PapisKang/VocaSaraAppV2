@@ -43,7 +43,7 @@ class Users(db.Model, UserMixin):
     
     verified_email  = db.Column(db.Integer(),   default=VERIFIED_EMAIL['not-verified'], nullable=False)
     
-    
+    last_login_at = db.Column(db.DateTime, default=datetime.utcnow)
     date_created    = db.Column(db.DateTime, default=dt.datetime.utcnow())
     date_modified   = db.Column(db.DateTime, default=db.func.current_timestamp(),
                                                onupdate=db.func.current_timestamp())
@@ -135,6 +135,7 @@ class UserProfile(db.Model):
     image          = db.Column(LONGTEXT, nullable=True)
     user          = db.Column(db.Integer, db.ForeignKey("users.id",ondelete="cascade"), nullable=False)
     user_id       = relationship(Users, uselist=False, backref="profile")
+    last_login_at = db.Column(db.DateTime, default=datetime.utcnow)
     date_created  = db.Column(db.DateTime, default=dt.datetime.utcnow())
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
                                                onupdate=db.func.current_timestamp())
