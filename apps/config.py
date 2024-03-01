@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 import sqlite3
+import logging
 
 class Email_config(object):
     MAIL_USERNAME = 'vocasaracontactapp@gmail.com'
@@ -106,6 +107,9 @@ class Config(object):
 class ProductionConfig(Config):
 
     DEBUG = False
+        # Configurer le logging pour enregistrer les erreurs dans un fichier
+    logging.basicConfig(filename='log/app.log', level=logging.ERROR,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
 
     # Security
     SESSION_COOKIE_HTTPONLY = True
