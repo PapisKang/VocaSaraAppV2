@@ -25,6 +25,7 @@ import os
 import base64
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible
 from flask import render_template, jsonify, send_file
 =======
@@ -37,6 +38,14 @@ from apps.authentication.models import (UserProfile, Users, ImageUploadVisible,
 from apps.authentication import models
 
 >>>>>>> Prince-Gildas
+=======
+from apps.authentication.models import (UserProfile, Users, ImageUploadVisible,
+                                        ImageUploadInvisible, RapportGenere, DocumentRapportGenere,
+                                        Troncon, Feeder, Defaut_invisible, Defaut_visible)
+
+from apps.authentication import models
+
+>>>>>>> develop
 from flask import render_template, jsonify, send_file
 import json
 from sqlalchemy import func
@@ -232,6 +241,7 @@ def acceuil():
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 @blueprint.route('/get_map_data')
 def get_map_data():
@@ -243,6 +253,8 @@ def get_map_data():
     for point in image_points:
 =======
 =======
+=======
+>>>>>>> develop
 # ./////////////////////// page de localisation de défuat§§§§§§§§§§
 @blueprint.route('/update_status/<int:image_id>', methods=['POST'])
 @login_required
@@ -378,10 +390,13 @@ def get_map_data():
 =======
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 >>>>>>> Prince-Gildas
 =======
 >>>>>>> Prince-Gildas
+=======
+>>>>>>> develop
 @blueprint.route('/localisation_page')
 @login_required
 def localisation_page():
@@ -606,12 +621,15 @@ def rapport_id_page():
     rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
     return render_template('rapport/rapport_id_page.html', rapports=rapports)
 
+<<<<<<< HEAD
 
 @blueprint.route('/rapport_id_page_invisible')
 def rapport_id_page_invisible():
     type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
     rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
     return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
+=======
+>>>>>>> develop
 
 
 @login_required
@@ -631,8 +649,76 @@ def mes_inspections(rapport_id):
         return redirect(url_for('authentication_blueprint.index'))
 
 
+@login_required
+@blueprint.route('/edit_image_visible/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
+def edit_image_visible(rapport_id, image_id):
+    # Fetch the image you want to edit
+    image = ImageUploadVisible.query.get(image_id)
+
+    # Fetch all available types of defects
+    defauts_visibles = Defaut_visible.query.all()
+
+    if image:
+        rapport = RapportGenere.query.get(rapport_id)
+        if rapport:
+            if request.method == 'POST':
+                try:
+                    # Update image details based on the form submission
+                    image.filename = request.form.get('filename')
+                    image.longitude = request.form.get('longitude')
+                    image.latitude = request.form.get('latitude')
+                    image.type_defaut = request.form.get('type_defaut')
+                    image.feeder = request.form.get('feeder')
+                    image.troncon = request.form.get('troncon')
+                    image.zone = request.form.get('zone')
+
+                    # Save changes to the database
+                    db.session.commit()
+
+                    return jsonify(success=True, message="Image updated successfully.")
+                except Exception as e:
+                    print(e)
+                    return jsonify(success=False, message="Failed to update image."), 500
+
+            return render_template('rapport/edit_image_upload_visible.html', image=image, rapport=rapport, defauts_visibles=defauts_visibles)
+        else:
+            return jsonify(success=False, message="Rapport not found."), 404
+    else:
+        return jsonify(success=False, message="Image not found."), 404
+
+@login_required
+@blueprint.route('/supprimer_image_visible/<int:rapport_id>/<int:image_id>', methods=['GET'])
+def supprimer_image_visible(rapport_id, image_id):
+    rapport = RapportGenere.query.get(rapport_id)
+    image = ImageUploadVisible.query.get(image_id)
+
+    if rapport and image:
+        # Supprimez toute la ligne (colonne) associée à l'image
+        db.session.delete(image)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Image et toutes ses données associées ont été supprimées avec succès',
+            'rapport_id': rapport_id,
+            'image_id': image_id
+        })
+
+    else:
+        return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
+
+#Invisible ::::::::::::::::::::::::::::::::::::::::::::::
 
 
+<<<<<<< HEAD
+=======
+@blueprint.route('/rapport_id_page_invisible')
+def rapport_id_page_invisible():
+    type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
+    rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
+    return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
+
+>>>>>>> develop
 
 @login_required
 @blueprint.route('/changer_statut/<int:rapport_id>/<int:image_id>', methods=['GET'])
@@ -656,7 +742,13 @@ def edit_image_upload_invisible(rapport_id, image_id):
     # Fetch the image you want to edit
     image = ImageUploadInvisible.query.get(image_id)
 
+<<<<<<< HEAD
     # Add role verification here if necessary
+=======
+        # Fetch all available types of defects
+    defauts_invisibles = Defaut_invisible.query.all()
+
+>>>>>>> develop
 
     if image:
         # Fetch the corresponding rapport
@@ -688,7 +780,11 @@ def edit_image_upload_invisible(rapport_id, image_id):
                     return jsonify(success=False, message="Failed to update image."), 500
 
             # Render the edit template if it's a GET request
+<<<<<<< HEAD
             return render_template('rapport/edit_image_upload_invisible.html', image=image, rapport=rapport, rapport_id=rapport_id)
+=======
+            return render_template('rapport/edit_image_upload_invisible.html', image=image, rapport=rapport, rapport_id=rapport_id,defauts_invisibles=defauts_invisibles)
+>>>>>>> develop
         else:
             # Handle the case where the rapport is not found
             return jsonify(success=False, message="Rapport not found."), 404
@@ -716,6 +812,11 @@ def supprimer_image_invisible(rapport_id, image_id):
 
     else:
         return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
+<<<<<<< HEAD
+=======
+    
+    
+>>>>>>> develop
 @login_required
 @blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
 def mes_inspections_invisible(rapport_id):
@@ -1486,3 +1587,122 @@ def add_model_data(model_name):
         return redirect(url_for('home_blueprint.show_model', model_name=model_name))
 
     return render_template('admin/add_model_data.html', model_name=model_name, model=model)
+<<<<<<< HEAD
+=======
+
+# PARTIE ADMIN#///////////////////////////////
+
+
+#DEFAUTS///////§§§§§§§§§§§§§§§§§§§§
+@login_required
+@blueprint.route('/add_defaut_visible', methods=['GET', 'POST'])
+def add_defaut_visible():
+    if request.method == 'POST':
+        nom = request.form.get('nom')
+        description = request.form.get('description')
+
+        new_defaut = Defaut_visible(Nom=nom, Description=description)
+        db.session.add(new_defaut)
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_visible'))
+
+    # Lire les noms des défauts depuis un fichier
+    with open('apps/IA/label/class_labels_normalv2.txt', 'r') as f:
+        noms_defauts = f.readlines()
+        print(noms_defauts)
+
+    return render_template('defauts/add_defaut_visible.html', noms_defauts=noms_defauts)
+
+@login_required
+@blueprint.route('/edit_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
+def edit_defaut_visible(defaut_id):
+    defaut = Defaut_visible.query.get_or_404(defaut_id)
+
+    if request.method == 'POST':
+        defaut.Nom = request.form.get('nom')
+        defaut.Description = request.form.get('description')
+
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_visible'))
+
+    return render_template('defauts/edit_defaut_visible.html', defaut=defaut)
+
+@login_required
+@blueprint.route('/delete_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
+def delete_defaut_visible(defaut_id):
+    defaut = Defaut_visible.query.get_or_404(defaut_id)
+
+    if request.method == 'POST':
+        db.session.delete(defaut)
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_visible'))
+
+    return render_template('defauts/delete_defaut_visible.html', defaut=defaut)
+
+@login_required
+@blueprint.route('/list_defauts_visible')
+def list_defauts_visible():
+    defauts = Defaut_visible.query.all()
+    return render_template('defauts/list_defauts_visible.html', defauts=defauts)
+
+#partie invisible
+@login_required
+@blueprint.route('/list_defauts_invisible')
+def list_defauts_invisible():
+    defauts = Defaut_invisible.query.all()
+    return render_template('defauts/list_defauts_invisible.html', defauts=defauts)
+
+@login_required
+@blueprint.route('/add_defaut_invisible', methods=['GET', 'POST'])
+def add_defaut_invisible():
+    if request.method == 'POST':
+        nom = request.form.get('nom')
+        description = request.form.get('description')
+
+        new_defaut = Defaut_invisible(Nom=nom, Description=description)
+        db.session.add(new_defaut)
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_invisible'))
+
+
+    # Lire les noms des défauts depuis un fichier
+    with open('apps/IA/label/class_label_mobilenetv2_thermo.txt', 'r') as f:
+        noms_defauts_invisibles = f.readlines()
+        print(noms_defauts_invisibles)
+
+    return render_template('defauts/add_defaut_invisible.html', noms_defauts_invisibles=noms_defauts_invisibles)
+
+@login_required
+@blueprint.route('/edit_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
+def edit_defaut_invisible(defaut_id):
+    defaut = Defaut_invisible.query.get_or_404(defaut_id)
+
+    if request.method == 'POST':
+        defaut.Nom = request.form.get('nom')
+        defaut.Description = request.form.get('description')
+
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_invisible'))
+
+    return render_template('defauts/edit_defaut_invisible.html', defaut=defaut)
+
+@login_required
+@blueprint.route('/delete_defaut_invisible/<int:defaut_id>', methods=['GET', 'POST'])
+def delete_defaut_invisible(defaut_id):
+    defaut = Defaut_invisible.query.get_or_404(defaut_id)
+
+    if request.method == 'POST':
+        db.session.delete(defaut)
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_invisible'))
+
+    return render_template('defauts/delete_defaut_invisible.html', defaut=defaut)
+
+#DEFAUTS///////§§§§§§§§§§§§§§§§§§§§
+>>>>>>> develop

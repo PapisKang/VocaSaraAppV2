@@ -10,7 +10,7 @@ from  sys import exit
 
 from apps.config import config_dict
 from apps import create_app, db
-
+import logging
 
 # WARNING: Don't run with debug turned on in production!
 DEBUG = os.getenv('FLASK_DEBUG', 'False') == 'True'
@@ -35,12 +35,13 @@ if not DEBUG:
 
 @app.cli.command("test_ftp")
 def test_ftp():
-
-    if testFTPConnection():
-        app.logger.info( 'FTP connection OK' )
-    else:
-        app.logger.info( 'FTP connection ERROR' )
-
+    try:
+        if testFTPConnection():
+            app.logger.info('FTP connection OK')
+        else:
+            app.logger.info('FTP connection ERROR')
+    except Exception as e:
+        app.logger.error(f'Error in test_ftp: {str(e)}')
 
 if DEBUG:
     app.logger.info('DEBUG            = ' + str(DEBUG)             )
@@ -48,6 +49,11 @@ if DEBUG:
     app.logger.info('DBMS             = ' + app_config.SQLALCHEMY_DATABASE_URI)
     app.logger.info('ASSETS_ROOT      = ' + app_config.ASSETS_ROOT )
 
+
 if __name__ == "__main__":
+    # Configurez le logging
+    logging.basicConfig(filename='log/app.log', level=logging.DEBUG,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+
     with app.app_context():
         managers.run()
