@@ -111,6 +111,7 @@ class ProductionConfig(Config):
     SESSION_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_DURATION = 36000
+    SESSION_COOKIE_SAMESITE = 'Lax'
 
 class DebugConfig(Config):
     DEBUG = True
