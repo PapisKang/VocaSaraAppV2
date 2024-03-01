@@ -843,9 +843,14 @@ def load_model_visible(num_classes):
 
     # Chargement des poids du modèle
     # Assurez-vous d'avoir le bon nom de fichier
-    model.load_state_dict(torch.load(
-        './apps/IA/model/model_mobilenetv2_normal.pt'))
+    if torch.cuda.is_available():
+        model.load_state_dict(torch.load(
+            './apps/IA/model/model_mobilenetv2_normal.pt'))
+    else:
+        model.load_state_dict(torch.load(
+            './apps/IA/model/model_mobilenetv2_normal.pt', map_location=torch.device('cpu')))
     return model.to(device)
+
 
 
 # Transformation des images pour la classification
@@ -1109,8 +1114,12 @@ def load_model(num_classes):
 
     # Chargement des poids du modèle
     # Assurez-vous d'avoir le bon nom de fichier
-    model.load_state_dict(torch.load(
-        './apps/IA/model/model_mobilenetv2_thermo.pt'))
+    if torch.cuda.is_available():
+        model.load_state_dict(torch.load(
+            './apps/IA/model/model_mobilenetv2_thermo.pt'))
+    else:
+        model.load_state_dict(torch.load(
+            './apps/IA/model/model_mobilenetv2_thermo.pt', map_location=torch.device('cpu')))
     return model.to(device)
 
 
