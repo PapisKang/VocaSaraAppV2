@@ -96,11 +96,6 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = upload_folder_name
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(
-    days=365)  # adjust as needed
-app.config['SESSION_PROTECTION'] = 'strong'
 
 # Configurations Flask-Mail
 app.config['MAIL_SERVER'] = Email_config.MAIL_SERVER
