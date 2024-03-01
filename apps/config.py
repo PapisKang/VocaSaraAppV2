@@ -111,7 +111,11 @@ class ProductionConfig(Config):
     SESSION_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_DURATION = 36000
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = True 
+    SESSION_COOKIE_SAMESITE = 'None'
+    REMEMBER_COOKIE_SECURE = True  # Utiliser uniquement des cookies sécurisés sur HTTPS
+    REMEMBER_COOKIE_SAMESITE = 'None'  # Autoriser les requêtes de tous les sites (cross-site)
+
 
 class DebugConfig(Config):
     DEBUG = True

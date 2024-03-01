@@ -852,7 +852,6 @@ def load_model_visible(num_classes):
     return model.to(device)
 
 
-
 # Transformation des images pour la classification
 def prepare_image_from_path_visible(file_path):
     transform = transforms.Compose([
