@@ -76,8 +76,12 @@
         <input type="text" id="latitude" name="latitude" value="{{ image.latitude }}">
 
         <label for="type_defaut">Type Défaut:</label>
-        <input type="text" id="type_defaut" name="type_defaut" value="{{ image.type_defaut }}">
-
+        <select id="type_defaut" name="type_defaut" class="form-control">
+            {% for defaut in defauts_visibles %}
+            <option value="{{ defaut.Nom }}" {% if defaut.Nom == image.type_defaut %} selected {% endif %}>{{ defaut.Nom }}</option>
+            {% endfor %}
+        </select>
+        
         <label for="feeder">Feeder:</label>
         <input type="text" id="feeder" name="feeder" value="{{ image.feeder }}">
 

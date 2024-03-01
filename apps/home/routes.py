@@ -570,12 +570,11 @@ def edit_image_visible(rapport_id, image_id):
     # Fetch the image you want to edit
     image = ImageUploadVisible.query.get(image_id)
 
-    # Add role verification here if necessary
+    # Fetch all available types of defects
+    defauts_visibles = Defaut_visible.query.all()
 
     if image:
-        # Fetch the corresponding rapport
         rapport = RapportGenere.query.get(rapport_id)
-
         if rapport:
             if request.method == 'POST':
                 try:
@@ -591,22 +590,15 @@ def edit_image_visible(rapport_id, image_id):
                     # Save changes to the database
                     db.session.commit()
 
-                    # Return a JSON response indicating success
                     return jsonify(success=True, message="Image updated successfully.")
                 except Exception as e:
-                    # Log the exception for debugging purposes
                     print(e)
-
-                    # Return a JSON response indicating failure
                     return jsonify(success=False, message="Failed to update image."), 500
 
-            # Render the edit template if it's a GET request
-            return render_template('rapport/edit_image_upload_visible.html', image=image, rapport=rapport, rapport_id=rapport_id)
+            return render_template('rapport/edit_image_upload_visible.html', image=image, rapport=rapport, defauts_visibles=defauts_visibles)
         else:
-            # Handle the case where the rapport is not found
             return jsonify(success=False, message="Rapport not found."), 404
     else:
-        # Handle the case where the image is not found
         return jsonify(success=False, message="Image not found."), 404
 
 @login_required
@@ -662,7 +654,9 @@ def edit_image_upload_invisible(rapport_id, image_id):
     # Fetch the image you want to edit
     image = ImageUploadInvisible.query.get(image_id)
 
-    # Add role verification here if necessary
+        # Fetch all available types of defects
+    defauts_invisibles = Defaut_invisible.query.all()
+
 
     if image:
         # Fetch the corresponding rapport
@@ -694,7 +688,7 @@ def edit_image_upload_invisible(rapport_id, image_id):
                     return jsonify(success=False, message="Failed to update image."), 500
 
             # Render the edit template if it's a GET request
-            return render_template('rapport/edit_image_upload_invisible.html', image=image, rapport=rapport, rapport_id=rapport_id)
+            return render_template('rapport/edit_image_upload_invisible.html', image=image, rapport=rapport, rapport_id=rapport_id,defauts_invisibles=defauts_invisibles)
         else:
             # Handle the case where the rapport is not found
             return jsonify(success=False, message="Rapport not found."), 404
