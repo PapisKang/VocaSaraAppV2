@@ -61,8 +61,13 @@
                 <span class="pcoded-mtext">Gestion/Données</span>
               </a>
             <li data-username="sub-option-3" class="nav-item">
-              <a href="#" class="nav-link">
-                <span class="pcoded-mtext">Defaut</span>
+              <a href="{{ url_for('home_blueprint.list_defauts_visible') }} "class="nav-link">
+                <span class="pcoded-mtext">Defaut_Visible</span>
+              </a>
+            </li>
+            <li data-username="sub-option-3" class="nav-item">
+              <a href="{{ url_for('home_blueprint.list_defauts_invisible') }} " class="nav-link">
+                <span class="pcoded-mtext">Defaut_Invisible</span>
               </a>
             </li>
   

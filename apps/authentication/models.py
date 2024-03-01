@@ -182,6 +182,18 @@ def request_loader(request):
     user = Users.query.filter_by(username=username).first()
     return user if user else None
 
+class Defaut_visible(db.Model):
+    __tablename__ = 'Defaut_visible'
+    id = db.Column(db.Integer, primary_key=True)
+    Nom = db.Column(db.String(255), nullable=False)
+    Description = db.Column(db.Text)  # Add a new column for description
+
+class Defaut_invisible(db.Model):
+    __tablename__ = 'Defaut_invisible'
+    id = db.Column(db.Integer, primary_key=True)
+    Nom = db.Column(db.String(255), nullable=False)
+    Description = db.Column(db.Text)  # Add a new column for description
+
 
 class Feeder(db.Model):
     __tablename__ = 'Feeder'

@@ -25,7 +25,7 @@ import os
 import base64
 from apps.authentication.models import (UserProfile, Users, ImageUploadVisible,
                                         ImageUploadInvisible, RapportGenere, DocumentRapportGenere,
-                                        Troncon, Feeder)
+                                        Troncon, Feeder, Defaut_invisible, Defaut_visible)
 
 from apps.authentication import models
 
@@ -1494,3 +1494,119 @@ def add_model_data(model_name):
         return redirect(url_for('home_blueprint.show_model', model_name=model_name))
 
     return render_template('admin/add_model_data.html', model_name=model_name, model=model)
+
+# PARTIE ADMIN#///////////////////////////////
+
+
+#DEFAUTS///////§§§§§§§§§§§§§§§§§§§§
+@login_required
+@blueprint.route('/add_defaut_visible', methods=['GET', 'POST'])
+def add_defaut_visible():
+    if request.method == 'POST':
+        nom = request.form.get('nom')
+        description = request.form.get('description')
+
+        new_defaut = Defaut_visible(Nom=nom, Description=description)
+        db.session.add(new_defaut)
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_visible'))
+
+    # Lire les noms des défauts depuis un fichier
+    with open('apps/IA/label/class_labels_normalv2.txt', 'r') as f:
+        noms_defauts = f.readlines()
+        print(noms_defauts)
+
+    return render_template('defauts/add_defaut_visible.html', noms_defauts=noms_defauts)
+
+@login_required
+@blueprint.route('/edit_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
+def edit_defaut_visible(defaut_id):
+    defaut = Defaut_visible.query.get_or_404(defaut_id)
+
+    if request.method == 'POST':
+        defaut.Nom = request.form.get('nom')
+        defaut.Description = request.form.get('description')
+
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_visible'))
+
+    return render_template('defauts/edit_defaut_visible.html', defaut=defaut)
+
+@login_required
+@blueprint.route('/delete_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
+def delete_defaut_visible(defaut_id):
+    defaut = Defaut_visible.query.get_or_404(defaut_id)
+
+    if request.method == 'POST':
+        db.session.delete(defaut)
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_visible'))
+
+    return render_template('defauts/delete_defaut_visible.html', defaut=defaut)
+
+@login_required
+@blueprint.route('/list_defauts_visible')
+def list_defauts_visible():
+    defauts = Defaut_visible.query.all()
+    return render_template('defauts/list_defauts_visible.html', defauts=defauts)
+
+#partie invisible
+@login_required
+@blueprint.route('/list_defauts_invisible')
+def list_defauts_invisible():
+    defauts = Defaut_invisible.query.all()
+    return render_template('defauts/list_defauts_invisible.html', defauts=defauts)
+
+@login_required
+@blueprint.route('/add_defaut_invisible', methods=['GET', 'POST'])
+def add_defaut_invisible():
+    if request.method == 'POST':
+        nom = request.form.get('nom')
+        description = request.form.get('description')
+
+        new_defaut = Defaut_invisible(Nom=nom, Description=description)
+        db.session.add(new_defaut)
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_invisible'))
+
+
+    # Lire les noms des défauts depuis un fichier
+    with open('apps/IA/label/class_label_mobilenetv2_thermo.txt', 'r') as f:
+        noms_defauts_invisibles = f.readlines()
+        print(noms_defauts_invisibles)
+
+    return render_template('defauts/add_defaut_invisible.html', noms_defauts_invisibles=noms_defauts_invisibles)
+
+@login_required
+@blueprint.route('/edit_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
+def edit_defaut_invisible(defaut_id):
+    defaut = Defaut_invisible.query.get_or_404(defaut_id)
+
+    if request.method == 'POST':
+        defaut.Nom = request.form.get('nom')
+        defaut.Description = request.form.get('description')
+
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_invisible'))
+
+    return render_template('defauts/edit_defaut_invisible.html', defaut=defaut)
+
+@login_required
+@blueprint.route('/delete_defaut_invisible/<int:defaut_id>', methods=['GET', 'POST'])
+def delete_defaut_invisible(defaut_id):
+    defaut = Defaut_invisible.query.get_or_404(defaut_id)
+
+    if request.method == 'POST':
+        db.session.delete(defaut)
+        db.session.commit()
+
+        return redirect(url_for('home_blueprint.list_defauts_invisible'))
+
+    return render_template('defauts/delete_defaut_invisible.html', defaut=defaut)
+
+#DEFAUTS///////§§§§§§§§§§§§§§§§§§§§
