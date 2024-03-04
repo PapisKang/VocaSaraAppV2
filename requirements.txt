@@ -84,3 +84,5 @@ scikit-learn
 xlsxwriter
 openpyxl
 python-Levenshtein
+pretty-errors
+
