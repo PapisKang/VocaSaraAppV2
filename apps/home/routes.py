@@ -1514,6 +1514,7 @@ def generate_report_document_invisible():
         db.session.commit()
         success_message = "Le rapport Invisible a été généré avec succès."
         rapports = RapportGenere.query.all()
+        generate_resume_rapport_invisible()
   
     except Exception as e:
         logging.error(
@@ -1522,6 +1523,134 @@ def generate_report_document_invisible():
 
     return render_template('rapport/creer_un_rapport_invisible.html', rapports=rapports, success_message=success_message, error_message=error_message)
 
+
+
+def generate_resume_rapport_invisible():
+    success_message = None
+    error_message = None
+    rapports = []
+    try:
+        # Récupérer les données depuis la base de données ImageUploadInvisible
+        curent_date = datetime.now().strftime("%Y-%m-%d")
+
+        # Récupérer les paramètres de la requête
+        last_image_data = ImageUploadInvisible.query.order_by(
+            ImageUploadInvisible.upload_date.desc()).first()
+        
+        # Utiliser les valeurs récupérées de la base de données
+        feeder = last_image_data.feeder
+        # Convert the date to a string with the format "YYYY-MM-DD"
+        date = datetime.now().strftime("%Y-%m-%d")
+        nom_operateur = last_image_data.nom_operateur
+        zone = last_image_data.zone
+        image_data = ImageUploadInvisible.query.filter(
+            ImageUploadInvisible.nom_operateur == nom_operateur,
+            ImageUploadInvisible.longitude.isnot(None),
+            ImageUploadInvisible.latitude.isnot(None),
+            ImageUploadInvisible.type_defaut != 'non_defaut',
+            ImageUploadInvisible.display == 'yes',
+        ).all()
+        # Créer une copie du fichier
+        wb_copy = load_workbook(
+            './apps/Exemple_rapport_thermique/resume_rapport_thermique_exemple.xlsx')
+        feuille_copy = wb_copy.active
+
+        # Écrire dans les cellules spécifiques du fichier d'origine
+        feuille_copy['A8'] = "Feeder : " + feeder
+        feuille_copy['F3'] = "Date : " + date
+        feuille_copy['G6'] = "Nom opérateur : " + nom_operateur
+        feuille_copy['G8'] = "Zone : " + zone
+        # Définir les styles de cellule
+        font = Font(name='Calibri', size=18)
+        alignment = Alignment(horizontal='center', vertical='center')
+        border = Border(top=Side(border_style='thick'),
+                        bottom=Side(border_style='thick'),
+                        left=Side(border_style='thick'),
+                        right=Side(border_style='thick'))
+        # Générer des données pour chaque colonne
+        row_num = 12
+        for image_info in image_data:
+            if image_info.type_defaut is not None and image_info.type_defaut.strip() != "":
+                defauts = image_info.type_defaut.split("/")
+                colonne_I_values = []
+                colonne_J_values = []
+
+                for defaut in defauts:
+                    defaut_db = Defaut_invisible.query.filter_by(Nom=defaut).first()
+                    if defaut_db:
+                        colonne_I_values.append(
+                            defaut_db.Description if defaut_db.Description else "Ajouter une description"
+                        )
+                        colonne_J_values.append(
+                            defaut_db.Commentaire if defaut_db.Commentaire else "Ajouter un commentaire"
+                        )
+                    else:
+                        colonne_I_values.append("Ajouter une description")
+                        colonne_J_values.append("Ajouter un commentaire")
+
+                # Date/Heure
+                feuille_copy[f'A{row_num}'] = image_info.upload_date
+                feuille_copy[f'B{row_num}'] = feeder  # feeder
+                feuille_copy[f'C{row_num}'] = image_info.troncon  # troncon
+                # longeur (à remplacer par la vraie valeur)
+                feuille_copy[f'D{row_num}'] = ""
+                # Nom de l'image
+                feuille_copy[f'E{row_num}'] = image_info.filename
+                latitude_nom = "Latitude"
+                longitude_nom = "Longitude"
+                feuille_copy[f'F{row_num}'] = f"{latitude_nom} {float(image_info.latitude):.8f}, {longitude_nom} {float(image_info.longitude):.8f}"
+                # Défaut de l'image
+                feuille_copy[f'G{row_num}'] = image_info.type_defaut
+                # Température
+                feuille_copy[f'H{row_num}'] = image_info.temperature
+                # Urgences (à remplacer par la vraie valeur)
+                feuille_copy[f'I{row_num}'] = ""
+                # Écriture des valeurs dans les colonnes J et K
+                feuille_copy[f'J{row_num}'] = ', '.join(colonne_I_values)
+                feuille_copy[f'K{row_num}'] = ', '.join(colonne_J_values)
+                feuille_copy[f'L{row_num}'] = row_num - 11  # Compter de 1 à n
+
+                # Appliquer les styles aux cellules
+                for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']:
+                    cell = feuille_copy[f'{col}{row_num}']
+                    cell.alignment = alignment
+                    cell.font = font
+                    cell.border = border
+
+                # Définir la hauteur des lignes
+                feuille_copy.row_dimensions[row_num].height = 138
+
+                row_num += 1  # Incrémenter le numéro de ligne
+
+        # Appliquer le style au titre "Urgences"
+        cell_title = feuille_copy['I11']
+        cell_title.fill = openpyxl.styles.PatternFill(
+            fill_type='solid', fgColor='FF0000')  # Rouge
+        # Texte blanc en gras
+        cell_title.font = Font(color="FFFFFF", bold=True)
+        nom_du_fichier = "Resume_des_rapport_invisibles_du_feeder_{}_du_{}_par_{}".format(
+            feeder, curent_date, nom_operateur)
+        # Enregistrer le fichier Excel en mémoire
+        excel_file = io.BytesIO()
+        wb_copy.save(excel_file)
+        excel_file.seek(0)
+        rapports = RapportGenere.query.all()
+        # Enregistrer le fichier dans la base de données
+        document = DocumentRapportGenere_invisible(
+            nom_operateur=nom_operateur,
+            nom_du_rapport=nom_du_fichier,
+            data=excel_file.read(),
+            type_de_fichier='excel'
+        )
+        db.session.add(document)
+        db.session.commit()
+        success_message = "Le rapport Invisible a été généré avec succès."
+    except Exception as e:
+        # Handle exceptions or errors
+        error_message = f"Une erreur s'est produite : {str(e)}"
+        logging.error(
+            f"Une erreur s'est produite dans generate_resume: {str(e)}")
+    return render_template('/rapport/creer_un_rapport.html', rapports=rapports, success_message=success_message, error_message=error_message)
 
 @blueprint.route('/mes_rapports_invisible')
 @login_required
