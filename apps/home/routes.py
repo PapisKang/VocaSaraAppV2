@@ -53,6 +53,7 @@ from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from PIL import Image as PILIMAGE
 import pretty_errors
+import re
 
 # Ajouter un log lorsqu'un utilisateur se connecte
 
@@ -1515,7 +1516,8 @@ def generate_report_document_invisible():
         success_message = "Le rapport Invisible a été généré avec succès."
         rapports = RapportGenere.query.all()
         generate_resume_rapport_invisible()
-  
+        generate_quantification_report_invisible()
+        
     except Exception as e:
         logging.error(
             f"Une erreur s'est produite dans generate_doc : {str(e)}")
@@ -1650,7 +1652,128 @@ def generate_resume_rapport_invisible():
         error_message = f"Une erreur s'est produite : {str(e)}"
         logging.error(
             f"Une erreur s'est produite dans generate_resume: {str(e)}")
-    return render_template('/rapport/creer_un_rapport.html', rapports=rapports, success_message=success_message, error_message=error_message)
+    return render_template('/rapport/creer_un_rapport_invisible.html', rapports=rapports, success_message=success_message, error_message=error_message)
+
+
+# @blueprint.route('/generate_quantification_report', methods=['GET', 'POST'])
+def generate_quantification_report_invisible():
+    success_message = None
+    error_message = None
+    rapports = []
+    try:
+        # Récupérer les données de la base de données
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        last_image_data = ImageUploadInvisible.query.order_by(
+            ImageUploadInvisible.upload_date.desc()).first()
+
+        if not last_image_data:
+            error_message = "Aucune donnée disponible dans la base de données."
+            return render_template('rapport/creer_un_rapport_invisible.html')
+
+        # Extraire les données nécessaires de la base de données
+        feeder = last_image_data.feeder
+        date = datetime.now().strftime("%Y-%m-%d")
+        nom_operateur = last_image_data.nom_operateur
+        image_data = ImageUploadInvisible.query.filter(
+            ImageUploadInvisible.nom_operateur == nom_operateur,
+            ImageUploadInvisible.longitude.isnot(None),
+            ImageUploadInvisible.latitude.isnot(None),
+            ImageUploadInvisible.type_defaut != 'non_defaut',
+            ImageUploadInvisible.display == 'yes',
+        ).all()
+
+        # Charger le modèle de feuille Quantification
+        template_workbook = load_workbook(
+            "./apps/Exemple_rapport_thermique/Quantification_Statistique_thermique_exemple.xlsx")
+        feuille_copy = template_workbook.active
+
+        feuille_copy['D7'] = f"Noms : {nom_operateur}"
+        feuille_copy['D8'] = f"Date : {date}"
+        feuille_copy['D11'] = feeder
+        feuille_copy['E11'] = "Température moyenne"
+
+        # Iterate through image_data and count defects
+        defect_count = {}
+        temperature_sum = {}
+        temperature_count = {}
+
+        for image_info in image_data:
+            if image_info.type_defaut:
+                defects = image_info.type_defaut.split('/')
+
+                # Extracted temperature information
+                max_temp, min_temp, avg_temp = map(float, re.findall(r'(\d+\.\d+)', image_info.temperature))
+
+                for defect in defects:
+                    defect = defect.strip()
+                    if defect and '/' not in defect:
+                        if defect in defect_count:
+                            defect_count[defect] += 1
+                            temperature_sum[defect] += avg_temp  # Using average temperature
+                            temperature_count[defect] += 1
+                        else:
+                            defect_count[defect] = 1
+                            temperature_sum[defect] = avg_temp  # Using average temperature
+                            temperature_count[defect] = 1
+
+
+        # Write data to the Quantification sheet
+        row_num = 12
+        for defect, count in defect_count.items():
+            average_temperature = temperature_sum[defect] / temperature_count[defect] if temperature_count[defect] > 0 else 0.0
+            feuille_copy.append(['', '', defect, count, average_temperature])
+
+        # Total of defects in a green cell
+        feuille_copy.append(['', '', 'Totale des défauts',
+                            sum(defect_count.values()), ''])
+        total_cell = feuille_copy.cell(row=feuille_copy.max_row, column=4)
+        total_cell.font = Font(name="Calibri", size=12, color="00AA00")
+
+        # Merge cell containing "DRS" with cells below
+        drs_cell = feuille_copy['A12']
+        feuille_copy.merge_cells(
+            start_row=12, start_column=1, end_row=feuille_copy.max_row, end_column=1)
+        drs_cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        # Add Pie Chart at the end
+        pie = DoughnutChart()
+        labels = Reference(feuille_copy, min_col=3, min_row=14,
+                           max_row=feuille_copy.max_row - 1)
+        data = Reference(feuille_copy, min_col=4, min_row=11,
+                         max_row=feuille_copy.max_row - 1)
+        pie.add_data(data, titles_from_data=True)
+        pie.set_categories(labels)
+        chart_cell = feuille_copy.cell(row=feuille_copy.max_row + 2, column=1)
+        feuille_copy.add_chart(pie, chart_cell.coordinate)
+
+        # Sauvegarder le rapport de quantification
+        nom_du_fichier = f"Quantification_invisible_Rapport_du_feeder_{feeder}_du_{current_date}_par_{nom_operateur}"
+
+        # Sauvegarder le fichier en tant que données binaires dans la base de données
+        excel_file = io.BytesIO()
+        template_workbook.save(excel_file)
+        excel_file.seek(0)
+
+        # Ajouter le rapport dans la base de données
+        rapports = RapportGenere.query.all()
+        document_quantification = DocumentRapportGenere_invisible(
+            nom_operateur=nom_operateur,
+            nom_du_rapport=nom_du_fichier,
+            data=excel_file.read(),
+            type_de_fichier='excel'
+        )
+        db.session.add(document_quantification)
+        db.session.commit()
+
+        success_message = "Le rapport quantification a été généré avec succès."
+    except FileNotFoundError:
+        error_message = "Le fichier de template n'a pas été trouvé."
+    except Exception as e:
+        error_message = f"Une erreur s'est produite : {str(e)}"
+        logging.error(
+            f"Une erreur s'est produite dans generate_quantification_report: {str(e)}")
+
+    return render_template('/rapport/creer_un_rapport_invisible.html', rapports=rapports, success_message=success_message, error_message=error_message)
 
 @blueprint.route('/mes_rapports_invisible')
 @login_required
