@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inspections Générées</title>
+    <title>Inspections Générées Invisibles</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <link rel="stylesheet" href="../../static/assets/css/soft-ui-dashboard.css" />
     <link rel="stylesheet" href="../../static/assets/css/soft-ui-dashboard.min.css" />
@@ -111,7 +111,7 @@
     {% include 'layouts/base.html' %}
     <div>  
         <div class="card" style="border: 2px solid rgb(239, 233, 233); margin-left:270px;">
-            <h1>Créer un rapport</h1>
+            <h1>Créer un rapport Invisibles</h1>
             <!-- Add this at the top of your HTML body -->
             {% if success_message %}
             <script>
@@ -136,7 +136,7 @@
             </div>
         
             <!-- Bouton pour générer les rapports sélectionnés -->
-            <form id="generateReportForm" method="post" action="{{ url_for('home_blueprint.generate_report_document') }}">
+            <form id="generateReportForm" method="post" action="{{ url_for('home_blueprint.generate_report_document_invisible') }}">
             <button id="generateReportBtn">Créer le rapport</button>
             <div style="overflow-x: auto">
                 <table id="rapportTable">

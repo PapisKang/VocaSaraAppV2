@@ -25,7 +25,7 @@ import os
 import base64
 from apps.authentication.models import (UserProfile, Users, ImageUploadVisible,
                                         ImageUploadInvisible, RapportGenere, DocumentRapportGenere,
-                                        Troncon, Feeder, Defaut_invisible, Defaut_visible)
+                                        Troncon, Feeder, Defaut_invisible, Defaut_visible,DocumentRapportGenere_invisible)
 
 from apps.authentication import models
 
@@ -52,6 +52,7 @@ from docx import Document
 from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from PIL import Image as PILIMAGE
+import pretty_errors
 
 # Ajouter un log lorsqu'un utilisateur se connecte
 
@@ -622,118 +623,6 @@ def supprimer_image_visible(rapport_id, image_id):
     else:
         return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
 
-#Invisible ::::::::::::::::::::::::::::::::::::::::::::::
-
-
-@blueprint.route('/rapport_id_page_invisible')
-def rapport_id_page_invisible():
-    type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
-    rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
-    return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
-
-
-@login_required
-@blueprint.route('/changer_statut/<int:rapport_id>/<int:image_id>', methods=['GET'])
-def changer_statut_inspection_invisible(rapport_id, image_id):
-    image = ImageUploadInvisible.query.get(image_id)
-
-    if image:
-        if current_user.role == 1:  # Assurez-vous que seul l'administrateur peut changer le statut
-            image.display = 'yes' if image.display == 'no' else 'no'
-            db.session.commit()
-            return jsonify({'success': True, 'message': 'Statut changé avec succès.'})
-        else:
-            return jsonify({'success': False, 'message': 'Vous n\'avez pas la permission de changer le statut.'})
-    else:
-        return jsonify({'success': False, 'message': 'Image introuvable.'})
-
-
-@login_required
-@blueprint.route('/edit_image/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
-def edit_image_upload_invisible(rapport_id, image_id):
-    # Fetch the image you want to edit
-    image = ImageUploadInvisible.query.get(image_id)
-
-        # Fetch all available types of defects
-    defauts_invisibles = Defaut_invisible.query.all()
-
-
-    if image:
-        # Fetch the corresponding rapport
-        rapport = RapportGenere.query.get(rapport_id)
-
-        if rapport:
-            if request.method == 'POST':
-                try:
-                    # Update image details based on the form submission
-                    image.filename = request.form.get('filename')
-                    image.longitude = request.form.get('longitude')
-                    image.latitude = request.form.get('latitude')
-                    image.type_defaut = request.form.get('type_defaut')
-                    image.temperature = request.form.get('temperature')
-                    image.feeder = request.form.get('feeder')
-                    image.troncon = request.form.get('troncon')
-                    image.zone = request.form.get('zone')
-
-                    # Save changes to the database
-                    db.session.commit()
-
-                    # Return a JSON response indicating success
-                    return jsonify(success=True, message="Image updated successfully.")
-                except Exception as e:
-                    # Log the exception for debugging purposes
-                    print(e)
-
-                    # Return a JSON response indicating failure
-                    return jsonify(success=False, message="Failed to update image."), 500
-
-            # Render the edit template if it's a GET request
-            return render_template('rapport/edit_image_upload_invisible.html', image=image, rapport=rapport, rapport_id=rapport_id,defauts_invisibles=defauts_invisibles)
-        else:
-            # Handle the case where the rapport is not found
-            return jsonify(success=False, message="Rapport not found."), 404
-    else:
-        # Handle the case where the image is not found
-        return jsonify(success=False, message="Image not found."), 404
-
-@login_required
-@blueprint.route('/supprimer_image/<int:rapport_id>/<int:image_id>', methods=['GET'])
-def supprimer_image_invisible(rapport_id, image_id):
-    rapport = RapportGenere.query.get(rapport_id)
-    image = ImageUploadInvisible.query.get(image_id)
-
-    if rapport and image:
-        # Supprimez toute la ligne (colonne) associée à l'image
-        db.session.delete(image)
-        db.session.commit()
-
-        return jsonify({
-            'success': True,
-            'message': 'Image et toutes ses données associées ont été supprimées avec succès',
-            'rapport_id': rapport_id,
-            'image_id': image_id
-        })
-
-    else:
-        return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
-    
-    
-@login_required
-@blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
-def mes_inspections_invisible(rapport_id):
-    rapport = RapportGenere.query.get(rapport_id)
-    if rapport:
-        # Filtrer les images invisibles avec les conditions spécifiées
-        images_invisibles = ImageUploadInvisible.query.filter(
-            ImageUploadInvisible.rapport_genere_id == rapport_id,
-            ImageUploadInvisible.type_defaut.isnot(None),
-            ImageUploadInvisible.type_defaut != "non_defaut",
-
-        ).all()
-
-        return render_template('rapport/mes_inspections_invisible.html', rapport=rapport, images_invisibles=images_invisibles)
-    else:
-        return redirect(url_for('authentication_blueprint.index'))
 
 
 @blueprint.route('/generate_report_document_page')
@@ -769,10 +658,6 @@ def generate_report_document():
             ImageUploadVisible.latitude.isnot(None),
             ImageUploadVisible.type_defaut != 'non_defaut'
         ).all()
-
-        # Charger les normes_conseils des défauts à partir du fichier JSON
-        with open('./apps/phrase_normes_conseils/normes_conseils.json', encoding='utf-8') as f:
-            normes_conseils_data = json.load(f)
 
         # Fonction pour créer une table des matières automatique
 
@@ -872,14 +757,15 @@ def generate_report_document():
                 defects = image_info.type_defaut.split('/')
                 for defect in defects:
                     defect = defect.strip()
-                    # Accédez aux remarques et conseils depuis le fichier JSON
-                    remarque = "Remarque par défaut"
-                    conseil = "Conseil par défaut"
-                    for defaut, info in normes_conseils_data.items():
-                        if defect in defaut:
-                            remarque = info.get("I", "Remarque par défaut")
-                            conseil = info.get("J", "Conseil par défaut")
-                            break
+                    # Accéder aux remarques et conseils depuis la table Defaut_visible
+                    defaut_visible = Defaut_visible.query.filter_by(Nom=defect).first()
+                    if defaut_visible:
+                        remarque = defaut_visible.Description
+                        conseil = defaut_visible.Commentaire
+                    else:
+                        # Ajouter une remarque et un conseil par défaut
+                        remarque = "Remarque par défaut"
+                        conseil = "Conseil par défaut"
 
                 # Ajouter une page pour chaque défaut
                 document.add_page_break()
@@ -1096,11 +982,7 @@ def generate_resume_rapport():
         # Récupérer les paramètres de la requête
         last_image_data = ImageUploadVisible.query.order_by(
             ImageUploadVisible.upload_date.desc()).first()
-
-        # Charger les normes_conseils des défauts à partir du fichier JSON
-        with open('./apps/phrase_normes_conseils/normes_conseils.json', encoding='utf-8') as f:
-            normes_conseils_data = json.load(f)
-
+        
         # Utiliser les valeurs récupérées de la base de données
         feeder = last_image_data.feeder
         # Convert the date to a string with the format "YYYY-MM-DD"
@@ -1130,23 +1012,27 @@ def generate_resume_rapport():
                         bottom=Side(border_style='thick'),
                         left=Side(border_style='thick'),
                         right=Side(border_style='thick'))
-
         # Générer des données pour chaque colonne
         row_num = 12
         for image_info in image_data:
             if image_info.type_defaut is not None and image_info.type_defaut.strip() != "":
                 defauts = image_info.type_defaut.split("/")
-                defauts = [defaut.strip() + '/' for defaut in defauts]
-
                 colonne_I_values = []
                 colonne_J_values = []
 
                 for defaut in defauts:
-                    if defaut in normes_conseils_data:
+                    defaut_db = Defaut_visible.query.filter_by(Nom=defaut).first()
+                    if defaut_db:
                         colonne_I_values.append(
-                            normes_conseils_data[defaut]['I'])
+                            defaut_db.Description if defaut_db.Description else "Ajouter une description"
+                        )
                         colonne_J_values.append(
-                            normes_conseils_data[defaut]['J'])
+                            defaut_db.Commentaire if defaut_db.Commentaire else "Ajouter un commentaire"
+                        )
+                    else:
+                        colonne_I_values.append("Ajouter une description")
+                        colonne_J_values.append("Ajouter un commentaire")
+
 
                 # Date/Heure
                 feuille_copy[f'A{row_num}'] = image_info.upload_date
@@ -1261,12 +1147,454 @@ def telecharger_rapport(rapport_id):
         return render_template('rapport/mes_rapports.html', error_message=error_message, rapports=rapports)
 
 
+@blueprint.route('/charger_rapport/<int:rapport_id>', methods=['GET', 'POST'])
+@login_required
+def charger_rapport(rapport_id):
+    rapport = DocumentRapportGenere.query.get_or_404(rapport_id)
+
+    # Vérifiez si l'utilisateur a le rôle requis pour charger le rapport
+    if current_user.role != 1:
+        return redirect(url_for('home_blueprint.mes_rapports'))
+
+    if request.method == 'POST':
+        # Traitement du chargement du fichier, remplacez cela par votre logique de chargement
+        uploaded_file = request.files['file']
+
+        # Assurez-vous que le fichier a été téléchargé avec succès
+        if uploaded_file:
+            # Mise à jour des données dans la base de données
+            rapport.data = uploaded_file.read()
+            rapport.date_de_creation = datetime.utcnow()
+            db.session.commit()
+
+            return redirect(url_for('home_blueprint.mes_rapports'))
+
+    return render_template('rapport/charger_rapport.html', rapport=rapport)
+
 # ////////////////////////////////////////Generte invisible rapport////////////////
+
+#Invisible ::::::::::::::::::::::::::::::::::::::::::::::
+
+
+@blueprint.route('/rapport_id_page_invisible')
+def rapport_id_page_invisible():
+    type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
+    rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
+    return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
+
+
+@login_required
+@blueprint.route('/changer_statut/<int:rapport_id>/<int:image_id>', methods=['GET'])
+def changer_statut_inspection_invisible(rapport_id, image_id):
+    image = ImageUploadInvisible.query.get(image_id)
+
+    if image:
+        if current_user.role == 1:  # Assurez-vous que seul l'administrateur peut changer le statut
+            image.display = 'yes' if image.display == 'no' else 'no'
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Statut changé avec succès.'})
+        else:
+            return jsonify({'success': False, 'message': 'Vous n\'avez pas la permission de changer le statut.'})
+    else:
+        return jsonify({'success': False, 'message': 'Image introuvable.'})
+
+
+@login_required
+@blueprint.route('/edit_image/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
+def edit_image_upload_invisible(rapport_id, image_id):
+    # Fetch the image you want to edit
+    image = ImageUploadInvisible.query.get(image_id)
+
+        # Fetch all available types of defects
+    defauts_invisibles = Defaut_invisible.query.all()
+
+
+    if image:
+        # Fetch the corresponding rapport
+        rapport = RapportGenere.query.get(rapport_id)
+
+        if rapport:
+            if request.method == 'POST':
+                try:
+                    # Update image details based on the form submission
+                    image.filename = request.form.get('filename')
+                    image.longitude = request.form.get('longitude')
+                    image.latitude = request.form.get('latitude')
+                    image.type_defaut = request.form.get('type_defaut')
+                    image.temperature = request.form.get('temperature')
+                    image.feeder = request.form.get('feeder')
+                    image.troncon = request.form.get('troncon')
+                    image.zone = request.form.get('zone')
+
+                    # Save changes to the database
+                    db.session.commit()
+
+                    # Return a JSON response indicating success
+                    return jsonify(success=True, message="Image updated successfully.")
+                except Exception as e:
+                    # Log the exception for debugging purposes
+                    print(e)
+
+                    # Return a JSON response indicating failure
+                    return jsonify(success=False, message="Failed to update image."), 500
+
+            # Render the edit template if it's a GET request
+            return render_template('rapport/edit_image_upload_invisible.html', image=image, rapport=rapport, rapport_id=rapport_id,defauts_invisibles=defauts_invisibles)
+        else:
+            # Handle the case where the rapport is not found
+            return jsonify(success=False, message="Rapport not found."), 404
+    else:
+        # Handle the case where the image is not found
+        return jsonify(success=False, message="Image not found."), 404
+
+@login_required
+@blueprint.route('/supprimer_image/<int:rapport_id>/<int:image_id>', methods=['GET'])
+def supprimer_image_invisible(rapport_id, image_id):
+    rapport = RapportGenere.query.get(rapport_id)
+    image = ImageUploadInvisible.query.get(image_id)
+
+    if rapport and image:
+        # Supprimez toute la ligne (colonne) associée à l'image
+        db.session.delete(image)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Image et toutes ses données associées ont été supprimées avec succès',
+            'rapport_id': rapport_id,
+            'image_id': image_id
+        })
+
+    else:
+        return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
+    
+    
+@login_required
+@blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
+def mes_inspections_invisible(rapport_id):
+    rapport = RapportGenere.query.get(rapport_id)
+    if rapport:
+        # Filtrer les images invisibles avec les conditions spécifiées
+        images_invisibles = ImageUploadInvisible.query.filter(
+            ImageUploadInvisible.rapport_genere_id == rapport_id,
+            ImageUploadInvisible.type_defaut.isnot(None),
+            ImageUploadInvisible.type_defaut != "non_defaut",
+
+        ).all()
+
+        return render_template('rapport/mes_inspections_invisible.html', rapport=rapport, images_invisibles=images_invisibles)
+    else:
+        return redirect(url_for('authentication_blueprint.index'))
+
 
 @blueprint.route('/generate_report_document_page_invisible')
 def generate_report_document_page_invisible():
     rapports = RapportGenere.query.filter_by(type_defaut="Invisible").all()
     return render_template('rapport/creer_un_rapport_invisible.html', rapports=rapports)
+
+@blueprint.route('/generate_report_document_invisible', methods=['GET', 'POST'])
+def generate_report_document_invisible():
+    success_message = None
+    error_message = None
+    rapports = []
+    try:
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        last_image_data = ImageUploadInvisible.query.order_by(
+            ImageUploadInvisible.upload_date.desc()).first()
+
+        if not last_image_data:
+            error_message = "Aucune donnée disponible dans la base de données."
+            return render_template('rapport/creer_un_rapport_invisible.html')
+
+        date = datetime.now().strftime("%Y-%m-%d")
+        nom_operateur = last_image_data.nom_operateur
+        feeder = last_image_data.feeder
+        zone = last_image_data.zone
+        groupement = last_image_data.groupement_troncon
+        image_data = ImageUploadInvisible.query.filter(
+            ImageUploadInvisible.nom_operateur == nom_operateur,
+            ImageUploadInvisible.longitude.isnot(None),
+            ImageUploadInvisible.latitude.isnot(None),
+            ImageUploadInvisible.type_defaut != 'non_defaut',
+            ImageUploadInvisible.display == 'yes',
+        ).all()
+
+        # Fonction pour créer une table des matières automatique
+
+        def create_table_of_contents(document):
+            # ////// Insérer la table des matières
+            table_of_contents = document.add_paragraph("Table des matières")
+            table_of_contents.runs[0].font.size = Pt(16)
+            table_of_contents.runs[0].font.name = "Times New Roman"
+            table_of_contents.runs[0].underline = True
+            table_of_contents.runs[0].font.color.rgb = RGBColor(
+                0x2F, 0x54, 0x96)  # Bleu sombre (#2F5496)
+            document.add_paragraph(
+                f"RAPPORT D’INSPECTION INVISIBLE PAR DRONE DANS LA ZONE {zone}")
+            feeder_title = document.add_paragraph()
+            run = feeder_title.add_run("FEEDER : ")
+            run.bold = True
+            run.font.size = Pt(11)
+            run.font.name = "Times New Roman"
+            document.add_paragraph(f"\t{feeder}")
+            groupement_title = document.add_paragraph()
+            run = groupement_title.add_run("GROUPEMENT : ")
+            run.bold = True
+            run.font.size = Pt(11)
+            run.font.name = "Times New Roman"
+            document.add_paragraph(f"\tGROUPEMENT TRONCONS ENTRE {groupement}")
+            return document
+        # Créer le document Word
+        document = Document()
+        # Paramètres de mise en page
+        sections = document.sections
+        for section in sections:
+            section.top_margin = Pt(52)  # Marge supérieure
+            section.bottom_margin = Pt(52)  # Marge inférieure
+            section.left_margin = Pt(52)  # Marge gauche
+            section.right_margin = Pt(52)  # Marge droite
+            section.page_width = Pt(612)  # Largeur de page
+            section.page_height = Pt(792)  # Hauteur de page
+
+        # Ajouter la première page
+        first_page = document.add_paragraph()
+        first_page.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        run = first_page.add_run(
+            f"RAPPORT D’INSPECTION INVISIBLE PAR DRONE DANS LA ZONE {zone}")
+        run.bold = True
+        run.font.size = Pt(28)
+        run.font.name = "Times New Roman"
+        run.font.color.rgb = RGBColor(
+            0x2F, 0x54, 0x96)  # Bleu sombre (#2F5496)
+
+        # Créer la table des matières
+        document = create_table_of_contents(document)
+        # Ajouter la distance entre l'entête et la page
+        for section in sections:
+            section.header_distance = Pt(36)
+
+        # Ajouter la deuxième page
+        document.add_page_break()
+        second_page = document.add_paragraph()
+        second_page.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        run = second_page.add_run("FEEDER:")
+        run.bold = True
+        run.underline = True
+        run.font.size = Pt(20)
+        run.font.name = "Times New Roman"
+        run.font.color.rgb = RGBColor(
+            0x2F, 0x54, 0x96)  # Bleu sombre (#2F5496)
+        second_page.add_run(f"\n\n\t{feeder}\n\n")
+        run = second_page.add_run("GROUPEMENT:")
+        run.bold = True
+        run.underline = True
+        run.font.size = Pt(20)
+        run.font.name = "Times New Roman"
+        run.font.color.rgb = RGBColor(
+            0x2F, 0x54, 0x96)  # Bleu sombre (#2F5496)
+        second_page.add_run(f"\n\n\tGROUPEMENT TRONCONS ENTRE {groupement}")
+        run.font.size = Pt(20)
+        run.font.name = "Times New Roman"
+        # Ajouter la troisième page
+        document.add_page_break()
+        third_page = document.add_paragraph()
+        third_page.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        run = third_page.add_run("\n")
+        # run.add_picture(Config.ASSETS_ROOT + '/img/logo.png', width=Inches(7))
+
+        run = third_page.add_run("\n\n")
+        run = third_page.add_run(f"GROUPEMENT TRONCONS ENTRE {groupement}")
+        run.underline = True
+        run.font.size = Pt(16)
+        for image_info in image_data:
+            # Charger l'image à partir des données binaires
+            image_data_bytes = base64.b64decode(image_info.data)
+            image = PILIMAGE.open(BytesIO(image_data_bytes))
+
+            # Récupérer les informations sur les défauts
+            # Vérifier si type_defaut est None avant de le diviser
+            if image_info.type_defaut:
+                defects = image_info.type_defaut.split('/')
+                for defect in defects:
+                    defect = defect.strip()
+                    # Accéder aux remarques et conseils depuis la table Defaut_visible
+                    defaut_invisible = Defaut_invisible.query.filter_by(Nom=defect).first()
+                    if defaut_invisible:
+                        remarque = defaut_invisible.Description
+                        conseil = defaut_invisible.Commentaire
+                    else:
+                        # Ajouter une remarque et un conseil par défaut
+                        remarque = "Remarque par défaut"
+                        conseil = "Conseil par défaut"
+
+                # Ajouter une page pour chaque défaut
+                document.add_page_break()
+                page = document.add_paragraph()
+                page.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+                # Créer le tableau pour stocker les données de l'image
+                table = document.add_table(rows=5, cols=1)
+                table.style = "Table Grid"
+                table.columns[0].width = Pt(900)
+
+                # Cellule pour les défauts
+                cell = table.cell(0, 0)
+                cell.text = f"Défauts : {defect}, Température : {image_info.temperature}"
+                cell.paragraphs[0].runs[0].bold = True
+
+                # Reduce image dimensions
+                max_image_size = (800, 600)
+                try:
+                    image.thumbnail(max_image_size, PILIMAGE.ANTIALIAS)
+                except:
+                    image.thumbnail(max_image_size)
+
+                # Compress image to reduce size
+                image = image.convert("RGB")
+                image_bytes = BytesIO()
+                image.save(image_bytes, format='JPEG', quality=95)
+                image_bytes.seek(0)
+
+                # Cellule pour l'image
+                cell = table.cell(1, 0)
+                cell.vertical_alignment = 1  # Alignement vertical centré
+                cell.add_paragraph().add_run().add_picture(image_bytes, width=Inches(7))
+
+                # Cellule pour la localisation
+                cell = table.cell(2, 0)
+                cell.vertical_alignment = 1  # Alignement vertical centré
+                # Cellule pour la remarque
+                cell = table.cell(3, 0)
+                cell.vertical_alignment = 1
+                cell.add_paragraph().add_run("Remarque: ").bold = True
+                cell.add_paragraph(remarque)
+
+                cell = table.cell(4, 0)
+                cell.vertical_alignment = 1
+                cell.add_paragraph().add_run("Conseil: ").bold = True
+                cell.add_paragraph(conseil)
+
+        # Ajouter le pied de page
+        footer_text = f"RAPPORT INVISIBLE DU {date}\t\t{nom_operateur}"
+        sections[-1].footer.paragraphs[0].text = footer_text
+        # En-tête
+        header_text = "VOCASARA S.U.A.R.L"
+        header_paragraph = sections[0].header.paragraphs[0]
+        header_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        header_run = header_paragraph.add_run(header_text)
+        header_run.bold = True
+        header_run.font.size = Pt(22)
+        header_run.font.name = "Times New Roman"
+        header_run.font.color.rgb = RGBColor(0x00, 0x00, 0x00)  # Noir
+        header_run.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        # Logo
+        # logo_path = Config.ASSETS_ROOT + '/img/logo.png'
+        # header_paragraph.add_run().add_picture(logo_path, width=Inches(4)
+        #                                       ).alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        # Sauvegarder le document Word
+        # Convert the date to a string with the format "YYYY-MM-DD"
+        date = datetime.now().strftime("%Y-%m-%d")
+        # document.save("rapport_du_feeder_{}_du_{}.docx".format(feeder,date))
+        nom_du_fichier = ("Rapport_defauts_invisible_du_feeder_{}_du_{}_par_{}".format(
+            feeder, current_date, nom_operateur))
+
+        # Enregistrer le fichier Word en mémoire
+        word_file = io.BytesIO()
+        document.save(word_file)
+        word_file.seek(0)
+
+        # Enregistrer le fichier dans la base de données
+        document_word = DocumentRapportGenere_invisible(
+            nom_operateur=nom_operateur,
+            nom_du_rapport=nom_du_fichier,
+            data=word_file.read(),  # Utilisez read() pour obtenir les données binaires
+            type_de_fichier='word'
+        )
+        db.session.add(document_word)
+        db.session.commit()
+        success_message = "Le rapport Invisible a été généré avec succès."
+        rapports = RapportGenere.query.all()
+  
+    except Exception as e:
+        logging.error(
+            f"Une erreur s'est produite dans generate_doc : {str(e)}")
+        error_message = f"Une erreur s'est produite : {str(e)}"
+
+    return render_template('rapport/creer_un_rapport_invisible.html', rapports=rapports, success_message=success_message, error_message=error_message)
+
+
+@blueprint.route('/mes_rapports_invisible')
+@login_required
+def mes_rapports_invisible():
+    # Récupérer l'utilisateur connecté
+    # user = current_user
+    rapports = DocumentRapportGenere_invisible.query.all()
+    return render_template('rapport/mes_rapports_invisible.html', rapports=rapports)
+
+@blueprint.route('/telecharger_rapport_invisible/<int:rapport_id>')
+@login_required
+def telecharger_rapport_invisible(rapport_id):
+    try:
+        rapport = DocumentRapportGenere_invisible.query.get_or_404(rapport_id)
+
+        if rapport.type_de_fichier == 'excel':
+            # Si le type de fichier est 'excel', c'est un document Excel
+            response = send_file(
+                io.BytesIO(rapport.data),
+                as_attachment=True,
+                download_name=f"{rapport.nom_du_rapport}.xlsx",
+                # Mimetype pour Excel
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+        elif rapport.type_de_fichier == 'word':
+            # Si le type de fichier est 'word', c'est un document Word
+            response = send_file(
+                io.BytesIO(rapport.data),
+                as_attachment=True,
+                download_name=f"{rapport.nom_du_rapport}.docx",
+                # Mimetype pour Word
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
+        else:
+            # Gérer d'autres types de fichiers si nécessaire
+            error_message = 'Type de fichier non pris en charge'
+            return render_template('rapport/mes_rapports_invisible.html', error_message=error_message, rapports=rapports)
+
+        # Logger le téléchargement réussi
+        logging.info(
+            f"Téléchargement réussi : Rapport ID {rapport.id} téléchargé par l'utilisateur {current_user.username}")
+
+        return response
+
+    except Exception as e:
+        error_message = f"Erreur lors du téléchargement du rapport : {str(e)}"
+        rapports = DocumentRapportGenere_invisible.query.all()
+        return render_template('rapport/mes_rapports_invisible.html', error_message=error_message, rapports=rapports)
+
+
+@blueprint.route('/charger_rapport/<int:rapport_id>', methods=['GET', 'POST'])
+@login_required
+def charger_rapport_invisible(rapport_id):
+    rapport = DocumentRapportGenere_invisible.query.get_or_404(rapport_id)
+
+    # Vérifiez si l'utilisateur a le rôle requis pour charger le rapport
+    if current_user.role != 1:
+        return redirect(url_for('home_blueprint.mes_rapports_invisible'))
+
+    if request.method == 'POST':
+        # Traitement du chargement du fichier, remplacez cela par votre logique de chargement
+        uploaded_file = request.files['file']
+
+        # Assurez-vous que le fichier a été téléchargé avec succès
+        if uploaded_file:
+            # Mise à jour des données dans la base de données
+            rapport.data = uploaded_file.read()
+            rapport.date_de_creation = datetime.utcnow()
+            db.session.commit()
+
+            return redirect(url_for('home_blueprint.mes_rapports_invisible'))
+
+    return render_template('rapport/charger_rapport_invisible.html', rapport=rapport)
 
 
 # ./////////////////////////Partie inspections.///////////////
@@ -1499,8 +1827,9 @@ def add_defaut_visible():
     if request.method == 'POST':
         nom = request.form.get('nom')
         description = request.form.get('description')
+        commentaire = request.form.get('commentaire')
 
-        new_defaut = Defaut_visible(Nom=nom, Description=description)
+        new_defaut = Defaut_visible(Nom=nom, Description=description, Commentaire=commentaire)
         db.session.add(new_defaut)
         db.session.commit()
 
@@ -1521,6 +1850,7 @@ def edit_defaut_visible(defaut_id):
     if request.method == 'POST':
         defaut.Nom = request.form.get('nom')
         defaut.Description = request.form.get('description')
+        defaut.Commentaire = request.form.get('commentaire')
 
         db.session.commit()
 
@@ -1560,8 +1890,9 @@ def add_defaut_invisible():
     if request.method == 'POST':
         nom = request.form.get('nom')
         description = request.form.get('description')
+        commentaire = request.form.get('commentaire')
 
-        new_defaut = Defaut_invisible(Nom=nom, Description=description)
+        new_defaut = Defaut_invisible(Nom=nom, Description=description, Commentaire=commentaire)
         db.session.add(new_defaut)
         db.session.commit()
 
@@ -1583,6 +1914,7 @@ def edit_defaut_invisible(defaut_id):
     if request.method == 'POST':
         defaut.Nom = request.form.get('nom')
         defaut.Description = request.form.get('description')
+        defaut.Commentaire = request.form.get('commentaire')
 
         db.session.commit()
 

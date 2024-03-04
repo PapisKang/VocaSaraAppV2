@@ -80,10 +80,10 @@
                             <td>{{ rapport.type_de_fichier }}</td>
                             <td>{{ rapport.date_de_creation }}</td>
                             <td>
-                                <a href="{{ url_for('home_blueprint.telecharger_rapport', rapport_id=rapport.id) }}" class="btn btn-success"
+                                <a href="{{ url_for('home_blueprint.telecharger_rapport_invisible', rapport_id=rapport.id) }}" class="btn btn-success"
                                     onclick="showSuccessAlert()">Télécharger</a>
                                 {% if current_user.role == 1 %}
-                                    <a href="{{ url_for('home_blueprint.charger_rapport', rapport_id=rapport.id) }}" class="btn btn-primary upload-button">Charger</a>
+                                    <a href="{{ url_for('home_blueprint.charger_rapport_invisible', rapport_id=rapport.id) }}" class="btn btn-primary upload-button">Charger</a>
                                 {% endif %}
                             </td>
                         </tr>

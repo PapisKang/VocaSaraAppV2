@@ -71,6 +71,8 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 from torchvision.models import mobilenet_v2  # Import de MobileNetV2
+import pretty_errors
+
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -1222,7 +1224,7 @@ def upload_and_traitement_invisible():
               # Envoyer un e-mail à l'utilisateur
         user_email = current_user.email
         subject_user = "Traitement d'images en cours"
-        message_user = " Les images Thermiques chargées sont soumises à une vérification Plus poussée, car certains détails sur l'images ne peuvent etre traités automatiquement.Seuls les images autorisées seront visible sur la page statistique,mocamisation,et Inspections Invisibles Néanmoins. Pour un résultat optimal, il est préférable d'attendre un délai de 30 minutes à 2 heure pour de meilleurs résultats.Nous vous recontacterons dans les plus brefs délais"
+        message_user = " Les images Thermiques chargées sont soumises à une vérification Plus poussée, car certains détails sur l'images ne peuvent etre traités automatiquement.Seuls les images autorisées seront visible sur la page statistique,Localisation,et Inspections Invisibles Néanmoins. Pour un résultat optimal, il est préférable d'attendre un délai de 30 minutes à 2 heure pour de meilleurs résultats.Nous vous recontacterons dans les plus brefs délais"
 
         send_email(user_email, subject_user, message_user)
 
