@@ -52,6 +52,7 @@ from docx import Document
 from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from PIL import Image as PILIMAGE
+import pretty_errors
 
 # Ajouter un log lorsqu'un utilisateur se connecte
 
@@ -622,118 +623,6 @@ def supprimer_image_visible(rapport_id, image_id):
     else:
         return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
 
-#Invisible ::::::::::::::::::::::::::::::::::::::::::::::
-
-
-@blueprint.route('/rapport_id_page_invisible')
-def rapport_id_page_invisible():
-    type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
-    rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
-    return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
-
-
-@login_required
-@blueprint.route('/changer_statut/<int:rapport_id>/<int:image_id>', methods=['GET'])
-def changer_statut_inspection_invisible(rapport_id, image_id):
-    image = ImageUploadInvisible.query.get(image_id)
-
-    if image:
-        if current_user.role == 1:  # Assurez-vous que seul l'administrateur peut changer le statut
-            image.display = 'yes' if image.display == 'no' else 'no'
-            db.session.commit()
-            return jsonify({'success': True, 'message': 'Statut changé avec succès.'})
-        else:
-            return jsonify({'success': False, 'message': 'Vous n\'avez pas la permission de changer le statut.'})
-    else:
-        return jsonify({'success': False, 'message': 'Image introuvable.'})
-
-
-@login_required
-@blueprint.route('/edit_image/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
-def edit_image_upload_invisible(rapport_id, image_id):
-    # Fetch the image you want to edit
-    image = ImageUploadInvisible.query.get(image_id)
-
-        # Fetch all available types of defects
-    defauts_invisibles = Defaut_invisible.query.all()
-
-
-    if image:
-        # Fetch the corresponding rapport
-        rapport = RapportGenere.query.get(rapport_id)
-
-        if rapport:
-            if request.method == 'POST':
-                try:
-                    # Update image details based on the form submission
-                    image.filename = request.form.get('filename')
-                    image.longitude = request.form.get('longitude')
-                    image.latitude = request.form.get('latitude')
-                    image.type_defaut = request.form.get('type_defaut')
-                    image.temperature = request.form.get('temperature')
-                    image.feeder = request.form.get('feeder')
-                    image.troncon = request.form.get('troncon')
-                    image.zone = request.form.get('zone')
-
-                    # Save changes to the database
-                    db.session.commit()
-
-                    # Return a JSON response indicating success
-                    return jsonify(success=True, message="Image updated successfully.")
-                except Exception as e:
-                    # Log the exception for debugging purposes
-                    print(e)
-
-                    # Return a JSON response indicating failure
-                    return jsonify(success=False, message="Failed to update image."), 500
-
-            # Render the edit template if it's a GET request
-            return render_template('rapport/edit_image_upload_invisible.html', image=image, rapport=rapport, rapport_id=rapport_id,defauts_invisibles=defauts_invisibles)
-        else:
-            # Handle the case where the rapport is not found
-            return jsonify(success=False, message="Rapport not found."), 404
-    else:
-        # Handle the case where the image is not found
-        return jsonify(success=False, message="Image not found."), 404
-
-@login_required
-@blueprint.route('/supprimer_image/<int:rapport_id>/<int:image_id>', methods=['GET'])
-def supprimer_image_invisible(rapport_id, image_id):
-    rapport = RapportGenere.query.get(rapport_id)
-    image = ImageUploadInvisible.query.get(image_id)
-
-    if rapport and image:
-        # Supprimez toute la ligne (colonne) associée à l'image
-        db.session.delete(image)
-        db.session.commit()
-
-        return jsonify({
-            'success': True,
-            'message': 'Image et toutes ses données associées ont été supprimées avec succès',
-            'rapport_id': rapport_id,
-            'image_id': image_id
-        })
-
-    else:
-        return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
-    
-    
-@login_required
-@blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
-def mes_inspections_invisible(rapport_id):
-    rapport = RapportGenere.query.get(rapport_id)
-    if rapport:
-        # Filtrer les images invisibles avec les conditions spécifiées
-        images_invisibles = ImageUploadInvisible.query.filter(
-            ImageUploadInvisible.rapport_genere_id == rapport_id,
-            ImageUploadInvisible.type_defaut.isnot(None),
-            ImageUploadInvisible.type_defaut != "non_defaut",
-
-        ).all()
-
-        return render_template('rapport/mes_inspections_invisible.html', rapport=rapport, images_invisibles=images_invisibles)
-    else:
-        return redirect(url_for('authentication_blueprint.index'))
 
 
 @blueprint.route('/generate_report_document_page')
@@ -1284,12 +1173,126 @@ def charger_rapport(rapport_id):
 
 # ////////////////////////////////////////Generte invisible rapport////////////////
 
+#Invisible ::::::::::::::::::::::::::::::::::::::::::::::
+
+
+@blueprint.route('/rapport_id_page_invisible')
+def rapport_id_page_invisible():
+    type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
+    rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
+    return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
+
+
+@login_required
+@blueprint.route('/changer_statut/<int:rapport_id>/<int:image_id>', methods=['GET'])
+def changer_statut_inspection_invisible(rapport_id, image_id):
+    image = ImageUploadInvisible.query.get(image_id)
+
+    if image:
+        if current_user.role == 1:  # Assurez-vous que seul l'administrateur peut changer le statut
+            image.display = 'yes' if image.display == 'no' else 'no'
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Statut changé avec succès.'})
+        else:
+            return jsonify({'success': False, 'message': 'Vous n\'avez pas la permission de changer le statut.'})
+    else:
+        return jsonify({'success': False, 'message': 'Image introuvable.'})
+
+
+@login_required
+@blueprint.route('/edit_image/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
+def edit_image_upload_invisible(rapport_id, image_id):
+    # Fetch the image you want to edit
+    image = ImageUploadInvisible.query.get(image_id)
+
+        # Fetch all available types of defects
+    defauts_invisibles = Defaut_invisible.query.all()
+
+
+    if image:
+        # Fetch the corresponding rapport
+        rapport = RapportGenere.query.get(rapport_id)
+
+        if rapport:
+            if request.method == 'POST':
+                try:
+                    # Update image details based on the form submission
+                    image.filename = request.form.get('filename')
+                    image.longitude = request.form.get('longitude')
+                    image.latitude = request.form.get('latitude')
+                    image.type_defaut = request.form.get('type_defaut')
+                    image.temperature = request.form.get('temperature')
+                    image.feeder = request.form.get('feeder')
+                    image.troncon = request.form.get('troncon')
+                    image.zone = request.form.get('zone')
+
+                    # Save changes to the database
+                    db.session.commit()
+
+                    # Return a JSON response indicating success
+                    return jsonify(success=True, message="Image updated successfully.")
+                except Exception as e:
+                    # Log the exception for debugging purposes
+                    print(e)
+
+                    # Return a JSON response indicating failure
+                    return jsonify(success=False, message="Failed to update image."), 500
+
+            # Render the edit template if it's a GET request
+            return render_template('rapport/edit_image_upload_invisible.html', image=image, rapport=rapport, rapport_id=rapport_id,defauts_invisibles=defauts_invisibles)
+        else:
+            # Handle the case where the rapport is not found
+            return jsonify(success=False, message="Rapport not found."), 404
+    else:
+        # Handle the case where the image is not found
+        return jsonify(success=False, message="Image not found."), 404
+
+@login_required
+@blueprint.route('/supprimer_image/<int:rapport_id>/<int:image_id>', methods=['GET'])
+def supprimer_image_invisible(rapport_id, image_id):
+    rapport = RapportGenere.query.get(rapport_id)
+    image = ImageUploadInvisible.query.get(image_id)
+
+    if rapport and image:
+        # Supprimez toute la ligne (colonne) associée à l'image
+        db.session.delete(image)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Image et toutes ses données associées ont été supprimées avec succès',
+            'rapport_id': rapport_id,
+            'image_id': image_id
+        })
+
+    else:
+        return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
+    
+    
+@login_required
+@blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
+def mes_inspections_invisible(rapport_id):
+    rapport = RapportGenere.query.get(rapport_id)
+    if rapport:
+        # Filtrer les images invisibles avec les conditions spécifiées
+        images_invisibles = ImageUploadInvisible.query.filter(
+            ImageUploadInvisible.rapport_genere_id == rapport_id,
+            ImageUploadInvisible.type_defaut.isnot(None),
+            ImageUploadInvisible.type_defaut != "non_defaut",
+
+        ).all()
+
+        return render_template('rapport/mes_inspections_invisible.html', rapport=rapport, images_invisibles=images_invisibles)
+    else:
+        return redirect(url_for('authentication_blueprint.index'))
+
+
 @blueprint.route('/generate_report_document_page_invisible')
 def generate_report_document_page_invisible():
     rapports = RapportGenere.query.filter_by(type_defaut="Invisible").all()
     return render_template('rapport/creer_un_rapport_invisible.html', rapports=rapports)
 
-@blueprint.route('/generate_report_document', methods=['GET', 'POST'])
+@blueprint.route('/generate_report_document_invisible', methods=['GET', 'POST'])
 def generate_report_document_invisible():
     success_message = None
     error_message = None
@@ -1301,7 +1304,7 @@ def generate_report_document_invisible():
 
         if not last_image_data:
             error_message = "Aucune donnée disponible dans la base de données."
-            return render_template('rapport/creer_un_rapport.html')
+            return render_template('rapport/creer_un_rapport_invisible.html')
 
         date = datetime.now().strftime("%Y-%m-%d")
         nom_operateur = last_image_data.nom_operateur
@@ -1327,7 +1330,7 @@ def generate_report_document_invisible():
             table_of_contents.runs[0].font.color.rgb = RGBColor(
                 0x2F, 0x54, 0x96)  # Bleu sombre (#2F5496)
             document.add_paragraph(
-                f"RAPPORT D’INSPECTION PAR DRONE DANS LA ZONE {zone}")
+                f"RAPPORT D’INSPECTION INVISIBLE PAR DRONE DANS LA ZONE {zone}")
             feeder_title = document.add_paragraph()
             run = feeder_title.add_run("FEEDER : ")
             run.bold = True
@@ -1357,7 +1360,7 @@ def generate_report_document_invisible():
         first_page = document.add_paragraph()
         first_page.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         run = first_page.add_run(
-            f"RAPPORT D’INSPECTION PAR DRONE DANS LA ZONE {zone}")
+            f"RAPPORT D’INSPECTION INVISIBLE PAR DRONE DANS LA ZONE {zone}")
         run.bold = True
         run.font.size = Pt(28)
         run.font.name = "Times New Roman"
@@ -1436,7 +1439,7 @@ def generate_report_document_invisible():
 
                 # Cellule pour les défauts
                 cell = table.cell(0, 0)
-                cell.text = f"Défauts : {defect}"
+                cell.text = f"Défauts : {defect}, Température : {image_info.temperature}"
                 cell.paragraphs[0].runs[0].bold = True
 
                 # Reduce image dimensions
