@@ -96,11 +96,6 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = upload_folder_name
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(
-    days=365)  # adjust as needed
-app.config['SESSION_PROTECTION'] = 'strong'
 
 # Configurations Flask-Mail
 app.config['MAIL_SERVER'] = Email_config.MAIL_SERVER
@@ -321,17 +316,9 @@ def photo_upload():
                 image_url = user_profile.image
 
     user_profile = UserProfile.query.filter_by(user=current_user.id).first()
-<<<<<<< HEAD
-    return render_template('home/index.html', user_profile=user_profile)
-=======
     return render_template('accounts/profile.html', user_profile=user_profile)
-<<<<<<< HEAD
->>>>>>> Prince-Gildas
-#///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
-=======
 # ///////////////////////////...............Route pour charger la phtoto de profile actuellement elle ne focntionne pas car l'image ne s'affiche pas sur toutes les pages je sais pas pourquoi, l'image est au format binaire////////
 
->>>>>>> Prince-Gildas
 
 @blueprint.route('/user_list', methods=['GET'])
 def user_list():

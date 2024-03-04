@@ -1,107 +1,25 @@
 {% extends 'layouts/base.html' %}
 
-<!-- Specific CSS goes HERE -->
 {% block stylesheets %}
-
     <!-- Ajout des liens vers les fichiers CSS de Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"  />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock stylesheets %}
 
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
-        }
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 2px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .lead {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 30px;
-            color: #007bff;
-        }
-
-        form {
-            text-align: center;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .custom-file-upload {
-            border: 1px solid #ccc;
-            display: inline-block;
-            padding: 6px 12px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: #ffffff;
-            border-radius: 1px;
-        }
-
-        .custom-file-upload:hover {
-            background-color: #0056b3;
-        }
-
-        button.btn.btn-primary {
-            font-family: 'Cursive', cursive;
-            margin-top: 20px;
-        }
-
-        .rounded-profile-img {
-            width: 100%;
-            border-radius: 3%;
-            margin-top: 20px;
-        }
-
-        hr {
-            border-top: 1px solid #ddd;
-            margin-top: 30px;
-            margin-bottom: 30px;
-        }
-    </style>
-    {% endblock stylesheets %}
-
-    {% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
-    
-    {% block content %} 
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-<body class="bg-light">
-    <div class="container mt-5">
-        
-=======
-{% include 'layouts/base.html' %}
-<body>
-=======
->>>>>>> develop
+{% block content %} 
     <div class="container">
->>>>>>> Prince-Gildas
         <p class="lead">Bienvenue, {{ current_user.username }}!</p>
 
         <form method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="image"><i class="fas fa-user-circle"></i> Photo de Profil:</label>
-                <label class="custom-file-upload">
-                    <input type="file" name="image" accept="image/*">
-                    Choisir un fichier
-                </label>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="image" name="image" accept="image/*">
+                    <label class="custom-file-label" for="image">Choisir un fichier</label>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Changer de Photo</button>
         </form>
@@ -109,18 +27,16 @@
         <hr>
 
         {% if user_profile.image %}
-            <img src="data:image/jpeg;base64,{{ user_profile.image }}" alt="Profile Picture" class="rounded-profile-img">
+            <img src="data:image/jpeg;base64,{{ user_profile.image }}" alt="Profile Picture" class="img-fluid rounded-profile-img">
         {% endif %}
     </div>
 
     {% include "includes/footer.html" %}
 {% endblock content %}
 
-<!-- Ajout des scripts JS de Bootstrap (optionnel) -->
 {% block javascripts %}
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-
-    <!-- Specific JS goes HERE --> 
+    <!-- Ajoutez vos scripts JS spécifiques ici -->
 {% endblock javascripts %}

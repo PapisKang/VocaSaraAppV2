@@ -9,68 +9,6 @@
 
 {% block content %} 
 
-<<<<<<< HEAD
-        <button type="submit" onclick="saveFormData()">Confirmer</button>
-      
-      </form>
-
-    </div>
-    <!-- Ajout du message pour demander l'autorisation des cookies -->
-<div id="cookie-consent-message" style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #333; color: #fff; padding: 10px; text-align: center; z-index: 1000;">
-  En utilisant ce site, vous acceptez l'utilisation de cookies pour améliorer votre expérience de navigation. <a href="#" onclick="acceptCookies()">J'accepte</a>
-</div>
-
-
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.1/dist/umd/popper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      loadFormData();
-    });
-
-    function saveFormData() {
-      const feederSelect = document.getElementById("feeder");
-      const feederInput = document.getElementById("feederInput");
-      const feederValue = feederInput.value ? feederInput.value : feederSelect.value;
-    
-      const tronconSelect = document.getElementById("troncon");
-      const tronconInput = document.getElementById("tronconInput");
-      const tronconValue = tronconInput.value ? tronconInput.value : tronconSelect.value;
-      const dateDebut = encodeURIComponent(document.getElementById("dateDebut").value);
-      const dateFin = encodeURIComponent(document.getElementById("dateFin").value);
-      const operateur = encodeURIComponent(document.getElementById("operateur").value);
-      const zone = encodeURIComponent(document.getElementById("zone").value);
-      const groupementTroncon = encodeURIComponent(document.getElementById("groupementTroncon").value);
-
-  // Encode les valeurs pour les cookies
-  const feeder = encodeURIComponent(feederValue);
-  const troncon = encodeURIComponent(tronconValue);
-  // ... (le reste des valeurs)
-
-  // Définir une date d'expiration pour les cookies
-  const expiration = new Date();
-  expiration.setFullYear(expiration.getFullYear() + 1); // Expiration dans 1 an
-  const expires = `;expires=${expiration.toUTCString()}`;
-
-  // Sauvegarder les données dans les cookies avec une date d'expiration
-  document.cookie = `feeder=${feeder}${expires}; path=/`;
-  document.cookie = `troncon=${troncon}${expires}; path=/`;
-      document.cookie = `dateDebut=${dateDebut}; path=/`;
-      document.cookie = `dateFin=${dateFin}; path=/`;
-      document.cookie = `operateur=${operateur}; path=/`;
-      document.cookie = `zone=${zone}; path=/`;
-      document.cookie = `groupementTroncon=${groupementTroncon}; path=/`;
-        // Soumettre le formulaire
-<<<<<<< HEAD
-  document.getElementById("rapportForm").submit();
-=======
-            // Vérifier si les champs obligatoires sont vides
-    if (!feederValue || !tronconValue || !dateDebut || !dateFin || !groupementTroncon || !zone) {
-      document.getElementById("errorMessage").style.display = "block";  // Afficher le message d'erreur
-      return;  // Arrêter le traitement si des champs obligatoires sont vides
-=======
 <style>
   .container-form {
     flex: 1;
@@ -78,73 +16,11 @@
     background-color: #fff;
     border-radius: 18px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
->>>>>>> Prince-Gildas
   }
   
-<<<<<<< HEAD
->>>>>>> Prince-Gildas
-    }
-
-    function loadFormData() {
-      const cookies = document.cookie.split(';');
-      const formData = {};
-    
-      cookies.forEach(cookie => {
-        const parts = cookie.trim().split('=');
-        const key = decodeURIComponent(parts[0]);
-        const value = decodeURIComponent(parts[1]);
-        formData[key] = value;
-      });
-    
-      // Charger les données dans les éléments <select> ou <input> selon la valeur
-      const feederSelect = document.getElementById("feeder");
-      const feederInput = document.getElementById("feederInput");
-      if (formData.feeder) {
-        if (feederSelect.querySelector(`option[value="${formData.feeder}"]`)) {
-          feederSelect.value = formData.feeder;
-        } else {
-          feederInput.value = formData.feeder;
-        }
-      }
-    
-      const tronconSelect = document.getElementById("troncon");
-      const tronconInput = document.getElementById("tronconInput");
-      if (formData.troncon) {
-        if (tronconSelect.querySelector(`option[value="${formData.troncon}"]`)) {
-          tronconSelect.value = formData.troncon;
-        } else {
-          tronconInput.value = formData.troncon;
-        }
-      }
-    
-      if (formData.dateDebut) {
-        document.getElementById("dateDebut").value = formData.dateDebut;
-      }
-      if (formData.dateFin) {
-        document.getElementById("dateFin").value = formData.dateFin;
-      }
-      if (formData.operateur) {
-        document.getElementById("operateur").value = formData.operateur;
-      }
-      if (formData.zone) {
-        document.getElementById("zone").value = formData.zone;
-      }
-      if (formData.groupementTroncon) {
-        document.getElementById("groupementTroncon").value = formData.groupementTroncon;
-      }
-    }
-    function toggleMenu() {
-      const nav = document.querySelector('nav');
-      nav.classList.toggle('active');
-    }
-    function acceptCookies() {
-      // Vous pouvez ajouter ici du code supplémentaire pour définir des cookies ou effectuer d'autres actions liées à l'acceptation des cookies.
-      document.getElementById('cookie-consent-message').style.display = 'none';
-=======
   form {
     display: grid;
     gap: 15px; /* Réduction de l'espacement entre les éléments du formulaire */
->>>>>>> Prince-Gildas
   }
   
   label {

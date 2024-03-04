@@ -74,9 +74,6 @@ transformers
 langid
 Flask-Cors
 python-docx
-<<<<<<< HEAD
-Flask-Mail
-=======
 Flask-Mail
 
 pytesseract
@@ -87,4 +84,3 @@ scikit-learn
 xlsxwriter
 openpyxl
 python-Levenshtein
->>>>>>> develop
