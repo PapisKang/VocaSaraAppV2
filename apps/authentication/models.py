@@ -299,3 +299,12 @@ class DocumentRapportGenere(db.Model):
     data = db.Column(db.LargeBinary(length=1000000))
     type_de_fichier = db.Column(db.String(10))
 
+class DocumentRapportGenere_invisible(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nom_operateur = db.Column(db.String(64), nullable=False, default=None)
+    nom_du_rapport = db.Column(db.String(255), nullable=False)
+    date_de_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    data = db.Column(db.LargeBinary(length=1000000))
+    type_de_fichier = db.Column(db.String(10))
+
+
