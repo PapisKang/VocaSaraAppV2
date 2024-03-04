@@ -1499,8 +1499,9 @@ def add_defaut_visible():
     if request.method == 'POST':
         nom = request.form.get('nom')
         description = request.form.get('description')
+        commentaire = request.form.get('commentaire')
 
-        new_defaut = Defaut_visible(Nom=nom, Description=description)
+        new_defaut = Defaut_visible(Nom=nom, Description=description, Commentaire=commentaire)
         db.session.add(new_defaut)
         db.session.commit()
 
@@ -1521,6 +1522,7 @@ def edit_defaut_visible(defaut_id):
     if request.method == 'POST':
         defaut.Nom = request.form.get('nom')
         defaut.Description = request.form.get('description')
+        defaut.Commentaire = request.form.get('commentaire')
 
         db.session.commit()
 
@@ -1560,8 +1562,9 @@ def add_defaut_invisible():
     if request.method == 'POST':
         nom = request.form.get('nom')
         description = request.form.get('description')
+        commentaire = request.form.get('commentaire')
 
-        new_defaut = Defaut_invisible(Nom=nom, Description=description)
+        new_defaut = Defaut_invisible(Nom=nom, Description=description, Commentaire=commentaire)
         db.session.add(new_defaut)
         db.session.commit()
 
@@ -1583,6 +1586,7 @@ def edit_defaut_invisible(defaut_id):
     if request.method == 'POST':
         defaut.Nom = request.form.get('nom')
         defaut.Description = request.form.get('description')
+        defaut.Commentaire = request.form.get('commentaire')
 
         db.session.commit()
 
