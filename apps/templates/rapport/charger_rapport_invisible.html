@@ -1,0 +1,51 @@
+<!-- charger_rapport.html -->
+{% extends 'layouts/base.html' %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <!-- Ajoutez le lien CDN Bootstrap ou d'autres styles personnalisés si nécessaire -->
+    <style>
+        /* Ajoutez vos styles personnalisés ici */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+            font-size: 15px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>Charger le Rapport</h1>
+
+        {% if error_message %}
+            <p class="error-message">{{ error_message }}</p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('home_blueprint.charger_rapport_invisible', rapport_id=rapport.id) }}" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="fileInput" class="form-label">Sélectionnez un fichier à charger :</label>
+                <input type="file" class="form-control" id="fileInput" name="file" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Charger le rapport</button>
+        </form>
+    </div>
+
+    {% include "includes/footer.html" %}
+{% endblock content %}
+
+{% block javascripts %}
+    {{ super() }}
+    <!-- Ajoutez le script Bootstrap JS ou d'autres scripts si nécessaire -->
+{% endblock javascripts %}

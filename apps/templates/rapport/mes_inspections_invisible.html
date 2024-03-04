@@ -1,9 +1,11 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Voir Images {% endblock title %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
 
-{% block stylesheets %}
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
 
+{% block content %} 
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -302,9 +304,12 @@
 
   
     </script>
+    {% include "includes/footer.html" %}
+    
   </div>
-{% endblock content %}
-
-{% block javascripts %}
-  <!-- Specific JS goes HERE -->
-{% endblock javascripts %}
+  
+  {% endblock content %}
+  
+  <!-- Specific JS goes HERE --> 
+  {% block javascripts %}{% endblock javascripts %}
+  
