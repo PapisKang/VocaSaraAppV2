@@ -72,7 +72,7 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 from torchvision.models import mobilenet_v2  # Import de MobileNetV2
 import pretty_errors
-
+import sys
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -108,6 +108,8 @@ app.config['MAIL_USERNAME'] = Email_config.MAIL_USERNAME
 app.config['MAIL_PASSWORD'] = Email_config.MAIL_PASSWORD
 app.config['MAIL_DEFAULT_SENDER'] = Email_config.MAIL_DEFAULT_SENDER
 
+app.logger.addHandler(logging.StreamHandler(sys.stdout))
+app.logger.setLevel(logging.ERROR)
 
 mail = Mail(app)
 
