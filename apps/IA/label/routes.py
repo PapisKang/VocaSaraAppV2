@@ -178,8 +178,9 @@ def generate_rapport():
 
 # Nouvelle route pour afficher la page avec les deux boutons et le texte explicatif
 
-@login_required
+
 @blueprint.route('/confirmation_page', methods=['GET'])
+@login_required
 def confirmation_page():
     return render_template('rapport/confirmation_page.html')
 
@@ -528,8 +529,9 @@ def rapport_id_page_invisible():
     rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
     return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
 
-@login_required
+
 @blueprint.route('/mes_inspections/<int:rapport_id>', methods=['GET'])
+@login_required
 def mes_inspections(rapport_id):
     rapport = RapportGenere.query.get(rapport_id)
     if rapport:
@@ -542,8 +544,9 @@ def mes_inspections(rapport_id):
 
 
 
-@login_required
+
 @blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
+@login_required
 def mes_inspections_invisible(rapport_id):
     rapport = RapportGenere.query.get(rapport_id)
     if rapport:
