@@ -72,11 +72,11 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 from torchvision.models import mobilenet_v2  # Import de MobileNetV2
 import pretty_errors
-
+import sys
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# classification d'images chargement du model
+
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -108,6 +108,8 @@ app.config['MAIL_USERNAME'] = Email_config.MAIL_USERNAME
 app.config['MAIL_PASSWORD'] = Email_config.MAIL_PASSWORD
 app.config['MAIL_DEFAULT_SENDER'] = Email_config.MAIL_DEFAULT_SENDER
 
+app.logger.addHandler(logging.StreamHandler(sys.stdout))
+app.logger.setLevel(logging.ERROR)
 
 mail = Mail(app)
 
@@ -822,8 +824,9 @@ def extract_gps_info(img_path):
     return None
 
 
-@login_required
+
 @blueprint.route("/upload_page")
+@login_required
 def upload_page():
     return render_template('rapport/traitement_visible.html')
 
@@ -877,8 +880,9 @@ def results_page(rapport_genere_id):
 
 
 # Mettez à jour la route pour traiter les images
-@login_required
+
 @blueprint.route('/upload_and_traitement_visible', methods=['POST'])
+@login_required
 def upload_and_traitement_visible():
     try:
         # Assurez-vous de récupérer le champ "file" comme une liste
@@ -1084,8 +1088,9 @@ except Exception as e:
     print("Error can't find tesseract:", e)
 
 
-@login_required
+
 @blueprint.route("/upload_page_invisible")
+@login_required
 def upload_page_invisible():
     return render_template('rapport/traitement_invisible.html')
 
