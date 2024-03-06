@@ -196,8 +196,9 @@ def generate_rapport():
 # Nouvelle route pour afficher la page avec les deux boutons et le texte explicatif
 
 
-@login_required
+
 @blueprint.route('/confirmation_page', methods=['GET'])
+@login_required
 def confirmation_page():
     return render_template('rapport/confirmation_page.html')
 
@@ -549,8 +550,9 @@ def rapport_id_page():
     return render_template('rapport/rapport_id_page.html', rapports=rapports)
 
 
-@login_required
+
 @blueprint.route('/mes_inspections/<int:rapport_id>', methods=['GET'])
+@login_required
 def mes_inspections(rapport_id):
     rapport = RapportGenere.query.get(rapport_id)
     if rapport:
@@ -566,8 +568,9 @@ def mes_inspections(rapport_id):
         return redirect(url_for('authentication_blueprint.index'))
 
 
-@login_required
+
 @blueprint.route('/edit_image_visible/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
+@login_required
 def edit_image_visible(rapport_id, image_id):
     # Fetch the image you want to edit
     image = ImageUploadVisible.query.get(image_id)
@@ -603,8 +606,9 @@ def edit_image_visible(rapport_id, image_id):
     else:
         return jsonify(success=False, message="Image not found."), 404
 
-@login_required
+
 @blueprint.route('/supprimer_image_visible/<int:rapport_id>/<int:image_id>', methods=['GET'])
+@login_required
 def supprimer_image_visible(rapport_id, image_id):
     rapport = RapportGenere.query.get(rapport_id)
     image = ImageUploadVisible.query.get(image_id)
@@ -1184,8 +1188,9 @@ def rapport_id_page_invisible():
     return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
 
 
-@login_required
+
 @blueprint.route('/changer_statut/<int:rapport_id>/<int:image_id>', methods=['GET'])
+@login_required
 def changer_statut_inspection_invisible(rapport_id, image_id):
     image = ImageUploadInvisible.query.get(image_id)
 
@@ -1200,8 +1205,9 @@ def changer_statut_inspection_invisible(rapport_id, image_id):
         return jsonify({'success': False, 'message': 'Image introuvable.'})
 
 
-@login_required
+
 @blueprint.route('/edit_image/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
+@login_required
 def edit_image_upload_invisible(rapport_id, image_id):
     # Fetch the image you want to edit
     image = ImageUploadInvisible.query.get(image_id)
@@ -1248,8 +1254,9 @@ def edit_image_upload_invisible(rapport_id, image_id):
         # Handle the case where the image is not found
         return jsonify(success=False, message="Image not found."), 404
 
-@login_required
+
 @blueprint.route('/supprimer_image/<int:rapport_id>/<int:image_id>', methods=['GET'])
+@login_required
 def supprimer_image_invisible(rapport_id, image_id):
     rapport = RapportGenere.query.get(rapport_id)
     image = ImageUploadInvisible.query.get(image_id)
@@ -1270,8 +1277,9 @@ def supprimer_image_invisible(rapport_id, image_id):
         return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
     
     
-@login_required
+
 @blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
+@login_required
 def mes_inspections_invisible(rapport_id):
     rapport = RapportGenere.query.get(rapport_id)
     if rapport:
@@ -2073,8 +2081,9 @@ def add_model_data(model_name):
 
 
 #DEFAUTS///////§§§§§§§§§§§§§§§§§§§§
-@login_required
+
 @blueprint.route('/add_defaut_visible', methods=['GET', 'POST'])
+@login_required
 def add_defaut_visible():
     if request.method == 'POST':
         nom = request.form.get('nom')
@@ -2094,8 +2103,9 @@ def add_defaut_visible():
 
     return render_template('defauts/add_defaut_visible.html', noms_defauts=noms_defauts)
 
-@login_required
+
 @blueprint.route('/edit_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
+@login_required
 def edit_defaut_visible(defaut_id):
     defaut = Defaut_visible.query.get_or_404(defaut_id)
 
@@ -2110,8 +2120,9 @@ def edit_defaut_visible(defaut_id):
 
     return render_template('defauts/edit_defaut_visible.html', defaut=defaut)
 
-@login_required
+
 @blueprint.route('/delete_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
+@login_required
 def delete_defaut_visible(defaut_id):
     defaut = Defaut_visible.query.get_or_404(defaut_id)
 
@@ -2123,21 +2134,24 @@ def delete_defaut_visible(defaut_id):
 
     return render_template('defauts/delete_defaut_visible.html', defaut=defaut)
 
-@login_required
+
 @blueprint.route('/list_defauts_visible')
+@login_required
 def list_defauts_visible():
     defauts = Defaut_visible.query.all()
     return render_template('defauts/list_defauts_visible.html', defauts=defauts)
 
 #partie invisible
-@login_required
+
 @blueprint.route('/list_defauts_invisible')
+@login_required
 def list_defauts_invisible():
     defauts = Defaut_invisible.query.all()
     return render_template('defauts/list_defauts_invisible.html', defauts=defauts)
 
-@login_required
+
 @blueprint.route('/add_defaut_invisible', methods=['GET', 'POST'])
+@login_required
 def add_defaut_invisible():
     if request.method == 'POST':
         nom = request.form.get('nom')
@@ -2158,8 +2172,9 @@ def add_defaut_invisible():
 
     return render_template('defauts/add_defaut_invisible.html', noms_defauts_invisibles=noms_defauts_invisibles)
 
-@login_required
+
 @blueprint.route('/edit_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
+@login_required
 def edit_defaut_invisible(defaut_id):
     defaut = Defaut_invisible.query.get_or_404(defaut_id)
 
@@ -2174,8 +2189,9 @@ def edit_defaut_invisible(defaut_id):
 
     return render_template('defauts/edit_defaut_invisible.html', defaut=defaut)
 
-@login_required
+
 @blueprint.route('/delete_defaut_invisible/<int:defaut_id>', methods=['GET', 'POST'])
+@login_required
 def delete_defaut_invisible(defaut_id):
     defaut = Defaut_invisible.query.get_or_404(defaut_id)
 
