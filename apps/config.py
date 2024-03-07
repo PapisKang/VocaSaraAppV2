@@ -104,20 +104,17 @@ class Config(object):
             print('> Error: SQLite Exception: ' + str(e))
             raise
 
+
 class ProductionConfig(Config):
 
     DEBUG = False
-        # Configurer le logging pour enregistrer les erreurs dans un fichier
-    logging.basicConfig(filename='log/app.log', level=logging.ERROR,
-                        format='%(asctime)s - %(levelname)s - %(message)s')
 
     # Security
     SESSION_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_DURATION = 36000
-    SESSION_COOKIE_SECURE = True 
-    REMEMBER_COOKIE_SECURE = True  # Utiliser uniquement des cookies sécurisés sur HTTPS
- 
+    
+    
 class DebugConfig(Config):
     DEBUG = True
 

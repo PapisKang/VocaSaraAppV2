@@ -111,6 +111,34 @@ app.config['MAIL_DEFAULT_SENDER'] = Email_config.MAIL_DEFAULT_SENDER
 app.logger.addHandler(logging.StreamHandler(sys.stdout))
 app.logger.setLevel(logging.ERROR)
 
+from logging.handlers import RotatingFileHandler
+
+def configure_logging():
+    log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(funcName)s - %(message)s')
+
+    # Fichier de log avec rotation
+    my_handler = RotatingFileHandler('log/app.log', mode='a', maxBytes=5*1024*1024, 
+                                     backupCount=2, encoding=None, delay=0)
+    my_handler.setFormatter(log_formatter)
+    my_handler.setLevel(logging.ERROR)
+
+    app_logger = logging.getLogger('root')
+    app_logger.setLevel(logging.ERROR)
+    app_logger.addHandler(my_handler)
+
+configure_logging()
+
+@app.before_request
+def before_request_logging():
+    logging.info(f"Avant la requête : {request.method} {request.url}")
+    # Loguer d'autres détails de la requête si nécessaire
+
+@app.after_request
+def after_request_logging(response):
+    logging.info(f"Après la requête : {response.status} {request.method} {request.url}")
+    # Loguer d'autres détails de la réponse si nécessaire
+    return response
+
 mail = Mail(app)
 
 @blueprint.route('/')
@@ -734,6 +762,9 @@ def reset_password(token):
 # Errors
 @login_manager.unauthorized_handler
 def unauthorized_handler():
+    logging.error(f"Accès refusé à {request.url} - IP: {request.remote_addr}")
+    logging.error(f"En-têtes: {request.headers}")
+    # Attention à ne pas loguer d'informations sensibles contenues dans les en-têtes ou le corps de la requête.
     return render_template('home/page-403.html'), 403
 
 
