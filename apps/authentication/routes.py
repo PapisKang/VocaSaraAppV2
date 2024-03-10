@@ -71,12 +71,10 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 from torchvision.models import mobilenet_v2  # Import de MobileNetV2
-import pretty_errors
-import sys
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
+# classification d'images chargement du model
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -98,6 +96,11 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = upload_folder_name
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(
+    days=365)  # adjust as needed
+app.config['SESSION_PROTECTION'] = 'strong'
 
 # Configurations Flask-Mail
 app.config['MAIL_SERVER'] = Email_config.MAIL_SERVER
@@ -108,36 +111,6 @@ app.config['MAIL_USERNAME'] = Email_config.MAIL_USERNAME
 app.config['MAIL_PASSWORD'] = Email_config.MAIL_PASSWORD
 app.config['MAIL_DEFAULT_SENDER'] = Email_config.MAIL_DEFAULT_SENDER
 
-app.logger.addHandler(logging.StreamHandler(sys.stdout))
-app.logger.setLevel(logging.ERROR)
-
-from logging.handlers import RotatingFileHandler
-
-def configure_logging():
-    log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(funcName)s - %(message)s')
-
-    # Fichier de log avec rotation
-    my_handler = RotatingFileHandler('log/app.log', mode='a', maxBytes=5*1024*1024, 
-                                     backupCount=2, encoding=None, delay=0)
-    my_handler.setFormatter(log_formatter)
-    my_handler.setLevel(logging.ERROR)
-
-    app_logger = logging.getLogger('root')
-    app_logger.setLevel(logging.ERROR)
-    app_logger.addHandler(my_handler)
-
-configure_logging()
-
-@app.before_request
-def before_request_logging():
-    logging.info(f"Avant la requête : {request.method} {request.url}")
-    # Loguer d'autres détails de la requête si nécessaire
-
-@app.after_request
-def after_request_logging(response):
-    logging.info(f"Après la requête : {response.status} {request.method} {request.url}")
-    # Loguer d'autres détails de la réponse si nécessaire
-    return response
 
 mail = Mail(app)
 
@@ -762,9 +735,6 @@ def reset_password(token):
 # Errors
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    logging.error(f"Accès refusé à {request.url} - IP: {request.remote_addr}")
-    logging.error(f"En-têtes: {request.headers}")
-    # Attention à ne pas loguer d'informations sensibles contenues dans les en-têtes ou le corps de la requête.
     return render_template('home/page-403.html'), 403
 
 
@@ -855,9 +825,8 @@ def extract_gps_info(img_path):
     return None
 
 
-
-@blueprint.route("/upload_page")
 @login_required
+@blueprint.route("/upload_page")
 def upload_page():
     return render_template('rapport/traitement_visible.html')
 
@@ -911,9 +880,8 @@ def results_page(rapport_genere_id):
 
 
 # Mettez à jour la route pour traiter les images
-
-@blueprint.route('/upload_and_traitement_visible', methods=['POST'])
 @login_required
+@blueprint.route('/upload_and_traitement_visible', methods=['POST'])
 def upload_and_traitement_visible():
     try:
         # Assurez-vous de récupérer le champ "file" comme une liste
@@ -1119,9 +1087,8 @@ except Exception as e:
     print("Error can't find tesseract:", e)
 
 
-
-@blueprint.route("/upload_page_invisible")
 @login_required
+@blueprint.route("/upload_page_invisible")
 def upload_page_invisible():
     return render_template('rapport/traitement_invisible.html')
 
@@ -1260,7 +1227,7 @@ def upload_and_traitement_invisible():
               # Envoyer un e-mail à l'utilisateur
         user_email = current_user.email
         subject_user = "Traitement d'images en cours"
-        message_user = " Les images Thermiques chargées sont soumises à une vérification Plus poussée, car certains détails sur l'images ne peuvent etre traités automatiquement.Seuls les images autorisées seront visible sur la page statistique,Localisation,et Inspections Invisibles Néanmoins. Pour un résultat optimal, il est préférable d'attendre un délai de 30 minutes à 2 heure pour de meilleurs résultats.Nous vous recontacterons dans les plus brefs délais"
+        message_user = " Les images Thermiques chargées sont soumises à une vérification Plus poussée, car certains détails sur l'images ne peuvent etre traités automatiquement.Seuls les images autorisées seront visible sur la page statistique,mocamisation,et Inspections Invisibles Néanmoins. Pour un résultat optimal, il est préférable d'attendre un délai de 30 minutes à 2 heure pour de meilleurs résultats.Nous vous recontacterons dans les plus brefs délais"
 
         send_email(user_email, subject_user, message_user)
 

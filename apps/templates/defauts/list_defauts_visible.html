@@ -16,7 +16,7 @@
             <ul class="list-group">
                 {% for defaut in defauts %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ defaut.Nom }} - {{ defaut.Description }} - {{ defaut.Commentaire }}
+                        {{ defaut.Nom }} - {{ defaut.Description }}
                         <div class="btn-group" role="group">
                             <a href="{{ url_for('home_blueprint.edit_defaut_visible', defaut_id=defaut.id) }}" class="btn btn-warning">Edit</a>
                             <a href="{{ url_for('home_blueprint.delete_defaut_visible', defaut_id=defaut.id) }}" class="btn btn-danger">Delete</a>

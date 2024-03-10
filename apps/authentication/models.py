@@ -188,14 +188,12 @@ class Defaut_visible(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     Nom = db.Column(db.String(255), nullable=False)
     Description = db.Column(db.Text)  # Add a new column for description
-    Commentaire = db.Column(db.Text)
 
 class Defaut_invisible(db.Model):
     __tablename__ = 'Defaut_invisible'
     id = db.Column(db.Integer, primary_key=True)
     Nom = db.Column(db.String(255), nullable=False)
     Description = db.Column(db.Text)  # Add a new column for description
-    Commentaire = db.Column(db.Text)  # Add a new column for descriptiond    
 
 
 class Feeder(db.Model):
@@ -298,13 +296,4 @@ class DocumentRapportGenere(db.Model):
     date_de_creation = db.Column(db.DateTime, default=datetime.utcnow)
     data = db.Column(db.LargeBinary(length=1000000))
     type_de_fichier = db.Column(db.String(10))
-
-class DocumentRapportGenere_invisible(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nom_operateur = db.Column(db.String(64), nullable=False, default=None)
-    nom_du_rapport = db.Column(db.String(255), nullable=False)
-    date_de_creation = db.Column(db.DateTime, default=datetime.utcnow)
-    data = db.Column(db.LargeBinary(length=1000000))
-    type_de_fichier = db.Column(db.String(10))
-
 

@@ -1,3 +1,4 @@
+
 {% extends 'layouts/base.html' %}
 
 {% block title %} Confidentialite {% endblock title %}
@@ -120,12 +121,6 @@
               id="file-input"
               style="display: none"
             />
-            <progress
-              value="0"
-              max="100"
-              id="progress-bar"
-              class="w-100 my-2"
-            ></progress>
             <button type="submit" class="btn btn-primary btn-block">
               Télécharger
             </button>
@@ -189,9 +184,7 @@
        .addEventListener("change", function (event) {
          var previewContainer = document.getElementById("preview-container");
          var selectedCount = document.getElementById("selected-count");
-         var progressBar = document.getElementById("progress-bar");
          previewContainer.innerHTML = ""; // Clear existing previews
-         progressBar.value = 0;
 
          var files = event.target.files;
          var selectedFiles = [];

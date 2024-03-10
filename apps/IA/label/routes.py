@@ -1,11 +1,4 @@
 # -*- encoding: utf-8 -*-
-from prettytable import PrettyTable
-from sqlalchemy import inspect
-from flask_cors import CORS
-from flask_limiter import Limiter
-from apps.home.chatbot import get_response
-import secrets
-import uuid
 from apps.home import blueprint
 from flask import render_template, Flask, redirect, request, url_for
 from flask_login import login_required
@@ -20,15 +13,11 @@ from flask_login import current_user
 from werkzeug.utils import secure_filename
 from io import BytesIO
 import zlib
+import base64
 import logging
 import os
 import base64
-from apps.authentication.models import (UserProfile, Users, ImageUploadVisible,
-                                        ImageUploadInvisible, RapportGenere, DocumentRapportGenere,
-                                        Troncon, Feeder, Defaut_invisible, Defaut_visible)
-
-from apps.authentication import models
-
+from apps.authentication.models import UserProfile, Users, ImageUploadVisible, ImageUploadInvisible, RapportGenere, DocumentRapportGenere
 from flask import render_template, jsonify, send_file
 import json
 from sqlalchemy import func
@@ -45,7 +34,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 import io
 import logging
 from apps.config import Config
-from sqlalchemy.orm import Mapper
+
 
 
 from docx import Document
@@ -54,16 +43,12 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from PIL import Image as PILIMAGE
 
 # Ajouter un log lorsqu'un utilisateur se connecte
-
-
 @blueprint.before_request
 def log_request():
     if current_user.is_authenticated:
-        access_logger.info(
-            'Utilisateur connecté : %s | Accès à l\'URL : %s', current_user.username, request.url)
+        access_logger.info('Utilisateur connecté : %s | Accès à l\'URL : %s', current_user.username, request.url)
     else:
         access_logger.info('Accès à l\'URL : %s', request.url)
-
 
 @blueprint.route('/<template>')
 @login_required
@@ -180,7 +165,7 @@ def generate_rapport():
         date_fin=date_fin,
         zone=zone,
         groupement_troncon=groupement_troncon,
-        type_defaut=type_defaut
+        type_defaut = type_defaut
     )
     db.session.add(new_report)
     db.session.commit()
@@ -192,7 +177,6 @@ def generate_rapport():
     return response
 
 # Nouvelle route pour afficher la page avec les deux boutons et le texte explicatif
-
 
 @login_required
 @blueprint.route('/confirmation_page', methods=['GET'])
@@ -212,7 +196,7 @@ def acceuil():
     return render_template('home/acceuil.html')
 
 
-# ./////////////////////// page de localisation de défuat§§§§§§§§§§
+#./////////////////////// page de localisation de défuat§§§§§§§§§§
 @blueprint.route('/update_status/<int:image_id>', methods=['POST'])
 @login_required
 def update_status(image_id):
@@ -226,8 +210,7 @@ def update_status(image_id):
         return jsonify({'error': 'Image not found'}), 404
     # Mettre à jour les informations
     image.status = new_status
-    # Mettre à jour avec le nom d'utilisateur de l'utilisateur connecté
-    image.updated_by = user.username
+    image.updated_by = user.username  # Mettre à jour avec le nom d'utilisateur de l'utilisateur connecté
     image.update_date = datetime.utcnow()  # Mettre à jour avec la date actuelle
     # Sauvegarder les modifications dans la base de données
     db.session.commit()
@@ -252,12 +235,10 @@ def get_rapports():
     ]
     return jsonify(rapports_data)
 
-
 @blueprint.route('/get_default_types')
 def get_default_types():
     # Query distinct default types from the database
-    default_types = db.session.query(
-        ImageUploadVisible.type_defaut).distinct().all()
+    default_types = db.session.query(ImageUploadVisible.type_defaut).distinct().all()
     default_types = [row[0] for row in default_types if row[0] is not None]
     return jsonify(default_types)
 
@@ -274,8 +255,7 @@ def get_map_data():
 
     # Query the data based on the selected default type
     if selected_default_type:
-        image_points = ImageUploadVisible.query.filter_by(
-            type_defaut=selected_default_type)
+        image_points = ImageUploadVisible.query.filter_by(type_defaut=selected_default_type)
     else:
         image_points = ImageUploadVisible.query
     # Récupérer le statut sélectionné (par défaut "en attente")
@@ -286,17 +266,15 @@ def get_map_data():
 
     # Initialiser image_points en fonction de la présence ou non de rapport_id
     if rapport_id:
-        image_points = ImageUploadVisible.query.filter_by(
-            rapport_genere_id=rapport_id)
+        image_points = ImageUploadVisible.query.filter_by(rapport_genere_id=rapport_id)
     else:
         image_points = ImageUploadVisible.query
-
+ 
+    # Si l'utilisateur est un administrateur, récupérer toutes les données
     image_points = image_points.filter(
         ImageUploadVisible.type_defaut.isnot(None),
         ImageUploadVisible.type_defaut != "",
-        ImageUploadVisible.type_defaut != "non_defaut",
-        # Ajouter cette condition pour filtrer les points avec un statut non nul
-        ImageUploadVisible.status.isnot(None)
+        ImageUploadVisible.status.isnot(None)  # Ajouter cette condition pour filtrer les points avec un statut non nul
     ).paginate(page=page, per_page=per_page, error_out=False)
 
     map_data = []
@@ -315,11 +293,12 @@ def get_map_data():
                 'nom_operateur': point.nom_operateur,
                 'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
                 'image_binary': point.data,
-                'status': point.status
+                'status': point.status  
             }
             map_data.append(data)
 
     return jsonify(map_data)
+
 
 
 @blueprint.route('/localisation_page')
@@ -327,15 +306,15 @@ def get_map_data():
 def localisation_page():
     return render_template('home/localisation_defauts.html')
 
-# ./////////////////////// page de localisation de défuat§§§§§§§§§§
+#./////////////////////// page de localisation de défuat§§§§§§§§§§
 
-# ./////////////////////// page de localisation de défaut invisible ////////////////////
-
+#./////////////////////// page de localisation de défaut invisible ////////////////////
 
 @blueprint.route('/localisation_defauts_invisible_page')
 @login_required
 def localisation_defauts_invisible_page():
     return render_template('/home/localisation_defauts_invisible.html')
+
 
 
 @blueprint.route('/update_status_invisible/<int:image_id>', methods=['POST'])
@@ -351,8 +330,7 @@ def update_status_invisible(image_id):
         return jsonify({'error': 'Image not found'}), 404
     # Mettre à jour les informations
     image.status = new_status
-    # Mettre à jour avec le nom d'utilisateur de l'utilisateur connecté
-    image.updated_by = user.username
+    image.updated_by = user.username  # Mettre à jour avec le nom d'utilisateur de l'utilisateur connecté
     image.update_date = datetime.utcnow()  # Mettre à jour avec la date actuelle
     # Sauvegarder les modifications dans la base de données
     db.session.commit()
@@ -394,6 +372,7 @@ def get_default_types_invisible():
     return jsonify(default_types)
 
 
+
 @blueprint.route('/get_map_data_invisible')
 def get_map_data_invisible():
     page = request.args.get('page', default=1, type=int)
@@ -406,8 +385,7 @@ def get_map_data_invisible():
 
     # Query the data based on the selected default type
     if selected_default_type:
-        image_points = ImageUploadInvisible.query.filter_by(
-            type_defaut=selected_default_type)
+        image_points = ImageUploadInvisible.query.filter_by(type_defaut=selected_default_type)
     else:
         image_points = ImageUploadInvisible.query
 
@@ -419,18 +397,16 @@ def get_map_data_invisible():
 
     # Initialiser image_points en fonction de la présence ou non de rapport_id
     if rapport_id:
-        image_points = ImageUploadInvisible.query.filter_by(
-            rapport_genere_id=rapport_id)
+        image_points = ImageUploadInvisible.query.filter_by(rapport_genere_id=rapport_id)
     else:
         image_points = ImageUploadInvisible.query
 
+    # Si l'utilisateur est un administrateur, récupérer toutes les données
     image_points = image_points.filter(
         ImageUploadInvisible.type_defaut.isnot(None),
         ImageUploadInvisible.type_defaut != "",
-        # Ajouter cette condition pour filtrer les points avec un statut non nul
-        ImageUploadInvisible.status.isnot(None),
-        # Ajouter cette condition pour filtrer les points avec display égal à 'yes'
-        ImageUploadInvisible.display == 'yes',
+        ImageUploadInvisible.status.isnot(None),  # Ajouter cette condition pour filtrer les points avec un statut non nul
+        ImageUploadInvisible.display == 'yes',  # Ajouter cette condition pour filtrer les points avec display égal à 'yes'
         ImageUploadInvisible.longitude.isnot(None),
         ImageUploadInvisible.latitude.isnot(None),
     ).paginate(page=page, per_page=per_page, error_out=False)
@@ -451,7 +427,7 @@ def get_map_data_invisible():
                 'nom_operateur': point.nom_operateur,
                 'upload_date': point.upload_date.strftime('%Y-%m-%d %H:%M:%S'),
                 'image_binary': point.data,
-                'temperature': point.temperature,
+                'temperature' : point.temperature,
                 'status': point.status
             }
             map_data.append(data)
@@ -459,10 +435,12 @@ def get_map_data_invisible():
     return jsonify(map_data)
 
 
-# ./////////////////////// page de localisation de défaut invisible ////////////////////
 
 
-# //////////////////////page de statistique.////////////////
+#./////////////////////// page de localisation de défaut invisible ////////////////////
+ 
+
+#//////////////////////page de statistique.////////////////
 
 @blueprint.route('/statistiques')
 @login_required
@@ -472,9 +450,7 @@ def statistiques():
         ImageUploadVisible.type_defaut,
         db.func.count().label('defaut_count')
     ).filter(
-        # Exclude rows where type_defaut is null
-        ImageUploadVisible.type_defaut.isnot(None),
-        ImageUploadVisible.type_defaut != "non_defaut"
+        ImageUploadVisible.type_defaut.isnot(None)  # Exclude rows where type_defaut is null
     ).group_by(
         ImageUploadVisible.type_defaut
     ).all()
@@ -500,7 +476,8 @@ def statistiques():
     return render_template('statistics/statistics.html', data=data_json)
 
 
-# //////////////////////page de statistique.////////////////
+
+#//////////////////////page de statistique.////////////////
 
 @blueprint.route('/statistics_invisible')
 def statistics_invisible():
@@ -509,10 +486,8 @@ def statistics_invisible():
         ImageUploadInvisible.type_defaut,
         db.func.count().label('defaut_count')
     ).filter(
-        # Exclude rows where type_defaut is null
-        ImageUploadInvisible.type_defaut.isnot(None),
-        # Exclude rows where type_defaut is "non_defaut"
-        ImageUploadInvisible.type_defaut != "non_defaut",
+        ImageUploadInvisible.type_defaut.isnot(None),  # Exclude rows where type_defaut is null
+        ImageUploadInvisible.type_defaut != "non_defaut",  # Exclude rows where type_defaut is "non_defaut"
         ImageUploadInvisible.display != "no"  # Exclude rows where display is "no"
     ).group_by(
         ImageUploadInvisible.type_defaut
@@ -537,7 +512,8 @@ def statistics_invisible():
     return render_template('/statistics/statistics_invisible.html', data=data_json)
 
 
-# ./////////////////////////Partie inspections.///////////////
+
+#./////////////////////////Partie inspections.///////////////
 
 
 @blueprint.route('/rapport_id_page')
@@ -546,178 +522,26 @@ def rapport_id_page():
     rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
     return render_template('rapport/rapport_id_page.html', rapports=rapports)
 
-
-@login_required
-@blueprint.route('/mes_inspections/<int:rapport_id>', methods=['GET'])
-def mes_inspections(rapport_id):
-    rapport = RapportGenere.query.get(rapport_id)
-    if rapport:
-        images_visibles = ImageUploadVisible.query.filter(
-            ImageUploadVisible.rapport_genere_id == rapport_id,
-            ImageUploadVisible.longitude.isnot(None),
-            ImageUploadVisible.latitude.isnot(None),
-            ImageUploadVisible.type_defaut != 'non_defaut'
-        ).all()
-
-        return render_template('rapport/mes_inspections.html', rapport=rapport, images_visibles=images_visibles)
-    else:
-        return redirect(url_for('authentication_blueprint.index'))
-
-
-@login_required
-@blueprint.route('/edit_image_visible/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
-def edit_image_visible(rapport_id, image_id):
-    # Fetch the image you want to edit
-    image = ImageUploadVisible.query.get(image_id)
-
-    # Fetch all available types of defects
-    defauts_visibles = Defaut_visible.query.all()
-
-    if image:
-        rapport = RapportGenere.query.get(rapport_id)
-        if rapport:
-            if request.method == 'POST':
-                try:
-                    # Update image details based on the form submission
-                    image.filename = request.form.get('filename')
-                    image.longitude = request.form.get('longitude')
-                    image.latitude = request.form.get('latitude')
-                    image.type_defaut = request.form.get('type_defaut')
-                    image.feeder = request.form.get('feeder')
-                    image.troncon = request.form.get('troncon')
-                    image.zone = request.form.get('zone')
-
-                    # Save changes to the database
-                    db.session.commit()
-
-                    return jsonify(success=True, message="Image updated successfully.")
-                except Exception as e:
-                    print(e)
-                    return jsonify(success=False, message="Failed to update image."), 500
-
-            return render_template('rapport/edit_image_upload_visible.html', image=image, rapport=rapport, defauts_visibles=defauts_visibles)
-        else:
-            return jsonify(success=False, message="Rapport not found."), 404
-    else:
-        return jsonify(success=False, message="Image not found."), 404
-
-@login_required
-@blueprint.route('/supprimer_image_visible/<int:rapport_id>/<int:image_id>', methods=['GET'])
-def supprimer_image_visible(rapport_id, image_id):
-    rapport = RapportGenere.query.get(rapport_id)
-    image = ImageUploadVisible.query.get(image_id)
-
-    if rapport and image:
-        # Supprimez toute la ligne (colonne) associée à l'image
-        db.session.delete(image)
-        db.session.commit()
-
-        return jsonify({
-            'success': True,
-            'message': 'Image et toutes ses données associées ont été supprimées avec succès',
-            'rapport_id': rapport_id,
-            'image_id': image_id
-        })
-
-    else:
-        return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
-
-#Invisible ::::::::::::::::::::::::::::::::::::::::::::::
-
-
 @blueprint.route('/rapport_id_page_invisible')
 def rapport_id_page_invisible():
     type_defaut = "Invisible"  # Remplacez cela par la valeur que vous souhaitez filtrer
     rapports = RapportGenere.query.filter_by(type_defaut=type_defaut).all()
     return render_template('rapport/rapport_id_page_invisible.html', rapports=rapports)
 
-
 @login_required
-@blueprint.route('/changer_statut/<int:rapport_id>/<int:image_id>', methods=['GET'])
-def changer_statut_inspection_invisible(rapport_id, image_id):
-    image = ImageUploadInvisible.query.get(image_id)
-
-    if image:
-        if current_user.role == 1:  # Assurez-vous que seul l'administrateur peut changer le statut
-            image.display = 'yes' if image.display == 'no' else 'no'
-            db.session.commit()
-            return jsonify({'success': True, 'message': 'Statut changé avec succès.'})
-        else:
-            return jsonify({'success': False, 'message': 'Vous n\'avez pas la permission de changer le statut.'})
-    else:
-        return jsonify({'success': False, 'message': 'Image introuvable.'})
-
-
-@login_required
-@blueprint.route('/edit_image/<int:rapport_id>/<int:image_id>', methods=['GET', 'POST'])
-def edit_image_upload_invisible(rapport_id, image_id):
-    # Fetch the image you want to edit
-    image = ImageUploadInvisible.query.get(image_id)
-
-        # Fetch all available types of defects
-    defauts_invisibles = Defaut_invisible.query.all()
-
-
-    if image:
-        # Fetch the corresponding rapport
-        rapport = RapportGenere.query.get(rapport_id)
-
-        if rapport:
-            if request.method == 'POST':
-                try:
-                    # Update image details based on the form submission
-                    image.filename = request.form.get('filename')
-                    image.longitude = request.form.get('longitude')
-                    image.latitude = request.form.get('latitude')
-                    image.type_defaut = request.form.get('type_defaut')
-                    image.temperature = request.form.get('temperature')
-                    image.feeder = request.form.get('feeder')
-                    image.troncon = request.form.get('troncon')
-                    image.zone = request.form.get('zone')
-
-                    # Save changes to the database
-                    db.session.commit()
-
-                    # Return a JSON response indicating success
-                    return jsonify(success=True, message="Image updated successfully.")
-                except Exception as e:
-                    # Log the exception for debugging purposes
-                    print(e)
-
-                    # Return a JSON response indicating failure
-                    return jsonify(success=False, message="Failed to update image."), 500
-
-            # Render the edit template if it's a GET request
-            return render_template('rapport/edit_image_upload_invisible.html', image=image, rapport=rapport, rapport_id=rapport_id,defauts_invisibles=defauts_invisibles)
-        else:
-            # Handle the case where the rapport is not found
-            return jsonify(success=False, message="Rapport not found."), 404
-    else:
-        # Handle the case where the image is not found
-        return jsonify(success=False, message="Image not found."), 404
-
-@login_required
-@blueprint.route('/supprimer_image/<int:rapport_id>/<int:image_id>', methods=['GET'])
-def supprimer_image_invisible(rapport_id, image_id):
+@blueprint.route('/mes_inspections/<int:rapport_id>', methods=['GET'])
+def mes_inspections(rapport_id):
     rapport = RapportGenere.query.get(rapport_id)
-    image = ImageUploadInvisible.query.get(image_id)
-
-    if rapport and image:
-        # Supprimez toute la ligne (colonne) associée à l'image
-        db.session.delete(image)
-        db.session.commit()
-
-        return jsonify({
-            'success': True,
-            'message': 'Image et toutes ses données associées ont été supprimées avec succès',
-            'rapport_id': rapport_id,
-            'image_id': image_id
-        })
-
+    if rapport:
+        images_visibles = ImageUploadVisible.query.filter_by(
+            rapport_genere_id=rapport_id).all()
+        return render_template('rapport/mes_inspections.html', rapport=rapport, images_visibles=images_visibles)
     else:
-        return jsonify({'success': False, 'message': 'Erreur lors de la suppression de l\'image'})
-    
-    
+        return redirect(url_for('authentication_blueprint.index'))
+
+
+
+
 @login_required
 @blueprint.route('/mes_inspections_invisible/<int:rapport_id>', methods=['GET'])
 def mes_inspections_invisible(rapport_id):
@@ -728,13 +552,12 @@ def mes_inspections_invisible(rapport_id):
             ImageUploadInvisible.rapport_genere_id == rapport_id,
             ImageUploadInvisible.type_defaut.isnot(None),
             ImageUploadInvisible.type_defaut != "non_defaut",
-
+            ImageUploadInvisible.display != "no"
         ).all()
 
         return render_template('rapport/mes_inspections_invisible.html', rapport=rapport, images_invisibles=images_invisibles)
     else:
         return redirect(url_for('authentication_blueprint.index'))
-
 
 @blueprint.route('/generate_report_document_page')
 def generate_report_document_page():
@@ -742,7 +565,6 @@ def generate_report_document_page():
     rapports = RapportGenere.query.filter_by(type_defaut="Visible").all()
 
     return render_template('rapport/creer_un_rapport.html', rapports=rapports)
-
 
 @blueprint.route('/generate_report_document', methods=['GET', 'POST'])
 def generate_report_document():
@@ -763,12 +585,8 @@ def generate_report_document():
         feeder = last_image_data.feeder
         zone = last_image_data.zone
         groupement = last_image_data.groupement_troncon
-        image_data = ImageUploadVisible.query.filter(
-            ImageUploadVisible.nom_operateur == nom_operateur,
-            ImageUploadVisible.longitude.isnot(None),
-            ImageUploadVisible.latitude.isnot(None),
-            ImageUploadVisible.type_defaut != 'non_defaut'
-        ).all()
+        image_data = ImageUploadVisible.query.filter_by(
+            nom_operateur=nom_operateur).all()
 
         # Charger les normes_conseils des défauts à partir du fichier JSON
         with open('./apps/phrase_normes_conseils/normes_conseils.json', encoding='utf-8') as f:
@@ -855,7 +673,7 @@ def generate_report_document():
         third_page = document.add_paragraph()
         third_page.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         run = third_page.add_run("\n")
-        # run.add_picture(Config.ASSETS_ROOT + '/img/logo.png', width=Inches(7))
+        #run.add_picture(Config.ASSETS_ROOT + '/img/logo.png', width=Inches(7))
 
         run = third_page.add_run("\n\n")
         run = third_page.add_run(f"GROUPEMENT TRONCONS ENTRE {groupement}")
@@ -880,7 +698,7 @@ def generate_report_document():
                             remarque = info.get("I", "Remarque par défaut")
                             conseil = info.get("J", "Conseil par défaut")
                             break
-
+                        
                 # Ajouter une page pour chaque défaut
                 document.add_page_break()
                 page = document.add_paragraph()
@@ -942,8 +760,8 @@ def generate_report_document():
         header_run.font.color.rgb = RGBColor(0x00, 0x00, 0x00)  # Noir
         header_run.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         # Logo
-        # logo_path = Config.ASSETS_ROOT + '/img/logo.png'
-        # header_paragraph.add_run().add_picture(logo_path, width=Inches(4)
+        #logo_path = Config.ASSETS_ROOT + '/img/logo.png'
+        #header_paragraph.add_run().add_picture(logo_path, width=Inches(4)
         #                                       ).alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         # Sauvegarder le document Word
         # Convert the date to a string with the format "YYYY-MM-DD"
@@ -951,7 +769,7 @@ def generate_report_document():
         # document.save("rapport_du_feeder_{}_du_{}.docx".format(feeder,date))
         nom_du_fichier = ("Rapport_defauts_visible_du_feeder_{}_du_{}_par_{}".format(
             feeder, current_date, nom_operateur))
-
+ 
         # Enregistrer le fichier Word en mémoire
         word_file = io.BytesIO()
         document.save(word_file)
@@ -970,16 +788,16 @@ def generate_report_document():
         rapports = RapportGenere.query.all()
         generate_quantification_report()
         generate_resume_rapport()
-
+        
     except Exception as e:
-        logging.error(
-            f"Une erreur s'est produite dans generate_doc : {str(e)}")
+        logging.error(f"Une erreur s'est produite dans generate_doc : {str(e)}")
         error_message = f"Une erreur s'est produite : {str(e)}"
+
 
     return render_template('rapport/creer_un_rapport.html', rapports=rapports, success_message=success_message, error_message=error_message)
 
 
-# @blueprint.route('/generate_quantification_report', methods=['GET', 'POST'])
+#@blueprint.route('/generate_quantification_report', methods=['GET', 'POST'])
 def generate_quantification_report():
     success_message = None
     error_message = None
@@ -998,16 +816,11 @@ def generate_quantification_report():
         feeder = last_image_data.feeder
         date = datetime.now().strftime("%Y-%m-%d")
         nom_operateur = last_image_data.nom_operateur
-        image_data = ImageUploadVisible.query.filter(
-            ImageUploadVisible.nom_operateur == nom_operateur,
-            ImageUploadVisible.longitude.isnot(None),
-            ImageUploadVisible.latitude.isnot(None),
-            ImageUploadVisible.type_defaut != 'non_defaut'
-        ).all()
+        image_data = ImageUploadVisible.query.filter_by(
+            nom_operateur=nom_operateur).all()
 
         # Charger le modèle de feuille Quantification
-        template_workbook = load_workbook(
-            "./apps/Exemple_rapport/Quantification_Statistique_exemple.xlsx")
+        template_workbook = load_workbook("./apps/Exemple_rapport/Quantification_Statistique_exemple.xlsx")
         feuille_copy = template_workbook.active
 
         feuille_copy['D7'] = f"Noms : {nom_operateur}"
@@ -1027,29 +840,26 @@ def generate_quantification_report():
                         else:
                             defect_count[defect] = 1
 
+
         # Write data to the Quantification sheet
         row_num = 12
         for defect, count in defect_count.items():
             feuille_copy.append(['', '', defect, count])
 
         # Total of defects in a green cell
-        feuille_copy.append(['', '', 'Totale des défauts',
-                            sum(defect_count.values())])
+        feuille_copy.append(['', '', 'Totale des défauts', sum(defect_count.values())])
         total_cell = feuille_copy.cell(row=feuille_copy.max_row, column=4)
         total_cell.font = Font(name="Calibri", size=12, color="00AA00")
 
         # Merge cell containing "DRS" with cells below
         drs_cell = feuille_copy['A12']
-        feuille_copy.merge_cells(
-            start_row=12, start_column=1, end_row=feuille_copy.max_row, end_column=1)
+        feuille_copy.merge_cells(start_row=12, start_column=1, end_row=feuille_copy.max_row, end_column=1)
         drs_cell.alignment = Alignment(horizontal="center", vertical="center")
 
         # Add Pie Chart at the end
         pie = DoughnutChart()
-        labels = Reference(feuille_copy, min_col=3, min_row=14,
-                           max_row=feuille_copy.max_row - 1)
-        data = Reference(feuille_copy, min_col=4, min_row=11,
-                         max_row=feuille_copy.max_row - 1)
+        labels = Reference(feuille_copy, min_col=3, min_row=14, max_row=feuille_copy.max_row - 1)
+        data = Reference(feuille_copy, min_col=4, min_row=11, max_row=feuille_copy.max_row - 1)
         pie.add_data(data, titles_from_data=True)
         pie.set_categories(labels)
         chart_cell = feuille_copy.cell(row=feuille_copy.max_row + 2, column=1)
@@ -1073,14 +883,13 @@ def generate_quantification_report():
         )
         db.session.add(document_quantification)
         db.session.commit()
-
+        
         success_message = "Le rapport quantification a été généré avec succès."
     except FileNotFoundError:
         error_message = "Le fichier de template n'a pas été trouvé."
     except Exception as e:
         error_message = f"Une erreur s'est produite : {str(e)}"
-        logging.error(
-            f"Une erreur s'est produite dans generate_quantification_report: {str(e)}")
+        logging.error(f"Une erreur s'est produite dans generate_quantification_report: {str(e)}")
 
     return render_template('/rapport/creer_un_rapport.html', rapports=rapports, success_message=success_message, error_message=error_message)
 
@@ -1107,12 +916,9 @@ def generate_resume_rapport():
         date = datetime.now().strftime("%Y-%m-%d")
         nom_operateur = last_image_data.nom_operateur
         zone = last_image_data.zone
-        image_data = ImageUploadVisible.query.filter(
-            ImageUploadVisible.nom_operateur == nom_operateur,
-            ImageUploadVisible.longitude.isnot(None),
-            ImageUploadVisible.latitude.isnot(None),
-            ImageUploadVisible.type_defaut != 'non_defaut'
-        ).all()
+        image_data = ImageUploadVisible.query.filter_by(
+            nom_operateur=nom_operateur).all()
+
         # Créer une copie du fichier
         wb_copy = load_workbook(
             './apps/Exemple_rapport/resume_rapport_visibles_exemple.xlsx')
@@ -1137,25 +943,21 @@ def generate_resume_rapport():
             if image_info.type_defaut is not None and image_info.type_defaut.strip() != "":
                 defauts = image_info.type_defaut.split("/")
                 defauts = [defaut.strip() + '/' for defaut in defauts]
-
+                
                 colonne_I_values = []
                 colonne_J_values = []
 
                 for defaut in defauts:
                     if defaut in normes_conseils_data:
-                        colonne_I_values.append(
-                            normes_conseils_data[defaut]['I'])
-                        colonne_J_values.append(
-                            normes_conseils_data[defaut]['J'])
+                        colonne_I_values.append(normes_conseils_data[defaut]['I'])
+                        colonne_J_values.append(normes_conseils_data[defaut]['J'])
 
-                # Date/Heure
-                feuille_copy[f'A{row_num}'] = image_info.upload_date
+                feuille_copy[f'A{row_num}'] = image_info.upload_date  # Date/Heure
                 feuille_copy[f'B{row_num}'] = feeder  # feeder
                 feuille_copy[f'C{row_num}'] = image_info.troncon  # troncon
                 # longeur (à remplacer par la vraie valeur)
                 feuille_copy[f'D{row_num}'] = ""
-                # Nom de l'image
-                feuille_copy[f'E{row_num}'] = image_info.filename
+                feuille_copy[f'E{row_num}'] = image_info.filename  # Nom de l'image
                 latitude_nom = "Latitude"
                 longitude_nom = "Longitude"
                 feuille_copy[f'F{row_num}'] = f"{latitude_nom} {float(image_info.latitude):.8f}, {longitude_nom} {float(image_info.longitude):.8f}"
@@ -1206,16 +1008,16 @@ def generate_resume_rapport():
     except Exception as e:
         # Handle exceptions or errors
         error_message = f"Une erreur s'est produite : {str(e)}"
-        logging.error(
-            f"Une erreur s'est produite dans generate_resume: {str(e)}")
+        logging.error(f"Une erreur s'est produite dans generate_resume: {str(e)}")
     return render_template('/rapport/creer_un_rapport.html', rapports=rapports, success_message=success_message, error_message=error_message)
+
 
 
 @blueprint.route('/mes_rapports')
 @login_required
 def mes_rapports():
     # Récupérer l'utilisateur connecté
-    # user = current_user
+    #user = current_user
     rapports = DocumentRapportGenere.query.all()
     return render_template('rapport/mes_rapports.html', rapports=rapports)
 
@@ -1225,35 +1027,26 @@ def mes_rapports():
 def telecharger_rapport(rapport_id):
     try:
         rapport = DocumentRapportGenere.query.get_or_404(rapport_id)
-
+        
         if rapport.type_de_fichier == 'excel':
             # Si le type de fichier est 'excel', c'est un document Excel
-            response = send_file(
+            return send_file(
                 io.BytesIO(rapport.data),
                 as_attachment=True,
                 download_name=f"{rapport.nom_du_rapport}.xlsx",
-                # Mimetype pour Excel
-                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'  # Mimetype pour Excel
             )
         elif rapport.type_de_fichier == 'word':
             # Si le type de fichier est 'word', c'est un document Word
-            response = send_file(
+            return send_file(
                 io.BytesIO(rapport.data),
                 as_attachment=True,
                 download_name=f"{rapport.nom_du_rapport}.docx",
-                # Mimetype pour Word
-                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'  # Mimetype pour Word
             )
         else:
             # Gérer d'autres types de fichiers si nécessaire
-            error_message = 'Type de fichier non pris en charge'
-            return render_template('rapport/mes_rapports.html', error_message=error_message, rapports=rapports)
-
-        # Logger le téléchargement réussi
-        logging.info(
-            f"Téléchargement réussi : Rapport ID {rapport.id} téléchargé par l'utilisateur {current_user.username}")
-
-        return response
+            error_message='Type de fichier non pris en charge'
 
     except Exception as e:
         error_message = f"Erreur lors du téléchargement du rapport : {str(e)}"
@@ -1261,7 +1054,7 @@ def telecharger_rapport(rapport_id):
         return render_template('rapport/mes_rapports.html', error_message=error_message, rapports=rapports)
 
 
-# ////////////////////////////////////////Generte invisible rapport////////////////
+#////////////////////////////////////////Generte invisible rapport////////////////
 
 @blueprint.route('/generate_report_document_page_invisible')
 def generate_report_document_page_invisible():
@@ -1269,27 +1062,30 @@ def generate_report_document_page_invisible():
     return render_template('rapport/creer_un_rapport_invisible.html', rapports=rapports)
 
 
-# ./////////////////////////Partie inspections.///////////////
+#./////////////////////////Partie inspections.///////////////
 
 
-# chatbot./////////////////pas de login required ici
+#chatbot./////////////////pas de login required ici
+import uuid
+import secrets
+from apps.home.chatbot import get_response
+from flask_limiter import Limiter
+import logging
+from flask_cors import CORS
 
 
 CORS(blueprint)  # Add this line to enable CORS for your blueprint
 # Define your model for the remember table
-
-
 class Remember(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.String(255))
     phrase = db.Column(db.Text)
 
-
 # Vérifier si le dossier existe, sinon le créer
 log_folder = './log'
 if not os.path.exists(log_folder):
     os.makedirs(log_folder)
-
+    
 # Configuration du logging
 logging.basicConfig(filename='./log/crash.log', level=logging.ERROR)
 
@@ -1301,10 +1097,8 @@ access_logger.addHandler(file_handler)
 
 limiter = Limiter(blueprint, default_limits=["200 per day", "100 per hour"])
 
-
 def generate_secret_key():
     return secrets.token_urlsafe()
-
 
 @blueprint.route('/chatbot')
 def chatbot():
@@ -1315,8 +1109,6 @@ def generate_session_id():
     return str(uuid.uuid4())
 
 # Fonction pour récupérer l'identifiant de session et l'identifiant de l'utilisateur
-
-
 def get_user_ids():
     session_id = request.cookies.get('session_id')
     user_id = request.cookies.get('user_id')
@@ -1325,7 +1117,6 @@ def get_user_ids():
     if not user_id:
         user_id = generate_session_id()
     return session_id, user_id
-
 
 @blueprint.route('/predict', methods=['POST'])
 @limiter.limit("20 per minute")
@@ -1336,10 +1127,8 @@ def predict():
         response = get_response(session_id, user_id, message)
         message = {"answer": response}
         resp = jsonify(message)
-        resp.set_cookie('session_id', session_id, httponly=True,
-                        secure=True, samesite='Strict')
-        resp.set_cookie('user_id', user_id, httponly=True,
-                        secure=True, samesite='Strict')
+        resp.set_cookie('session_id', session_id, httponly=True, secure=True, samesite='Strict')
+        resp.set_cookie('user_id', user_id, httponly=True, secure=True, samesite='Strict')
         return resp
     except Exception as e:
         logging.exception('Une erreur s\'est produite :')
@@ -1362,245 +1151,14 @@ def save_phrase():
         logging.exception('Une erreur s\'est produite :')
         return jsonify({'error': 'Une erreur s\'est produite.'}), 500
 
-# chatbot //////////////////////////// pas de login required ici
-
+#chatbot //////////////////////////// pas de login required ici
 
 @blueprint.route('/chatbot_info')
 @login_required
 def chatbot_info():
     return render_template('/Chatbot/chatbot_infos.html')
 
-
 @blueprint.route('/confidentialite')
 @login_required
 def confidentialite():
     return render_template('home/confidentialite.html')
-
-
-# PARTIE ADMIN#///////////////////////////////
-def get_all_models():
-    """Renvoie un dictionnaire de tous les modèles SQLAlchemy avec leurs noms comme clés."""
-    all_models = {}
-    for mapper in db.Model.registry.mappers:
-        # Assurez-vous que l'élément est bien un Mapper et qu'il a une classe implémentée
-        if isinstance(mapper, Mapper) and hasattr(mapper.class_, '__tablename__'):
-            model_class = mapper.class_
-            model_name = model_class.__name__
-            all_models[model_name] = model_class
-    return all_models
-
-
-@blueprint.route('/models', methods=['GET'])
-def list_all_models():
-    all_models = get_all_models()
-
-    all_models_data = {}
-    for model_name, model_class in all_models.items():
-        # Ici, nous récupérons les données avec leurs IDs pour pouvoir créer des liens corrects
-        all_models_data[model_name] = db.session.query(model_class).all()
-
-    return render_template('admin/all_models.html', all_models_data=all_models_data)
-
-
-@blueprint.route('/models/<model_name>', methods=['GET'])
-def show_model(model_name):
-    model_class = getattr(models, model_name, None)
-
-    if not model_class:
-        return render_template('home/page-404.html'), 404
-
-    columns = model_class.__table__.columns.keys()
-    models_data = db.session.query(model_class).all()
-
-    table = PrettyTable(columns)
-    for model in models_data:
-        row = []
-        for column in columns:
-            data = getattr(model, column)
-            # Vérifiez si la colonne est de type binaire
-            if isinstance(inspect(model_class).columns[column].type, db.LargeBinary):
-                # Tronquez les données binaires pour l'affichage
-                data = str(data)[:100] + '...' if data else None
-            row.append(data)
-        table.add_row(row)
-
-    return render_template('admin/show_model.html', model_name=model_name, table=table)
-
-
-@blueprint.route('/models/<model_name>/<int:model_id>', methods=['GET', 'POST'])
-def edit_model(model_name, model_id):
-    model_class = getattr(models, model_name, None)
-
-    if not model_class:
-        return render_template('home/page-404.html'), 404
-
-    model = model_class.query.get_or_404(
-        model_id) if model_id else model_class()
-
-    columns = model_class.__table__.columns
-    binary_columns = [column.name for column in columns if isinstance(
-        column.type, db.LargeBinary)]
-
-    if request.method == 'POST':
-        for column in columns:
-            column_name = column.name
-            setattr(model, column_name, request.form.get(column_name))
-        db.session.add(model)
-        db.session.commit()
-        return redirect(url_for('home_blueprint.show_model'))
-
-    return render_template('admin/edit_model.html', model_name=model_name, model=model, binary_columns=binary_columns)
-
-
-@blueprint.route('/models/<model_name>/<int:model_id>/delete', methods=['GET', 'POST'])
-def delete_model(model_name, model_id):
-    model_class = getattr(models, model_name, None)
-    model = model_class.query.get(model_id)
-
-    if model:
-        db.session.delete(model)
-        db.session.commit()
-        # Utilisez request.args.get pour obtenir l'URL de redirection
-        redirect_url = request.args.get(
-            'redirect_url', url_for('home_blueprint.list_all_models'))
-        return redirect(redirect_url)
-    else:
-        return render_template('home/page-404.html')
-
-
-@blueprint.route('/models/<model_name>/add', methods=['GET', 'POST'])
-def add_model_data(model_name):
-    model_class = getattr(models, model_name, None)
-
-    if not model_class:
-        return render_template('home/page-404.html'), 404
-
-    # Assuming you have a default model instance to get column names
-    model = model_class()
-
-    if request.method == 'POST':
-        new_model_data = model_class()
-        for column in model_class.__table__.columns:
-            column_name = column.name
-            setattr(new_model_data, column_name, request.form.get(column_name))
-        db.session.add(new_model_data)
-        db.session.commit()
-        return redirect(url_for('home_blueprint.show_model', model_name=model_name))
-
-    return render_template('admin/add_model_data.html', model_name=model_name, model=model)
-
-# PARTIE ADMIN#///////////////////////////////
-
-
-#DEFAUTS///////§§§§§§§§§§§§§§§§§§§§
-@login_required
-@blueprint.route('/add_defaut_visible', methods=['GET', 'POST'])
-def add_defaut_visible():
-    if request.method == 'POST':
-        nom = request.form.get('nom')
-        description = request.form.get('description')
-
-        new_defaut = Defaut_visible(Nom=nom, Description=description)
-        db.session.add(new_defaut)
-        db.session.commit()
-
-        return redirect(url_for('home_blueprint.list_defauts_visible'))
-
-    # Lire les noms des défauts depuis un fichier
-    with open('apps/IA/label/class_labels_normalv2.txt', 'r') as f:
-        noms_defauts = f.readlines()
-        print(noms_defauts)
-
-    return render_template('defauts/add_defaut_visible.html', noms_defauts=noms_defauts)
-
-@login_required
-@blueprint.route('/edit_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
-def edit_defaut_visible(defaut_id):
-    defaut = Defaut_visible.query.get_or_404(defaut_id)
-
-    if request.method == 'POST':
-        defaut.Nom = request.form.get('nom')
-        defaut.Description = request.form.get('description')
-
-        db.session.commit()
-
-        return redirect(url_for('home_blueprint.list_defauts_visible'))
-
-    return render_template('defauts/edit_defaut_visible.html', defaut=defaut)
-
-@login_required
-@blueprint.route('/delete_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
-def delete_defaut_visible(defaut_id):
-    defaut = Defaut_visible.query.get_or_404(defaut_id)
-
-    if request.method == 'POST':
-        db.session.delete(defaut)
-        db.session.commit()
-
-        return redirect(url_for('home_blueprint.list_defauts_visible'))
-
-    return render_template('defauts/delete_defaut_visible.html', defaut=defaut)
-
-@login_required
-@blueprint.route('/list_defauts_visible')
-def list_defauts_visible():
-    defauts = Defaut_visible.query.all()
-    return render_template('defauts/list_defauts_visible.html', defauts=defauts)
-
-#partie invisible
-@login_required
-@blueprint.route('/list_defauts_invisible')
-def list_defauts_invisible():
-    defauts = Defaut_invisible.query.all()
-    return render_template('defauts/list_defauts_invisible.html', defauts=defauts)
-
-@login_required
-@blueprint.route('/add_defaut_invisible', methods=['GET', 'POST'])
-def add_defaut_invisible():
-    if request.method == 'POST':
-        nom = request.form.get('nom')
-        description = request.form.get('description')
-
-        new_defaut = Defaut_invisible(Nom=nom, Description=description)
-        db.session.add(new_defaut)
-        db.session.commit()
-
-        return redirect(url_for('home_blueprint.list_defauts_invisible'))
-
-
-    # Lire les noms des défauts depuis un fichier
-    with open('apps/IA/label/class_label_mobilenetv2_thermo.txt', 'r') as f:
-        noms_defauts_invisibles = f.readlines()
-        print(noms_defauts_invisibles)
-
-    return render_template('defauts/add_defaut_invisible.html', noms_defauts_invisibles=noms_defauts_invisibles)
-
-@login_required
-@blueprint.route('/edit_defaut_visible/<int:defaut_id>', methods=['GET', 'POST'])
-def edit_defaut_invisible(defaut_id):
-    defaut = Defaut_invisible.query.get_or_404(defaut_id)
-
-    if request.method == 'POST':
-        defaut.Nom = request.form.get('nom')
-        defaut.Description = request.form.get('description')
-
-        db.session.commit()
-
-        return redirect(url_for('home_blueprint.list_defauts_invisible'))
-
-    return render_template('defauts/edit_defaut_invisible.html', defaut=defaut)
-
-@login_required
-@blueprint.route('/delete_defaut_invisible/<int:defaut_id>', methods=['GET', 'POST'])
-def delete_defaut_invisible(defaut_id):
-    defaut = Defaut_invisible.query.get_or_404(defaut_id)
-
-    if request.method == 'POST':
-        db.session.delete(defaut)
-        db.session.commit()
-
-        return redirect(url_for('home_blueprint.list_defauts_invisible'))
-
-    return render_template('defauts/delete_defaut_invisible.html', defaut=defaut)
-
-#DEFAUTS///////§§§§§§§§§§§§§§§§§§§§
